@@ -4,7 +4,7 @@
     // "target": "es5",
     // "module": "commonjs",
     // "moduleResolution": "node",
-    "outDir": "../build/server",
+    "outDir": "../build",
     // "allowJs": true,
     // "resolveJsonModule": true,
     // "emitDecoratorMetadata": true,
