@@ -2,6 +2,8 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import env from "dotenv";
+env.config();
+
 import http from "http";
 import handleError from "./utils/handleError";
 import applyRoutes from "./apis";
@@ -9,8 +11,6 @@ import applyRoutes from "./apis";
 const app = express();
 const router = express.Router();
 const httpServer = http.createServer(app);
-
-env.config();
 
 const mongooseUrl: string = process.env.MONGODB_URL || process.exit();
 const portHttp: string = process.env.PORT_HTTP || process.exit();

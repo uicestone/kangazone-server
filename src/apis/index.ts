@@ -8,6 +8,7 @@ import ConfigRouter from "./ConfigRouter";
 import PaymentRouter from "./PaymentRouter";
 import StoreRouter from "./StoreRouter";
 import UserRouter from "./UserRouter";
+import WechatRouter from "./WechatRouter";
 
 export default (app, router) => {
   // register routes
@@ -17,7 +18,8 @@ export default (app, router) => {
     ConfigRouter,
     PaymentRouter,
     StoreRouter,
-    UserRouter
+    UserRouter,
+    WechatRouter
   ].forEach(R => {
     router = R(router);
   });
