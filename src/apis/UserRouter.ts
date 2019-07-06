@@ -16,7 +16,8 @@ export default router => {
       handleAsyncErrors(async (req, res) => {
         const user = new User(req.body);
         await user.save();
-        res.json({ user, token: signToken(user) });
+        user.token = signToken(user);
+        res.json(user);
       })
     )
 
@@ -73,7 +74,8 @@ export default router => {
     .get(
       handleAsyncErrors(async (req, res) => {
         const user = req.item;
-        res.json({ user, token: signToken(user) });
+        user.token = signToken(user);
+        res.json(user);
       })
     )
 

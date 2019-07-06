@@ -37,10 +37,10 @@ export default (router: Router) => {
           avatarUrl
         });
       }
+      user.token = signToken(user);
 
       res.json({
         user,
-        token: signToken(user),
         session_key
       });
     })
