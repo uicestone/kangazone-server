@@ -8,9 +8,10 @@ import User, { IUser } from "./User";
 const Booking = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: User },
   store: { type: Schema.Types.ObjectId, ref: Store },
-  type: String,
+  type: { type: String, enum: ["play", "party"] },
   date: String,
-  slot: String,
+  slot: { type: String, enum: ["上午", "下午", "晚上"] },
+  hours: Number,
   membersCount: Number,
   socksCount: Number,
   status: { type: String, default: "PENDING" },
@@ -36,6 +37,7 @@ export interface IBooking extends mongoose.Document {
   type: string;
   date: string;
   slot: string;
+  hours: number;
   membersCount: number;
   socksCount: number;
   status: string;
