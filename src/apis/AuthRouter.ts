@@ -35,8 +35,6 @@ export default router => {
         user.password = undefined;
         res.json(user);
       } else {
-        const token = crypto.randomBytes(48).toString("hex");
-        user.token = token;
         await user.save();
         user.password = undefined;
         res.json(user);

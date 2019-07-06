@@ -15,6 +15,7 @@ export default (router: Router) => {
       const userData = await wxoauth.getUser(code, encryptedData, iv);
       const {
         openid,
+        session_key,
         userInfo: {
           nickName,
           avatarUrl,
@@ -26,17 +27,21 @@ export default (router: Router) => {
         }
       } = userData;
 
-      let user = await User.findOne({ openid });
+      let user = await User.findOne({ openid }).select(["+token"]);
       if (!user) {
-        user = await User.create({
+        await User.create({
           openid,
           name: nickName,
           gender,
           avatarUrl
         });
+        user = await User.findOne({ openid }).select(["+token"]);
       }
 
-      res.json(user);
+      res.json({
+        user,
+        session_key
+      });
     })
   );
 

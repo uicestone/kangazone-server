@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
+import crypto from "crypto";
 
 const User = new Schema({
   role: { type: String, default: "customer" },
@@ -28,6 +29,11 @@ User.set("toJSON", {
     delete ret._id;
     delete ret.__v;
   }
+});
+
+User.pre("save", function() {
+  const self = this as IUser;
+  self.token = crypto.randomBytes(48).toString("hex");
 });
 
 export interface IUser extends mongoose.Document {
