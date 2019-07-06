@@ -30,12 +30,6 @@ User.set("toJSON", {
     delete ret.__v;
   }
 });
-
-User.pre("save", function() {
-  const self = this as IUser;
-  self.token = crypto.randomBytes(48).toString("hex");
-});
-
 export interface IUser extends mongoose.Document {
   role: string;
   login?: string;

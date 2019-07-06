@@ -87,7 +87,7 @@ export default router => {
       })
     )
 
-    .patch(
+    .put(
       handleAsyncErrors(async (req, res) => {
         if (req.user.role === "customer") {
           throw new HttpError(

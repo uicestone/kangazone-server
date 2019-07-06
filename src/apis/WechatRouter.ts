@@ -4,6 +4,7 @@ import User from "../models/User";
 import { wxoauth, wxpay } from "../utils/wechat";
 import HttpError from "../utils/HttpError";
 import { utils as wepayUtils } from "@sigodenjs/wechatpay";
+import { signToken } from "../utils/helper";
 
 export default (router: Router) => {
   router.route("/wechat/login").post(
@@ -27,7 +28,7 @@ export default (router: Router) => {
         }
       } = userData;
 
-      let user = await User.findOne({ openid }).select(["+token"]);
+      let user = await User.findOne({ openid });
       if (!user) {
         await User.create({
           openid,
@@ -35,11 +36,11 @@ export default (router: Router) => {
           gender,
           avatarUrl
         });
-        user = await User.findOne({ openid }).select(["+token"]);
       }
 
       res.json({
         user,
+        token: signToken(user),
         session_key
       });
     })

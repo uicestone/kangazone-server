@@ -4,6 +4,7 @@ import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import User from "../models/User";
+import { signToken, hashPwd } from "../utils/helper";
 
 export default router => {
   // User CURD
@@ -15,7 +16,7 @@ export default router => {
       handleAsyncErrors(async (req, res) => {
         const user = new User(req.body);
         await user.save();
-        res.json(user);
+        res.json({ user, token: signToken(user) });
       })
     )
 
@@ -72,7 +73,7 @@ export default router => {
     .get(
       handleAsyncErrors(async (req, res) => {
         const user = req.item;
-        res.json(user);
+        res.json({ user, token: signToken(user) });
       })
     )
 
@@ -80,6 +81,9 @@ export default router => {
       handleAsyncErrors(async (req, res) => {
         if (req.user.role !== "admin") {
           delete req.body.role;
+        }
+        if (req.body.password) {
+          req.body.password = hashPwd(req.body.password);
         }
         const user = req.item;
         user.set(req.body);

@@ -66,7 +66,7 @@ export default router => {
       })
     )
 
-    .patch(
+    .put(
       handleAsyncErrors(async (req, res) => {
         const payment = req.item;
         payment.set(req.body);

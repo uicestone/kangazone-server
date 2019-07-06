@@ -4,6 +4,7 @@ import crypto from "crypto";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import User, { IUser } from "../models/User";
 import HttpError from "../utils/HttpError";
+import { signToken, comparePwd, hashPwd } from "../utils/helper";
 
 // bluebird.promisifyAll(redisClient);
 
@@ -19,26 +20,21 @@ export default router => {
       }
 
       const user = await User.findOne({ email: req.body.email }).select([
-        "+password",
-        "+token"
+        "+password"
       ]);
+      const token = signToken(user);
 
       if (!user) {
         throw new HttpError(401, "用户不存在");
       }
+      const validPassword = comparePwd(req.body.password, user.password);
 
-      if (user.password !== req.body.password) {
+      if (!validPassword) {
         throw new HttpError(403, "密码错误");
       }
 
-      if (user.token) {
-        user.password = undefined;
-        res.json(user);
-      } else {
-        await user.save();
-        user.password = undefined;
-        res.json(user);
-      }
+      user.password = undefined;
+      res.json({ user, token });
 
       let authLog = `[USR] 用户 ${user.name} 成功登录`;
 
@@ -66,7 +62,7 @@ export default router => {
 
       console.log(authLog);
 
-      res.json(user);
+      res.json({ user, token: signToken(user) });
     })
   );
 

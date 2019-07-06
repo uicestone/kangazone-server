@@ -77,7 +77,7 @@ export default router => {
       })
     )
 
-    .patch(
+    .put(
       handleAsyncErrors(async (req, res) => {
         const config = req.item;
         config.set(req.body);
