@@ -2,9 +2,10 @@ language: node_js
 node_js:
   - lts/*
 cache: yarn
+before_script: npm install -g pm2
 script: yarn build
 after_success:
   - echo "${DEPLOY_KEY}" | base64 --decode >/tmp/id_rsa
   - chmod 600 /tmp/id_rsa
   - scp -r -o "StrictHostKeyChecking no" -i /tmp/id_rsa build/* ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
-  - yarn deploy
+  - pm2 deploy production
