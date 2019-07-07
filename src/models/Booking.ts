@@ -10,7 +10,7 @@ const Booking = new Schema({
   store: { type: Schema.Types.ObjectId, ref: Store },
   type: { type: String, enum: ["play", "party"] },
   date: String,
-  slot: { type: String, enum: ["上午", "下午", "晚上"] },
+  checkInAt: String,
   hours: Number,
   membersCount: Number,
   socksCount: Number,
@@ -18,7 +18,7 @@ const Booking = new Schema({
   payments: { type: [Schema.Types.ObjectId], ref: Payment }
 });
 
-Booking.index({ date: 1, slot: 1, customer: 1 }, { unique: true });
+Booking.index({ date: 1, checkInAt: 1, customer: 1 }, { unique: true });
 
 Booking.plugin(autoPopulate, ["customer", "store", "payments"]);
 Booking.plugin(updateTimes);
@@ -36,7 +36,7 @@ export interface IBooking extends mongoose.Document {
   store: IStore;
   type: string;
   date: string;
-  slot: string;
+  checkInAt: string;
   hours: number;
   membersCount: number;
   socksCount: number;
