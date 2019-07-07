@@ -6,15 +6,20 @@ import Store, { IStore } from "./Store";
 import User, { IUser } from "./User";
 
 const Booking = new Schema({
-  customer: { type: Schema.Types.ObjectId, ref: User },
-  store: { type: Schema.Types.ObjectId, ref: Store },
-  type: { type: String, enum: ["play", "party"] },
-  date: String,
-  checkInAt: String,
-  hours: Number,
-  membersCount: Number,
-  socksCount: Number,
-  status: { type: String, default: "PENDING" },
+  customer: { type: Schema.Types.ObjectId, ref: User, required: true },
+  store: { type: Schema.Types.ObjectId, ref: Store, required: true },
+  type: { type: String, enum: ["play", "party"], default: "play" },
+  date: { type: String, required: true },
+  checkInAt: { type: String, required: true },
+  hours: { type: Number, required: true },
+  membersCount: { type: Number, default: 1 },
+  socksCount: { type: Number, default: 1 },
+  status: {
+    type: String,
+    enum: ["PENDING", "BOOKED", "IN_SERVICE", "FINISHED"],
+    default: "PENDING"
+  },
+  price: { type: Number },
   payments: { type: [Schema.Types.ObjectId], ref: Payment }
 });
 
@@ -41,8 +46,8 @@ export interface IBooking extends mongoose.Document {
   membersCount: number;
   socksCount: number;
   status: string;
-  price: number;
-  payment?: IPayment[];
+  price?: number;
+  payments?: IPayment[];
 }
 
 export default mongoose.model<IBooking>("Booking", Booking);

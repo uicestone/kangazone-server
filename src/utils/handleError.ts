@@ -18,6 +18,8 @@ export default (err: Error, req, res, next) => {
       message = `Duplicated key.`;
     }
     res.status(409).json({ message });
+  } else if (err.name === "ValidationError") {
+    res.status(400).json({ message: err.message });
   } else {
     console.error(JSON.stringify(err), "\n[Stack]", err.stack);
     res.status(500).send("Internal server error.");
