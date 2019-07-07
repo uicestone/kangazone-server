@@ -16,12 +16,16 @@ export default async function(req, res, next) {
   if (!token) {
     next(new HttpError(401, "无效登录，请重新登录"));
   }
-  const user = getTokenData(token);
 
-  if (!user) {
+  try {
+    const tokenData = getTokenData(token);
+    req.user = {
+      _id: tokenData.userId,
+      role: tokenData.userRole
+    };
+  } catch (err) {
     next(new HttpError(401, "无效登录，请重新登录"));
   }
 
-  req.user = user;
   next();
 }
