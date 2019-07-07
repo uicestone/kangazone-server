@@ -8,7 +8,7 @@ import { signToken, comparePwd, hashPwd } from "../utils/helper";
 export default router => {
   router.route("/auth/login").post(
     handleAsyncErrors(async (req, res) => {
-      if (!req.body.email) {
+      if (!req.body.login) {
         throw new HttpError(400, "请输入用户名");
       }
 
@@ -35,7 +35,9 @@ export default router => {
       user.token = token;
       res.json(user);
 
-      let authLog = `[USR] 用户 ${user.name} 成功登录`;
+      let authLog = `[USR] 用户 ${user.name || user.login} (${
+        user._id
+      }) 成功登录`;
 
       ["version", "device-serial", "system", "device-model"].forEach(field => {
         if (req.get(`x-client-${field}`)) {
