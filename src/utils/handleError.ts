@@ -8,12 +8,16 @@ export default (err: Error, req, res, next) => {
     const match = err.message.match(
       /collection: .*?\.(.*?) index: (.*?) dup key: { : (.*?) }$/
     );
-    res.status(409).json({
-      message: `Duplicated "${match[1]}" "${match[2].replace(
+    let message = "";
+    if (match) {
+      message = `Duplicated "${match[1]}" "${match[2].replace(
         /_\d+_?/g,
         ", "
-      )}": ${match[3]}`
-    });
+      )}": ${match[3]}`;
+    } else {
+      message = `Duplicated key.`;
+    }
+    res.status(409).json({ message });
   } else {
     console.error(JSON.stringify(err), "\n[Stack]", err.stack);
     res.status(500).send("Internal server error.");
