@@ -1,6 +1,3 @@
-// import bluebird from "bluebird";
-import crypto from "crypto";
-// import { createClient as redisClient } from "redis";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import User, { IUser } from "../models/User";
 import HttpError from "../utils/HttpError";
@@ -19,7 +16,7 @@ export default router => {
         throw new HttpError(400, "请输入密码");
       }
 
-      const user = await User.findOne({ email: req.body.email }).select([
+      const user = await User.findOne({ login: req.body.login }).select([
         "+password"
       ]);
 
@@ -63,7 +60,7 @@ export default router => {
       });
 
       console.log(authLog);
-      user.token = signToken(user);
+
       res.json(user);
     })
   );
