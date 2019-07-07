@@ -14,8 +14,15 @@ export default router => {
     .post(
       handleAsyncErrors(async (req, res) => {
         const booking = new Booking(req.body);
-        if (req.user.role === "customer") {
+        if (!booking.customer) {
           booking.customer = req.user;
+        }
+
+        if (
+          req.user.role === "customer" &&
+          !booking.customer.equals(req.user._id)
+        ) {
+          throw new HttpError(403, "只能为自己预订");
         }
         await booking.save();
         res.json(booking);
