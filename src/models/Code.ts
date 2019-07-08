@@ -3,7 +3,9 @@ import updateTimes from "./plugins/updateTimes";
 
 const Code = new Schema({
   num: String,
-  expiresAt: Date
+  type: { type: String, enum: ["play"], default: "play" },
+  hours: Number,
+  expiresAt: { type: Date, required: true }
 });
 
 Code.plugin(updateTimes);
@@ -17,7 +19,8 @@ Code.set("toJSON", {
 });
 
 export interface ICode extends mongoose.Document {
-  num: string;
+  num?: string;
+  hours?: number;
   expiresAt: Date;
 }
 

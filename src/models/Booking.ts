@@ -36,6 +36,10 @@ Booking.set("toJSON", {
   }
 });
 
+Booking.methods.paymentSuccess = function() {
+  // change booking status
+  // send user notification
+};
 export interface IBooking extends mongoose.Document {
   customer: IUser;
   store: IStore;
@@ -48,6 +52,7 @@ export interface IBooking extends mongoose.Document {
   status: string;
   price?: number;
   payments?: IPayment[];
+  paymentSuccess: () => Promise<IBooking>;
 }
 
 export default mongoose.model<IBooking>("Booking", Booking);

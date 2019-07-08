@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
+import { config } from "./Config";
 
 const User = new Schema({
   role: { type: String, default: "customer" },
@@ -30,6 +31,15 @@ User.set("toJSON", {
     delete ret.__v;
   }
 });
+
+User.methods.depositSuccess = function(levelPrice) {
+  config.depositLevels.filter(l => l.price === levelPrice);
+  // TODO
+  // set card type
+  // reward code to user
+  // send user notification
+};
+
 export interface IUser extends mongoose.Document {
   role: string;
   login?: string;
@@ -43,6 +53,7 @@ export interface IUser extends mongoose.Document {
   openid?: string;
   credit: number;
   cardType: string;
+  depositSuccess: (price: number) => Promise<IUser>;
 }
 
 export default mongoose.model<IUser>("User", User);

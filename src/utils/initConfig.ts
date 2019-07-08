@@ -1,7 +1,7 @@
-import Config from "../models/Config";
+import Config, { IConfig } from "../models/Config";
 import reduceConfig from "./reduceConfig";
 
-export default async () => {
+export default async config => {
   const existingConfig = reduceConfig(await Config.find());
   const initConfigItemsInsert = Object.keys(initConfig)
     .filter(key => !existingConfig[key])
@@ -12,9 +12,10 @@ export default async () => {
       `[SYS] ${initConfigItemsInsert.length} config items initialized.`
     );
   }
+  Object.assign(config, existingConfig);
 };
 
-const initConfig = {
+const initConfig: IConfig = {
   cardTypes: {
     白金: {
       firstHourPrice: 138,
@@ -33,7 +34,7 @@ const initConfig = {
     {
       price: 1000,
       cardType: "白金",
-      awardCodes: [
+      rewardCodes: [
         {
           type: "play",
           hour: 1,
@@ -44,7 +45,7 @@ const initConfig = {
     {
       price: 2000,
       cardType: "荣耀",
-      awardCodes: [
+      rewardCodes: [
         {
           type: "play",
           hour: 1,
@@ -55,7 +56,7 @@ const initConfig = {
     {
       price: 3000,
       cardType: "至尊",
-      awardCodes: [
+      rewardCodes: [
         {
           type: "play",
           hour: 1,

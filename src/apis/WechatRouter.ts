@@ -68,7 +68,8 @@ export default (router: Router) => {
           throw new Error("业务逻辑异常" + parsedData.out_trade_no);
         }
 
-        // TODO: 业务流程
+        // TODO find and update payment
+        // TODO trigger booking.paymentSuccess or user.depositSuccess
 
         return {
           return_code: "SUCCESS",

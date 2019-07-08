@@ -21,4 +21,13 @@ configSchema.statics.get = async function(key, defaults) {
 
 export default mongoose.model("Config", configSchema);
 
-initConfig();
+export interface IConfig {
+  cardTypes?: { [name: string]: { firstHourPrice: number; netPrice: number } };
+  depositLevels?: { price: number; cardType: string; rewardCodes: Object[] }[];
+  hourPrice?: number;
+  hourPriceRatio?: number[];
+}
+
+export let config: IConfig = {};
+
+initConfig(config);
