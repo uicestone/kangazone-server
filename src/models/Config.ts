@@ -20,3 +20,5 @@ configSchema.statics.get = async function(key, defaults) {
 };
 
 export default mongoose.model("Config", configSchema);
+
+initConfig();
