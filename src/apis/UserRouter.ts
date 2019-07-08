@@ -5,6 +5,9 @@ import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import User from "../models/User";
 import { signToken, hashPwd } from "../utils/helper";
+import { config } from "../models/Config";
+import Payment, { Gateways } from "../models/Payment";
+import { payArgs as wechatPayArgs } from "../utils/wechat";
 
 export default router => {
   // User CURD
@@ -105,6 +108,38 @@ export default router => {
         res.end();
       })
     );
+
+  router.route("/user-deposit").post(
+    handleAsyncErrors(async (req, res) => {
+      const level = config.depositLevels.filter(
+        level => level.price === +req.body.depositLevel
+      )[0];
+      if (!level) {
+        throw new HttpError(400, "充值金额错误");
+      }
+      const payment = new Payment({
+        customer: req.user,
+        amount: level.price,
+        title: `${level.cardType}卡 充值${level.rewardCodes}元`,
+        gateway: Gateways.WechatPay // TODO more payment options
+      });
+
+      await payment.save();
+
+      if (payment.gateway === Gateways.WechatPay) {
+        if (!payment.gatewayData.nonce_str || !payment.gatewayData.prepay_id) {
+          throw new Error(
+            `Incomplete gateway data: ${JSON.stringify(payment.gatewayData)}.`
+          );
+        }
+        const wechatGatewayData = payment.gatewayData as {
+          nonce_str: string;
+          prepay_id: string;
+        };
+        res.json(wechatPayArgs(wechatGatewayData));
+      }
+    })
+  );
 
   return router;
 };

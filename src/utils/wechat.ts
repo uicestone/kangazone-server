@@ -1,45 +1,53 @@
 import WXOauth from "@xinglu/wxapp-oauth";
-import { Pay, utils as wepayUtils } from "@sigodenjs/wechatpay";
+import { Pay, SignType, utils } from "@sigodenjs/wechatpay";
 import fs from "fs";
 
 const {
   WEIXIN_APPID,
   WEIXIN_SECRET,
-  WEIXIN_KEY,
-  WEIXIN_MCHID,
+  WEIXIN_MCH_ID,
+  WEIXIN_MCH_KEY,
+  WEIXIN_MCH_CERT_PATH,
   APP_HOME
 } = process.env;
 
-export const wxoauth = WXOauth({
+export const oAuth = WXOauth({
   appid: WEIXIN_APPID,
   secret: WEIXIN_SECRET
 });
-export const wxpay = new Pay({
+export const pay = new Pay({
   appId: WEIXIN_APPID,
-  mchId: WEIXIN_MCHID,
-  key: WEIXIN_KEY,
-  pfx: new Buffer("")
+  mchId: WEIXIN_MCH_ID,
+  key: WEIXIN_MCH_KEY,
+  pfx: fs.readFileSync(WEIXIN_MCH_CERT_PATH)
 });
 
-export const unifiedOrder = async ({
-  out_trade_no,
-  total_fee
-}: {
-  out_trade_no: string;
-  total_fee: number;
-}) => {
-  const gatewayData = await wxpay.unifiedOrder({
-    body: "测试",
-    out_trade_no,
-    total_fee,
+export const unifiedOrder = async (
+  outTradeNo: string,
+  totalFee: number,
+  openid: string,
+  body: string = " "
+) => {
+  const gatewayData = await pay.unifiedOrder({
+    body,
+    out_trade_no: outTradeNo,
+    total_fee: Math.round(totalFee * 100),
     trade_type: "JSAPI",
+    openid,
     notify_url: `${APP_HOME}/wechat/pay/notify`,
     spbill_create_ip: "8.8.8.8"
   });
-  if (!wxpay.verifySign(gatewayData)) throw new Error("签名校验失败");
+  if (!pay.verifySign(gatewayData)) throw new Error("WechatPay sign error.");
   if (gatewayData.result_code === "FAIL")
-    throw new Error(`交易失败: ${JSON.stringify(gatewayData)}`);
+    throw new Error(`Trade failed: ${JSON.stringify(gatewayData)}`);
 
+  return gatewayData;
+};
+
+export const payArgs = (gatewayData: {
+  nonce_str: string;
+  prepay_id: string;
+}) => {
   const timeStamp = String(Date.now()).substr(0, 10);
   const nonceStr = gatewayData.nonce_str;
   const _package = `prepay_id=${gatewayData.prepay_id}`;
@@ -47,9 +55,8 @@ export const unifiedOrder = async ({
     timeStamp,
     nonceStr,
     package: _package,
-    paySign: wepayUtils.sign(
-      // @ts-ignore
-      "MD5",
+    paySign: utils.sign(
+      SignType.MD5,
       {
         appId: WEIXIN_APPID,
         timeStamp,
@@ -57,7 +64,7 @@ export const unifiedOrder = async ({
         package: _package,
         signType: "MD5"
       },
-      WEIXIN_KEY
+      WEIXIN_MCH_KEY
     )
   };
 };

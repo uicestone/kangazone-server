@@ -1,9 +1,9 @@
 import { Router } from "express";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import User from "../models/User";
-import { wxoauth, wxpay } from "../utils/wechat";
+import { oAuth, pay } from "../utils/wechat";
 import HttpError from "../utils/HttpError";
-import { utils as wepayUtils } from "@sigodenjs/wechatpay";
+import { utils } from "@sigodenjs/wechatpay";
 import { signToken } from "../utils/helper";
 
 export default (router: Router) => {
@@ -13,7 +13,7 @@ export default (router: Router) => {
       if (!code || !encryptedData || !iv) {
         throw new HttpError(400, "缺少参数");
       }
-      const userData = await wxoauth.getUser(code, encryptedData, iv);
+      const userData = await oAuth.getUser(code, encryptedData, iv);
       const {
         openid,
         session_key,
@@ -52,30 +52,34 @@ export default (router: Router) => {
       if (!session_key || !encryptedData || !iv) {
         throw new HttpError(400, "缺少参数");
       }
-      const data = wxoauth.decrypt(encryptedData, session_key, iv);
+      const data = oAuth.decrypt(encryptedData, session_key, iv);
       res.json(data);
     })
   );
 
   router.route("/wechat/pay/notify").post(
     handleAsyncErrors(async (req, res) => {
-      let data: any = await wepayUtils.fromXML(req.body);
-      const returnData = await wxpay.payNotify(data, async parsedData => {
-        if (!wxpay.verifySign(parsedData)) {
-          throw new Error("签名异常" + parsedData.out_trade_no);
+      let data: any = await utils.fromXML(req.body);
+      const returnData = await pay.payNotify(data, async parsedData => {
+        if (!pay.verifySign(parsedData)) {
+          throw new Error("WechatPay sign error: " + parsedData.out_trade_no);
         }
         if (parsedData.result_code === "FAIL") {
-          throw new Error("业务逻辑异常" + parsedData.out_trade_no);
+          throw new Error("WechatPay error: " + parsedData.out_trade_no);
         }
 
         // TODO find and update payment
         // TODO trigger booking.paymentSuccess or user.depositSuccess
+
+        console.log(`[PAY] WechatPay success.`, parsedData);
 
         return {
           return_code: "SUCCESS",
           return_msg: "OK"
         };
       });
+
+      res.json(returnData);
     })
   );
   return router;
