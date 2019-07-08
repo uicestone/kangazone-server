@@ -18,6 +18,7 @@ const portHttp: string = process.env.PORT_HTTP || process.exit();
 console.log(`[SYS] System time is ${new Date()}`);
 
 mongoose.connect(mongooseUrl, { useNewUrlParser: true });
+mongoose.set("useCreateIndex", true);
 mongoose.Promise = global.Promise;
 
 app.use(bodyParser.json({ limit: "4mb" }));
