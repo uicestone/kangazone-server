@@ -1,6 +1,6 @@
-import User from "../models/User";
 import HttpError from "../utils/HttpError";
 import { getTokenData } from "../utils/helper";
+import { Types } from "mongoose";
 
 export default async function(req, res, next) {
   const token = req.get("authorization") || req.query.token;
@@ -9,7 +9,7 @@ export default async function(req, res, next) {
     try {
       const tokenData = getTokenData(token);
       req.user = {
-        _id: tokenData.userId,
+        _id: Types.ObjectId(tokenData.userId),
         role: tokenData.userRole
       };
     } catch (err) {

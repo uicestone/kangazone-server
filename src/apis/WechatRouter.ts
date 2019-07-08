@@ -30,7 +30,7 @@ export default (router: Router) => {
 
       let user = await User.findOne({ openid });
       if (!user) {
-        await User.create({
+        user = await User.create({
           openid,
           name: nickName,
           gender,
