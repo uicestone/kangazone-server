@@ -1,10 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
+import initConfig from "../utils/initConfig";
 
-const configSchema = new Schema({
-  key: String,
-  value: Schema.Types.Mixed
-});
+const configSchema = new Schema({}, { strict: false });
 
 configSchema.plugin(updateTimes);
 

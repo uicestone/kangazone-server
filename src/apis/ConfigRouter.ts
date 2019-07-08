@@ -26,43 +26,35 @@ export default router => {
     .get(
       paginatify,
       handleAsyncErrors(async (req, res) => {
-        const { limit, skip } = req.pagination;
-        const query = Config.find();
-        const sort = parseSortString(req.query.order) || {
-          goodsType: 1,
-          name: 1
-        };
-
-        let total = await query.countDocuments();
-        const page = await query
-          .find()
-          .sort(sort)
-          .limit(limit)
-          .skip(skip)
+        const items = await Config.find()
+          .sort({ createdAt: -1 })
           .exec();
 
-        if (skip + page.length > total) {
-          total = skip + page.length;
-        }
-
-        res.paginatify(limit, skip, total).json(page);
+        res.json(
+          items.reduce((acc, cur) => {
+            const curObj = cur.toObject();
+            ["_id", "__v", "createdAt", "updatedAt"].forEach(k => {
+              curObj[k] = undefined;
+            });
+            return Object.assign(acc, curObj);
+          }, {})
+        );
       })
     );
 
   router
-    .route("/config/:configId")
+    .route("/config/:key")
 
     .all(
       handleAsyncErrors(async (req, res, next) => {
         if (req.user.role !== "admin") {
           throw new HttpError(403);
         }
-        const where = Types.ObjectId.isValid(req.params.configId)
-          ? { _id: req.params.configId }
-          : { key: req.params.configId };
-        const config = await Config.findOne(where);
+        const config = await Config.findOne({
+          [req.params.key]: { $exists: true }
+        });
         if (!config) {
-          throw new HttpError(404, `Config not found: ${req.params.configId}`);
+          throw new HttpError(404, `Config not found: ${req.params.key}`);
         }
         req.item = config;
         next();
