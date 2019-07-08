@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
-import crypto from "crypto";
 
 const User = new Schema({
   role: { type: String, default: "customer" },
@@ -13,7 +12,8 @@ const User = new Schema({
   avatarUrl: String,
   region: String,
   openid: { type: String, index: { unique: true, sparse: true } },
-  credit: Number // for customer only
+  credit: Number, // for customer only
+  cardType: { type: String } // for customer only
 });
 
 // User.virtual("avatarUrl").get(function(req) {
@@ -42,6 +42,7 @@ export interface IUser extends mongoose.Document {
   region?: string;
   openid?: string;
   credit: number;
+  cardType: string;
 }
 
 export default mongoose.model<IUser>("User", User);

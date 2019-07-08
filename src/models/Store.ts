@@ -4,7 +4,8 @@ import updateTimes from "./plugins/updateTimes";
 const Store = new Schema({
   name: String,
   address: String,
-  phone: String
+  phone: String,
+  partyRooms: Number
 });
 
 Store.index({ name: 1 }, { unique: true });
@@ -23,6 +24,7 @@ export interface IStore extends mongoose.Document {
   name: string;
   address: string;
   phone: string;
+  partyRooms: number;
 }
 
 export default mongoose.model<IStore>("Store", Store);
