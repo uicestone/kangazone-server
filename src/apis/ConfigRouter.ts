@@ -4,6 +4,7 @@ import parseSortString from "../utils/parseSortString";
 import Config from "../models/Config";
 import HttpError from "../utils/HttpError";
 import { Types } from "mongoose";
+import reduceConfig from "../utils/reduceConfig";
 
 export default router => {
   // Config CURD
@@ -30,15 +31,7 @@ export default router => {
           .sort({ createdAt: -1 })
           .exec();
 
-        res.json(
-          items.reduce((acc, cur) => {
-            const curObj = cur.toObject();
-            ["_id", "__v", "createdAt", "updatedAt"].forEach(k => {
-              curObj[k] = undefined;
-            });
-            return Object.assign(acc, curObj);
-          }, {})
-        );
+        res.json(reduceConfig(items));
       })
     );
 
