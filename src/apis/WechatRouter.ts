@@ -80,7 +80,7 @@ export default (router: Router) => {
         };
       });
 
-      res.json(returnData);
+      res.send(utils.toXML(returnData));
     })
   );
   return router;
