@@ -111,15 +111,19 @@ export default router => {
 
   router.route("/user-deposit").post(
     handleAsyncErrors(async (req, res) => {
+      const { DEBUG } = process.env;
+
       const level = config.depositLevels.filter(
         level => level.price === +req.body.depositLevel
       )[0];
+
       if (!level) {
         throw new HttpError(400, "充值金额错误");
       }
+
       const payment = new Payment({
         customer: req.user,
-        amount: level.price,
+        amount: DEBUG === "true" ? level.price / 1e4 : level.price,
         title: `${level.cardType}卡 充值${level.rewardCodes}元`,
         gateway: Gateways.WechatPay // TODO more payment options
       });
