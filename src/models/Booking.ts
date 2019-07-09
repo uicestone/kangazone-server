@@ -36,8 +36,10 @@ Booking.set("toJSON", {
   }
 });
 
-Booking.methods.paymentSuccess = function() {
-  // change booking status
+Booking.methods.paymentSuccess = async function() {
+  const booking = this as IBooking;
+  booking.status = "BOOKED";
+  await booking.save();
   // send user notification
 };
 export interface IBooking extends mongoose.Document {

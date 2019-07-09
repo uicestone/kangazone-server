@@ -9,6 +9,7 @@ const Payment = new Schema({
   amount: { type: Number, required: true },
   paid: { type: Boolean, default: false },
   title: { type: String, default: " " },
+  attach: { type: String },
   gateway: { type: String, required: true },
   gatewayData: Object
 });
@@ -33,7 +34,8 @@ Payment.pre("save", async function() {
         payment._id.toString(),
         payment.amount,
         payment.customer.openid,
-        payment.title
+        payment.title,
+        payment.attach
       );
       break;
     default:
@@ -46,6 +48,7 @@ export interface IPayment extends mongoose.Document {
   amount: number;
   paid: boolean;
   title: string;
+  attach: string;
   gateway: string;
   gatewayData?: { [key: string]: any };
 }

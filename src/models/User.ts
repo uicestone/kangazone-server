@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
 import { config } from "./Config";
+import Code from "./Code";
 
 const User = new Schema({
   role: { type: String, default: "customer" },
@@ -31,11 +32,25 @@ User.set("toJSON", {
   }
 });
 
-User.methods.depositSuccess = function(levelPrice) {
-  config.depositLevels.filter(l => l.price === levelPrice);
-  // TODO
-  // set card type
-  // reward code to user
+User.methods.depositSuccess = async function(levelPrice: number) {
+  const user = this as IUser;
+  const level = config.depositLevels.filter(l => l.price === levelPrice)[0];
+  if (!level) {
+    throw new Error(`Deposit level not found for price ${levelPrice}.`);
+  }
+  user.cardType = level.cardType;
+  await user.save();
+  const codes = level.rewardCodes.reduce((codes, cur) => {
+    for (let i = 0; i < cur.count; i++) {
+      codes.push(
+        new Code({ type: cur.type, hours: cur.hours, customer: user })
+      );
+    }
+    return codes;
+  }, []);
+
+  await Code.insertMany(codes);
+
   // send user notification
 };
 

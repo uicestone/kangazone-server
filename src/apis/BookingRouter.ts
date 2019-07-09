@@ -4,6 +4,13 @@ import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import Booking from "../models/Booking";
+import Payment, { Gateways } from "../models/Payment";
+import { payArgs as wechatPayArgs } from "../utils/wechat";
+import { config } from "../models/Config";
+import { Router } from "express";
+import User from "../models/User";
+
+const { DEBUG } = process.env;
 
 export default router => {
   // Booking CURD
@@ -18,14 +25,61 @@ export default router => {
           booking.customer = req.user;
         }
 
+        if (booking.hours > config.hourPriceRatio.length) {
+          throw new HttpError(
+            400,
+            `预定小时数超过限制（${config.hourPriceRatio.length}小时）`
+          );
+        }
+
         if (
           req.user.role === "customer" &&
           !booking.customer.equals(req.user._id)
         ) {
           throw new HttpError(403, "只能为自己预订");
         }
-        await booking.save();
-        res.json(booking);
+
+        const customer = await User.findOne({ _id: req.user._id }); // load user from db to get cardType
+        const firstHourPrice =
+          config.cardTypes[customer.cardType].firstHourPrice;
+
+        booking.price = config.hourPriceRatio
+          .slice(0, booking.hours)
+          .reduce((price, ratio) => {
+            return price + firstHourPrice * ratio;
+          }, 0);
+
+        const payment = new Payment({
+          customer: req.user,
+          amount: DEBUG === "true" ? booking.price / 1e4 : booking.price,
+          title: `预定${booking.store.name} ${booking.date} ${
+            booking.hours
+          }小时 ${booking.checkInAt}入场`,
+          attach: `booking ${booking._id}`,
+          gateway: Gateways.WechatPay // TODO more payment options
+        });
+
+        await Promise.all([booking.save(), payment.save()]);
+
+        let payArgs = {};
+        if (payment.gateway === Gateways.WechatPay) {
+          if (
+            !payment.gatewayData.nonce_str ||
+            !payment.gatewayData.prepay_id
+          ) {
+            throw new Error(
+              `Incomplete gateway data: ${JSON.stringify(payment.gatewayData)}.`
+            );
+          }
+          const wechatGatewayData = payment.gatewayData as {
+            nonce_str: string;
+            prepay_id: string;
+          };
+
+          payArgs = wechatPayArgs(wechatGatewayData);
+        }
+
+        res.json({ payArgs, ...booking.toObject() });
       })
     )
 

@@ -5,6 +5,8 @@ import { oAuth, pay } from "../utils/wechat";
 import HttpError from "../utils/HttpError";
 import { utils } from "@sigodenjs/wechatpay";
 import { signToken } from "../utils/helper";
+import Payment from "../models/Payment";
+import Booking from "../models/Booking";
 
 export default (router: Router) => {
   router.route("/wechat/login").post(
@@ -69,7 +71,24 @@ export default (router: Router) => {
           throw new Error("WechatPay error: " + parsedData.out_trade_no);
         }
 
-        // TODO find and update payment
+        const payment = await Payment.findOne({ _id: parsedData.out_trade_no });
+        payment.paid = true;
+        payment.gatewayData = parsedData;
+        const paymentAttach = payment.attach.split(" ");
+        switch (paymentAttach[0]) {
+          case "booking":
+            const booking = await Booking.findOne({ _id: paymentAttach[1] });
+            await booking.paymentSuccess();
+            break;
+          case "deposit":
+            const user = await User.findOne({ _id: paymentAttach[1] });
+            await user.depositSuccess(+paymentAttach[2]);
+            break;
+          default:
+            console.error(
+              `[PAY] Unknown payment attach: ${JSON.stringify(payment.attach)}`
+            );
+        }
         // TODO trigger booking.paymentSuccess or user.depositSuccess
 
         console.log(`[PAY] WechatPay success.`, parsedData);

@@ -37,7 +37,7 @@ const initConfig: IConfig = {
       rewardCodes: [
         {
           type: "play",
-          hour: 1,
+          hours: 1,
           count: 1
         }
       ]
@@ -48,7 +48,7 @@ const initConfig: IConfig = {
       rewardCodes: [
         {
           type: "play",
-          hour: 1,
+          hours: 1,
           count: 2
         }
       ]
@@ -59,7 +59,7 @@ const initConfig: IConfig = {
       rewardCodes: [
         {
           type: "play",
-          hour: 1,
+          hours: 1,
           count: 4
         }
       ]

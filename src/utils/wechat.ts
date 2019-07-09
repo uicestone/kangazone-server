@@ -26,10 +26,12 @@ export const unifiedOrder = async (
   outTradeNo: string,
   totalFee: number,
   openid: string,
-  body: string = " "
+  body: string = " ",
+  attach: string = ""
 ) => {
   const gatewayData = await pay.unifiedOrder({
     body,
+    attach,
     out_trade_no: outTradeNo,
     total_fee: Math.round(totalFee * 100),
     trade_type: "JSAPI",
