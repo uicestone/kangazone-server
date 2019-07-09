@@ -9,6 +9,8 @@ import { config } from "../models/Config";
 import Payment, { Gateways } from "../models/Payment";
 import { payArgs as wechatPayArgs } from "../utils/wechat";
 
+const { DEBUG } = process.env;
+
 export default router => {
   // User CURD
   router
@@ -19,7 +21,6 @@ export default router => {
       handleAsyncErrors(async (req, res) => {
         const user = new User(req.body);
         await user.save();
-        user.token = signToken(user);
         res.json(user);
       })
     )
@@ -77,7 +78,6 @@ export default router => {
     .get(
       handleAsyncErrors(async (req, res) => {
         const user = req.item;
-        user.token = signToken(user);
         res.json(user);
       })
     )
@@ -111,8 +111,6 @@ export default router => {
 
   router.route("/user-deposit").post(
     handleAsyncErrors(async (req, res) => {
-      const { DEBUG } = process.env;
-
       const level = config.depositLevels.filter(
         level => level.price === +req.body.depositLevel
       )[0];

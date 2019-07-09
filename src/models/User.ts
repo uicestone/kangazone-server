@@ -6,7 +6,6 @@ const User = new Schema({
   role: { type: String, default: "customer" },
   login: { type: String, index: { unique: true, sparse: true } },
   password: { type: String, select: false },
-  token: { type: String, select: false },
   name: String,
   gender: String,
   mobile: String,
@@ -44,15 +43,14 @@ export interface IUser extends mongoose.Document {
   role: string;
   login?: string;
   password?: string;
-  token?: string;
   name?: string;
   gender?: string;
   mobile?: string;
   avatarUrl?: string;
   region?: string;
   openid?: string;
-  credit: number;
-  cardType: string;
+  credit?: number;
+  cardType?: string;
   depositSuccess: (price: number) => Promise<IUser>;
 }
 

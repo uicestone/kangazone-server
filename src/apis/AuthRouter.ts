@@ -32,8 +32,8 @@ export default router => {
       const token = signToken(user);
 
       user.password = undefined;
-      user.token = token;
-      res.json(user);
+
+      res.json({ token, user });
 
       let authLog = `[USR] 用户 ${user.name || user.login} (${
         user._id

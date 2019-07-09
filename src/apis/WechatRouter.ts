@@ -34,13 +34,14 @@ export default (router: Router) => {
           openid,
           name: nickName,
           gender,
-          avatarUrl
+          avatarUrl,
+          region: `${country} ${province} ${city}`
         });
       }
-      user.token = signToken(user);
 
       res.json({
         user,
+        token: signToken(user),
         session_key
       });
     })
