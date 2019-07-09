@@ -122,7 +122,7 @@ export default router => {
       const payment = new Payment({
         customer: req.user,
         amount: DEBUG === "true" ? level.price / 1e4 : level.price,
-        title: `${level.cardType}卡 充值${level.rewardCodes}元`,
+        title: `${level.cardType}卡 充值${level.price}元`,
         gateway: Gateways.WechatPay // TODO more payment options
       });
 

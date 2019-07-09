@@ -22,6 +22,7 @@ mongoose.set("useCreateIndex", true);
 mongoose.Promise = global.Promise;
 
 app.use(bodyParser.json({ limit: "4mb" }));
+app.use(bodyParser.raw({ type: "text/xml" }));
 
 app.set("trust proxy", "loopback");
 applyRoutes(app, router);
