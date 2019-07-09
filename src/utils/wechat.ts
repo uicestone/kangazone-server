@@ -8,7 +8,8 @@ const {
   WEIXIN_MCH_ID,
   WEIXIN_MCH_KEY,
   WEIXIN_MCH_CERT_PATH,
-  APP_HOME
+  APP_HOME,
+  DEBUG
 } = process.env;
 
 export const oAuth = WXOauth({
@@ -28,6 +29,9 @@ export const unifiedOrder = async (
   openid: string,
   body: string = " "
 ) => {
+  if (DEBUG) {
+    totalFee = totalFee / 10000;
+  }
   const gatewayData = await pay.unifiedOrder({
     body,
     out_trade_no: outTradeNo,
