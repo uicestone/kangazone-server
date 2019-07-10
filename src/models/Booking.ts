@@ -20,7 +20,7 @@ const Booking = new Schema({
     default: "PENDING"
   },
   price: { type: Number },
-  payments: { type: [Schema.Types.ObjectId], ref: Payment }
+  payments: [{ type: Schema.Types.ObjectId, ref: Payment }]
 });
 
 Booking.index({ date: 1, checkInAt: 1, customer: 1 }, { unique: true });
