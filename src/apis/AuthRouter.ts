@@ -67,5 +67,15 @@ export default router => {
     })
   );
 
+  router.route("/auth/token/:userId").get(
+    handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
+      const user = await User.findOne({ _id: req.params.userId });
+      res.json({ token: signToken(user), user });
+    })
+  );
+
   return router;
 };
