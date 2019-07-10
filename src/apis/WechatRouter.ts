@@ -98,6 +98,7 @@ export default (router: Router) => {
             );
         }
         // TODO trigger booking.paymentSuccess or user.depositSuccess
+        await payment.save();
 
         console.log(`[PAY] WechatPay success.`, parsedData);
 
