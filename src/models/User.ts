@@ -39,7 +39,7 @@ User.methods.depositSuccess = async function(levelPrice: number) {
     throw new Error(`Deposit level not found for price ${levelPrice}.`);
   }
   user.cardType = level.cardType;
-  await user.save();
+  user.credit = user.credit ? user.credit + levelPrice : levelPrice;
   const codes = level.rewardCodes.reduce((codes, cur) => {
     for (let i = 0; i < cur.count; i++) {
       codes.push(
@@ -49,7 +49,7 @@ User.methods.depositSuccess = async function(levelPrice: number) {
     return codes;
   }, []);
 
-  await Code.insertMany(codes);
+  await Promise.all([Code.insertMany(codes), await user.save()]);
 
   // send user notification
 };
