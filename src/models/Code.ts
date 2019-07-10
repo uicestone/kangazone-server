@@ -8,7 +8,7 @@ const Code = new Schema({
   type: { type: String, enum: ["play"], default: "play" },
   num: String,
   hours: Number,
-  expiresAt: { type: Date, required: true }
+  expiresAt: { type: Date }
 });
 
 Code.plugin(updateTimes);
@@ -26,7 +26,7 @@ export interface ICode extends mongoose.Document {
   type: string;
   num?: string;
   hours?: number;
-  expiresAt: Date;
+  expiresAt?: Date;
 }
 
 export default mongoose.model("Code", Code);

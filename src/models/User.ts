@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
 import { config } from "./Config";
-import Code from "./Code";
+import Code, { ICode } from "./Code";
 
 const User = new Schema({
   role: { type: String, default: "customer" },
@@ -14,7 +14,8 @@ const User = new Schema({
   region: String,
   openid: { type: String, index: { unique: true, sparse: true } },
   credit: Number, // for customer only
-  cardType: { type: String } // for customer only
+  cardType: { type: String }, // for customer only
+  codes: [{ type: Schema.Types.ObjectId, ref: Code }]
 });
 
 // User.virtual("avatarUrl").get(function(req) {
@@ -47,15 +48,16 @@ User.methods.depositSuccess = async function(levelPrice: number) {
   user.cardType = level.cardType;
   user.credit = user.credit ? user.credit + levelPrice : levelPrice;
   const codes = level.rewardCodes.reduce((codes, cur) => {
+    let code;
     for (let i = 0; i < cur.count; i++) {
-      codes.push(
-        new Code({ type: cur.type, hours: cur.hours, customer: user })
-      );
+      code = new Code({ type: cur.type, hours: cur.hours, customer: user });
+      codes.push(code);
+      user.codes.push(code);
     }
     return codes;
   }, []);
 
-  await Promise.all([Code.insertMany(codes), await user.save()]);
+  await Promise.all([Code.insertMany(codes), user.save()]);
 
   // send user notification
 };
@@ -72,6 +74,7 @@ export interface IUser extends mongoose.Document {
   openid?: string;
   credit?: number;
   cardType?: string;
+  codes?: ICode[];
   depositSuccess: (price: number) => Promise<IUser>;
 }
 
