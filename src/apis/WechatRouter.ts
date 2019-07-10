@@ -72,6 +72,14 @@ export default (router: Router) => {
         }
 
         const payment = await Payment.findOne({ _id: parsedData.out_trade_no });
+
+        if (payment.paid) {
+          return {
+            return_code: "SUCCESS",
+            return_msg: "OK"
+          };
+        }
+
         payment.paid = true;
         payment.gatewayData = parsedData;
         const paymentAttach = payment.attach.split(" ");
@@ -99,6 +107,7 @@ export default (router: Router) => {
         };
       });
 
+      res.set("Content-Type", "application/xml; charset=utf-8");
       res.send(utils.toXML(returnData));
     })
   );
