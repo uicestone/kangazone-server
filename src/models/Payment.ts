@@ -25,7 +25,7 @@ Payment.set("toJSON", {
   }
 });
 
-Payment.pre("save", async function() {
+Payment.pre("save", async function(next) {
   const payment = this as IPayment;
   switch (payment.gateway) {
     case Gateways.WechatPay:
@@ -41,6 +41,7 @@ Payment.pre("save", async function() {
     default:
       throw Error("Payment gateway not supported.");
   }
+  next();
 });
 
 export interface IPayment extends mongoose.Document {
