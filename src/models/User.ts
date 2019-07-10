@@ -24,6 +24,12 @@ const User = new Schema({
 
 User.plugin(updateTimes);
 
+User.pre("validate", function(next) {
+  const user = this as IUser;
+  user.credit = +user.credit.toFixed(2);
+  next();
+});
+
 User.set("toJSON", {
   getters: true,
   transform: function(doc, ret, options) {

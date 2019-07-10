@@ -54,6 +54,7 @@ export interface IPayment extends mongoose.Document {
 }
 
 export enum Gateways {
+  Credit = "credit",
   WechatPay = "wechatpay",
   Alipay = "alipay",
   UnionPay = "unionpay",

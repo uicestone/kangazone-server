@@ -7,7 +7,6 @@ import Booking from "../models/Booking";
 import Payment, { Gateways } from "../models/Payment";
 import { payArgs as wechatPayArgs } from "../utils/wechat";
 import { config } from "../models/Config";
-import { Router } from "express";
 import User from "../models/User";
 
 const { DEBUG } = process.env;
@@ -40,44 +39,84 @@ export default router => {
         }
 
         const customer = await User.findOne({ _id: req.user._id }); // load user from db to get cardType
-        const firstHourPrice =
-          config.cardTypes[customer.cardType].firstHourPrice;
+
+        if (!customer) {
+          throw new HttpError(401, "用户不存在");
+        }
+
+        const cardType = config.cardTypes[customer.cardType];
+
+        const firstHourPrice = cardType
+          ? cardType.firstHourPrice
+          : config.hourPrice;
 
         booking.price = config.hourPriceRatio
           .slice(0, booking.hours)
           .reduce((price, ratio) => {
-            return price + firstHourPrice * ratio;
+            return +(price + firstHourPrice * ratio).toFixed(2);
           }, 0);
 
-        const payment = new Payment({
-          customer: req.user,
-          amount: DEBUG === "true" ? booking.price / 1e4 : booking.price,
-          title: `预定${booking.store.name} ${booking.date} ${
-            booking.hours
-          }小时 ${booking.checkInAt}入场`,
-          attach: `booking ${booking._id}`,
-          gateway: Gateways.WechatPay // TODO more payment options
-        });
+        const { useCredit = true } = req.query;
 
-        await Promise.all([booking.save(), payment.save()]);
+        let creditPayAmount = 0;
 
-        let payArgs = {};
-        if (payment.gateway === Gateways.WechatPay) {
-          if (
-            !payment.gatewayData.nonce_str ||
-            !payment.gatewayData.prepay_id
-          ) {
-            throw new Error(
-              `Incomplete gateway data: ${JSON.stringify(payment.gatewayData)}.`
-            );
-          }
-          const wechatGatewayData = payment.gatewayData as {
-            nonce_str: string;
-            prepay_id: string;
-          };
-
-          payArgs = wechatPayArgs(wechatGatewayData);
+        if (useCredit && customer.credit) {
+          const creditPayAmount = Math.min(booking.price, customer.credit);
+          customer.credit -= creditPayAmount;
+          customer.validate();
+          const creditPayment = new Payment({
+            customer: req.user,
+            amount: creditPayAmount,
+            title: `预定${booking.store.name} ${booking.date} ${
+              booking.hours
+            }小时 ${booking.checkInAt}入场`,
+            attach: `booking ${booking._id}`,
+            gateway: Gateways.Credit
+          });
+          await creditPayment.save();
+          booking.payments.push(creditPayment);
         }
+
+        let payArgs: {};
+
+        const extraPayAmount = booking.price - creditPayAmount;
+
+        if (extraPayAmount >= 0.01) {
+          const extraPayment = new Payment({
+            customer: req.user,
+            amount: DEBUG === "true" ? extraPayAmount / 1e4 : extraPayAmount,
+            title: `预定${booking.store.name} ${booking.date} ${
+              booking.hours
+            }小时 ${booking.checkInAt}入场`,
+            attach: `booking ${booking._id}`,
+            gateway: Gateways.WechatPay // TODO more payment options
+          });
+
+          await extraPayment.save();
+
+          booking.payments.push(extraPayment);
+
+          if (extraPayment.gateway === Gateways.WechatPay) {
+            if (
+              !extraPayment.gatewayData.nonce_str ||
+              !extraPayment.gatewayData.prepay_id
+            ) {
+              throw new Error(
+                `Incomplete gateway data: ${JSON.stringify(
+                  extraPayment.gatewayData
+                )}.`
+              );
+            }
+            const wechatGatewayData = extraPayment.gatewayData as {
+              nonce_str: string;
+              prepay_id: string;
+            };
+
+            payArgs = wechatPayArgs(wechatGatewayData);
+          }
+        }
+
+        await booking.save();
 
         res.json({ payArgs, ...booking.toObject() });
       })
