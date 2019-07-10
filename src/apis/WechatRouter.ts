@@ -64,6 +64,11 @@ export default (router: Router) => {
     handleAsyncErrors(async (req, res) => {
       let data: any = await utils.fromXML(req.body);
       const returnData = await pay.payNotify(data, async parsedData => {
+        const successData = {
+          return_code: "SUCCESS",
+          return_msg: "OK"
+        };
+
         if (!pay.verifySign(parsedData)) {
           throw new Error("WechatPay sign error: " + parsedData.out_trade_no);
         }
@@ -73,11 +78,15 @@ export default (router: Router) => {
 
         const payment = await Payment.findOne({ _id: parsedData.out_trade_no });
 
-        if (payment.paid) {
+        if (!payment) {
           return {
-            return_code: "SUCCESS",
-            return_msg: "OK"
+            return_code: "FAIL",
+            return_msg: `Payment id not found: ${parsedData.out_trade_no}.`
           };
+        }
+
+        if (payment.paid) {
+          return successData;
         }
 
         payment.paid = true;
@@ -97,19 +106,18 @@ export default (router: Router) => {
               `[PAY] Unknown payment attach: ${JSON.stringify(payment.attach)}`
             );
         }
-        // TODO trigger booking.paymentSuccess or user.depositSuccess
+
         await payment.save();
 
-        console.log(`[PAY] WechatPay success.`, parsedData);
+        console.log(
+          `[PAY] WechatPay success. Data: ${JSON.stringify(parsedData)}`
+        );
 
-        return {
-          return_code: "SUCCESS",
-          return_msg: "OK"
-        };
+        return successData;
       });
 
-      res.set("Content-Type", "application/xml; charset=utf-8");
-      res.send(utils.toXML(returnData));
+      res.type("application/xml; charset=utf-8");
+      res.end(returnData);
     })
   );
   return router;
