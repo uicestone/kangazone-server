@@ -8,6 +8,7 @@ import Payment, { Gateways } from "../models/Payment";
 import { payArgs as wechatPayArgs } from "../utils/wechat";
 import { config } from "../models/Config";
 import User from "../models/User";
+import Store from "../models/Store";
 
 const { DEBUG } = process.env;
 
@@ -22,6 +23,15 @@ export default router => {
         const booking = new Booking(req.body);
         if (!booking.customer) {
           booking.customer = req.user;
+        }
+
+        if (!booking.store) {
+          booking.store = await Store.findOne();
+        }
+        await booking.populate("store").execPopulate();
+
+        if (!booking.store.name) {
+          throw new HttpError(400, "门店信息错误");
         }
 
         if (booking.hours > config.hourPriceRatio.length) {
