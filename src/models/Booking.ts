@@ -25,7 +25,11 @@ const Booking = new Schema({
 
 Booking.index({ date: 1, checkInAt: 1, customer: 1 }, { unique: true });
 
-Booking.plugin(autoPopulate, ["customer", "store", "payments"]);
+Booking.plugin(autoPopulate, [
+  { path: "customer", select: "name avatarUrl" },
+  "store",
+  "payments"
+]);
 Booking.plugin(updateTimes);
 
 Booking.set("toJSON", {

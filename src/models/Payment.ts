@@ -14,7 +14,7 @@ const Payment = new Schema({
   gatewayData: Object
 });
 
-Payment.plugin(autoPopulate, ["customer"]);
+Payment.plugin(autoPopulate, [{ path: "customer", select: "name avatarUrl" }]);
 Payment.plugin(updateTimes);
 
 Payment.set("toJSON", {
