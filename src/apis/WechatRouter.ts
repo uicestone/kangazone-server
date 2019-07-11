@@ -76,7 +76,13 @@ export default (router: Router) => {
           throw new Error("WechatPay error: " + parsedData.out_trade_no);
         }
 
+        console.log(
+          `[PAY] WechatPay success. Data: ${JSON.stringify(parsedData)}`
+        );
+
         const payment = await Payment.findOne({ _id: parsedData.out_trade_no });
+
+        console.log(`[PAY] Payment found, id: ${payment._id}.`);
 
         if (!payment) {
           return {
@@ -86,6 +92,7 @@ export default (router: Router) => {
         }
 
         if (payment.paid) {
+          console.log(`[PAY] Payment ${payment._id} is paid before, skipped.`);
           return successData;
         }
 
@@ -96,10 +103,12 @@ export default (router: Router) => {
           case "booking":
             const booking = await Booking.findOne({ _id: paymentAttach[1] });
             await booking.paymentSuccess();
+            console.log(`[PAY] Booking payment success, id: ${booking._id}.`);
             break;
           case "deposit":
             const user = await User.findOne({ _id: paymentAttach[1] });
             await user.depositSuccess(+paymentAttach[2]);
+            console.log(`[PAY] User deposit success, id: ${user._id}.`);
             break;
           default:
             console.error(
@@ -108,10 +117,6 @@ export default (router: Router) => {
         }
 
         await payment.save();
-
-        console.log(
-          `[PAY] WechatPay success. Data: ${JSON.stringify(parsedData)}`
-        );
 
         return successData;
       });

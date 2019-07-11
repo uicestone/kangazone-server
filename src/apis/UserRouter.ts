@@ -129,6 +129,8 @@ export default router => {
 
       await payment.save();
 
+      console.log(`[PAY] Payment created, id: ${payment._id}.`);
+
       if (payment.gateway === Gateways.WechatPay) {
         if (!payment.gatewayData.nonce_str || !payment.gatewayData.prepay_id) {
           throw new Error(
