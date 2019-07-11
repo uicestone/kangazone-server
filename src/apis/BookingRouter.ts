@@ -71,9 +71,7 @@ export default router => {
         let creditPayAmount = 0;
 
         if (useCredit && customer.credit) {
-          const creditPayAmount = Math.min(booking.price, customer.credit);
-          customer.credit -= creditPayAmount;
-          customer.validate();
+          creditPayAmount = Math.min(booking.price, customer.credit);
           const creditPayment = new Payment({
             customer: req.user,
             amount: creditPayAmount,
@@ -90,8 +88,9 @@ export default router => {
         let payArgs: {};
 
         const extraPayAmount = booking.price - creditPayAmount;
-
-        if (extraPayAmount >= 0.01) {
+        if (extraPayAmount < 0.01) {
+          booking.status = "BOOKED";
+        } else {
           const extraPayment = new Payment({
             customer: req.user,
             amount: DEBUG === "true" ? extraPayAmount / 1e4 : extraPayAmount,
@@ -172,7 +171,7 @@ export default router => {
 
     .all(
       handleAsyncErrors(async (req, res, next) => {
-        const booking = await Booking.findOne(req.params.bookingId);
+        const booking = await Booking.findOne({ _id: req.params.bookingId });
         if (req.user.role === "customer") {
           if (!booking.customer.equals(req.user._id)) {
             throw new HttpError(403);

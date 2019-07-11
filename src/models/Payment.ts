@@ -27,9 +27,12 @@ Payment.set("toJSON", {
 
 Payment.pre("save", async function(next) {
   const payment = this as IPayment;
+
+  if (payment.paid) return next();
+
   switch (payment.gateway) {
     case Gateways.WechatPay:
-      if (payment.paid || payment.gatewayData) return next();
+      if (payment.gatewayData) return next();
       await payment.populate("customer").execPopulate();
       payment.gatewayData = await wechatUnifiedOrder(
         payment._id.toString(),
@@ -38,6 +41,12 @@ Payment.pre("save", async function(next) {
         payment.title,
         payment.attach
       );
+      break;
+    case Gateways.Credit:
+      payment.paid = true;
+      const customer = await User.findOne({ _id: payment.customer });
+      customer.credit -= payment.amount;
+      await customer.save();
       break;
     default:
       throw Error("Payment gateway not supported.");
