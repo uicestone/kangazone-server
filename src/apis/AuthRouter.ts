@@ -51,7 +51,7 @@ export default router => {
 
   router.route("/auth/user").get(
     handleAsyncErrors(async (req, res) => {
-      const user = req.user;
+      const user = await User.findOne({ _id: req.user });
 
       let authLog = `[USR] 用户 ${user.name} 获取登录信息`;
 
