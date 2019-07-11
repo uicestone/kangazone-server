@@ -13,7 +13,8 @@ export default (router: Router) => {
     handleAsyncErrors(async (req, res) => {
       const { code } = req.body;
       if (!code) throw new Error("缺少参数");
-      const { openid, session_key } = await oAuth.getUser(code);
+      const userData = await oAuth.getUser(code);
+      const { openid, session_key } = userData;
       const user = await User.findOne({ openid });
       res.json({
         user,
@@ -32,8 +33,7 @@ export default (router: Router) => {
       }
 
       const userData = oAuth.decrypt(encryptedData, session_key, iv);
-      const { openid } = userData;
-
+      const { openId: openid } = userData;
       let user = await User.findOne({ openid });
       if (!user) {
         const {
