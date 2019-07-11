@@ -12,26 +12,23 @@ export default (router: Router) => {
   router.route("/wechat/login").post(
     handleAsyncErrors(async (req, res) => {
       const { code, encryptedData, iv } = req.body;
-      if (!code || !encryptedData || !iv) {
-        throw new HttpError(400, "缺少参数");
-      }
+
       const userData = await oAuth.getUser(code, encryptedData, iv);
-      const {
-        openid,
-        session_key,
-        userInfo: {
-          nickName,
-          avatarUrl,
-          gender,
-          city,
-          province,
-          country,
-          unionId
-        }
-      } = userData;
+      const { openid, session_key } = userData;
 
       let user = await User.findOne({ openid });
-      if (!user) {
+      if (!user && encryptedData && iv) {
+        const {
+          userInfo: {
+            nickName,
+            avatarUrl,
+            gender,
+            city,
+            province,
+            country,
+            unionId
+          }
+        } = userData;
         user = await User.create({
           openid,
           name: nickName,
