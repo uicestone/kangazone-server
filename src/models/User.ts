@@ -29,7 +29,9 @@ User.plugin(updateTimes);
 
 User.pre("validate", function(next) {
   const user = this as IUser;
-  user.credit = +user.credit.toFixed(2);
+  if (user.credit) {
+    user.credit = +user.credit.toFixed(2);
+  }
   next();
 });
 

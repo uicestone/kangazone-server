@@ -11,23 +11,38 @@ import Booking from "../models/Booking";
 export default (router: Router) => {
   router.route("/wechat/login").post(
     handleAsyncErrors(async (req, res) => {
-      const { code, encryptedData, iv } = req.body;
+      const { code } = req.body;
+      if (!code) throw new Error("缺少参数");
+      const { openid, session_key } = await oAuth.getUser(code);
+      const user = await User.findOne({ openid });
+      res.json({
+        user,
+        token: user ? signToken(user) : null,
+        session_key,
+        openid
+      });
+    })
+  );
 
-      const userData = await oAuth.getUser(code, encryptedData, iv);
-      const { openid, session_key } = userData;
+  router.route("/wechat/signup").post(
+    handleAsyncErrors(async (req, res) => {
+      const { session_key, encryptedData, iv } = req.body;
+      if (!session_key || !encryptedData || !iv) {
+        throw new Error("缺少参数");
+      }
+
+      const userData = oAuth.decrypt(encryptedData, session_key, iv);
+      const { openid } = userData;
 
       let user = await User.findOne({ openid });
-      if (!user && encryptedData && iv) {
+      if (!user) {
         const {
-          userInfo: {
-            nickName,
-            avatarUrl,
-            gender,
-            city,
-            province,
-            country,
-            unionId
-          }
+          nickName,
+          avatarUrl,
+          gender,
+          city,
+          province,
+          country
         } = userData;
         user = await User.create({
           openid,
@@ -41,6 +56,7 @@ export default (router: Router) => {
       res.json({
         user,
         token: signToken(user),
+        openid,
         session_key
       });
     })
