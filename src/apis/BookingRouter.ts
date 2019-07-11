@@ -229,50 +229,51 @@ export default router => {
     );
 
   router
-    .route("/booking-availability/:month")
-
-    // get availability of dates
+    /**
+     *  get availability of dates
+     *  :type could be 'play', 'party'
+     *  either ?month=2019-07 or ?date=2019-07-11 should be provided
+     */
+    .route("/booking-availability/:type")
     .get(
       handleAsyncErrors(async (req, res) => {
-        const yearMonth = req.params.month;
-        const ltYearMonth = moment(yearMonth, "YYYY-MM")
-          .add(1, "month")
-          .format("YYYY-MM");
-        const availability = {
-          full: [],
-          am: [],
-          pm: []
-        };
-        const availabilityByDates = await Booking.aggregate([
-          { $match: { date: { $gte: yearMonth, $lt: ltYearMonth } } },
-          {
-            $group: {
-              _id: "$date",
-              total: { $sum: 1 },
-              am: { $sum: { $cond: [{ $eq: ["$ampm", "am"] }, 1, 0] } },
-              pm: { $sum: { $cond: [{ $eq: ["$ampm", "pm"] }, 1, 0] } }
-            }
-          },
-          {
-            $project: {
-              date: "$_id",
-              _id: false,
-              total: true,
-              am: true,
-              pm: true
-            }
-          }
-        ]);
+        const { month, date, hours } = req.query;
+        const { type } = req.params;
+        if (!month && !date) {
+          throw new HttpError(400, "Missing month or date in query.");
+        }
+        if (date && !hours) {
+          throw new HttpError(
+            400,
+            "Missing hours in query, date availability requires hours."
+          );
+        }
+        if (!["play", "party"].includes(type)) {
+          throw new HttpError(400, `Invalid booking type: ${type}.`);
+        }
 
-        availabilityByDates.forEach(availabilityByDate => {
-          if (availabilityByDate.total >= 2) {
-            availability.full.push(availabilityByDate.date);
-          } else if (availabilityByDate.am >= 1) {
-            availability.am.push(availabilityByDate.date);
-          } else if (availabilityByDate.pm >= 1) {
-            availability.pm.push(availabilityByDate.date);
-          }
-        });
+        let availability: {
+          full: string[];
+          peak?: string[];
+          remarks?: string;
+        } = { full: [] };
+
+        if (date && type !== "party") {
+          availability.remarks = "Only party has hourly availability.";
+        } else if (month) {
+          const nextMonth = moment(month, "YYYY-MM")
+            .add(1, "month")
+            .format("YYYY-MM");
+
+          availability = {
+            full: ["2019-07-16", "2019-07-18"],
+            peak: ["2019-07-20", "2019-07-21"]
+          };
+        } else {
+          availability = {
+            full: ["10:00", "12:00", "16:00", "20:00"]
+          };
+        }
 
         res.json(availability);
       })
