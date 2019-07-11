@@ -131,18 +131,7 @@ export default router => {
 
       console.log(`[PAY] Payment created, id: ${payment._id}.`);
 
-      if (payment.gateway === Gateways.WechatPay) {
-        if (!payment.gatewayData.nonce_str || !payment.gatewayData.prepay_id) {
-          throw new Error(
-            `Incomplete gateway data: ${JSON.stringify(payment.gatewayData)}.`
-          );
-        }
-        const wechatGatewayData = payment.gatewayData as {
-          nonce_str: string;
-          prepay_id: string;
-        };
-        res.json(wechatPayArgs(wechatGatewayData));
-      }
+      res.json(payment);
     })
   );
 

@@ -2,7 +2,10 @@ import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
 import autoPopulate from "./plugins/autoPopulate";
 import User, { IUser } from "./User";
-import { unifiedOrder as wechatUnifiedOrder } from "../utils/wechat";
+import {
+  unifiedOrder as wechatUnifiedOrder,
+  payArgs as wechatPayArgs
+} from "../utils/wechat";
 
 const Payment = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: User, required: true },
@@ -16,6 +19,22 @@ const Payment = new Schema({
 
 Payment.plugin(autoPopulate, [{ path: "customer", select: "name avatarUrl" }]);
 Payment.plugin(updateTimes);
+
+Payment.virtual("payArgs").get(function() {
+  const payment = this as IPayment;
+  if (payment.gateway === Gateways.WechatPay && !payment.paid) {
+    if (!payment.gatewayData.nonce_str || !payment.gatewayData.prepay_id) {
+      throw new Error(
+        `Incomplete gateway data: ${JSON.stringify(payment.gatewayData)}.`
+      );
+    }
+    const wechatGatewayData = payment.gatewayData as {
+      nonce_str: string;
+      prepay_id: string;
+    };
+    return wechatPayArgs(wechatGatewayData);
+  }
+});
 
 Payment.set("toJSON", {
   getters: true,

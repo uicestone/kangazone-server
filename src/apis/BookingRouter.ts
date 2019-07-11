@@ -5,7 +5,6 @@ import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import Booking from "../models/Booking";
 import Payment, { Gateways } from "../models/Payment";
-import { payArgs as wechatPayArgs } from "../utils/wechat";
 import { config } from "../models/Config";
 import User from "../models/User";
 import Store from "../models/Store";
@@ -85,8 +84,6 @@ export default router => {
           booking.payments.push(creditPayment);
         }
 
-        let payArgs: {};
-
         const extraPayAmount = booking.price - creditPayAmount;
         if (extraPayAmount < 0.01) {
           booking.status = "BOOKED";
@@ -120,14 +117,12 @@ export default router => {
               nonce_str: string;
               prepay_id: string;
             };
-
-            payArgs = wechatPayArgs(wechatGatewayData);
           }
         }
 
         await booking.save();
 
-        res.json({ payArgs, ...booking.toObject() });
+        res.json(booking);
       })
     )
 
