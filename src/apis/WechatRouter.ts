@@ -82,7 +82,7 @@ export default (router: Router) => {
 
         const payment = await Payment.findOne({ _id: parsedData.out_trade_no });
 
-        console.log(`[PAY] Payment found, id: ${payment._id}.`);
+        console.log(`[PAY] Payment found, id: ${parsedData.out_trade_no}.`);
 
         if (!payment) {
           return {
