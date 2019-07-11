@@ -29,6 +29,7 @@ Payment.pre("save", async function(next) {
   const payment = this as IPayment;
   switch (payment.gateway) {
     case Gateways.WechatPay:
+      if (payment.paid || payment.gatewayData) return next();
       await payment.populate("customer").execPopulate();
       payment.gatewayData = await wechatUnifiedOrder(
         payment._id.toString(),
