@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
 import { config } from "./Config";
 import Code, { ICode } from "./Code";
+import autoPopulate from "./plugins/autoPopulate";
 
 const User = new Schema({
   role: { type: String, default: "customer" },
@@ -23,6 +24,7 @@ const User = new Schema({
 //   return (process.env.CDN_URL || req.baseUrl )+ this.avatarUri;
 // });
 
+User.plugin(autoPopulate, ["codes"]);
 User.plugin(updateTimes);
 
 User.pre("validate", function(next) {
