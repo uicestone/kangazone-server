@@ -26,7 +26,12 @@ export interface IConfig {
   depositLevels?: {
     price: number;
     cardType: string;
-    rewardCodes: { type: string; hours: number; count: number }[];
+    rewardCodes: {
+      title: string;
+      type: string;
+      hours: number;
+      count: number;
+    }[];
   }[];
   hourPrice?: number;
   hourPriceRatio?: number[];

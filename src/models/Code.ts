@@ -5,6 +5,7 @@ import { IUser } from "./User";
 const Code = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: "User", required: true },
   // User imports Code, so we cannot depend User here, use "User" instead
+  title: { type: String, required: true },
   type: { type: String, enum: ["play"], default: "play" },
   num: String,
   hours: Number,
@@ -23,6 +24,7 @@ Code.set("toJSON", {
 
 export interface ICode extends mongoose.Document {
   customer: IUser;
+  title: string;
   type: string;
   num?: string;
   hours?: number;

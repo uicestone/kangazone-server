@@ -54,7 +54,12 @@ User.methods.depositSuccess = async function(levelPrice: number) {
   const codes = level.rewardCodes.reduce((codes, cur) => {
     let code;
     for (let i = 0; i < cur.count; i++) {
-      code = new Code({ type: cur.type, hours: cur.hours, customer: user });
+      code = new Code({
+        title: cur.title,
+        type: cur.type,
+        hours: cur.hours,
+        customer: user
+      });
       codes.push(code);
       user.codes.push(code);
     }

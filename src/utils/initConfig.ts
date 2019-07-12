@@ -36,6 +36,7 @@ const initConfig: IConfig = {
       cardType: "白金",
       rewardCodes: [
         {
+          title: "1小时自由体验券",
           type: "play",
           hours: 1,
           count: 1
@@ -47,6 +48,7 @@ const initConfig: IConfig = {
       cardType: "荣耀",
       rewardCodes: [
         {
+          title: "1小时自由体验券",
           type: "play",
           hours: 1,
           count: 2
@@ -58,6 +60,7 @@ const initConfig: IConfig = {
       cardType: "至尊",
       rewardCodes: [
         {
+          title: "1小时自由体验券",
           type: "play",
           hours: 1,
           count: 4
