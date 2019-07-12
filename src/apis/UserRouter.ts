@@ -19,6 +19,11 @@ export default router => {
     // create a user
     .post(
       handleAsyncErrors(async (req, res) => {
+        if (req.user.role !== "admin") {
+          ["role", "openid", "codes", "cardType", "credit"].forEach(f => {
+            delete req.body[f];
+          });
+        }
         const user = new User(req.body);
         await user.save();
         res.json(user);
@@ -85,7 +90,9 @@ export default router => {
     .put(
       handleAsyncErrors(async (req, res) => {
         if (req.user.role !== "admin") {
-          delete req.body.role;
+          ["role", "openid", "codes", "cardType", "credit"].forEach(f => {
+            delete req.body[f];
+          });
         }
         if (req.body.password) {
           req.body.password = hashPwd(req.body.password);
