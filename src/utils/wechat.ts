@@ -33,7 +33,7 @@ export const unifiedOrder = async (
     body,
     attach,
     out_trade_no: outTradeNo,
-    total_fee: Math.round(totalFee * 100),
+    total_fee: Math.max(Math.round(totalFee * 100), 1),
     trade_type: "JSAPI",
     openid,
     notify_url: `${APP_HOME}/wechat/pay/notify`,
