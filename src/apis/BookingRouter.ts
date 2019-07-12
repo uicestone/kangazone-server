@@ -250,6 +250,7 @@ export default router => {
           full: string[];
           peak?: string[];
           remarks?: string;
+          checkInAt?: string[];
         } = { full: [] };
 
         if (date && type !== "party") {
@@ -265,7 +266,17 @@ export default router => {
           };
         } else {
           availability = {
-            full: ["10:00", "12:00", "16:00", "20:00"]
+            full: ["10:00", "12:00", "16:00", "20:00"],
+            checkInAt: [
+              "11:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "21:00"
+            ]
           };
         }
 
