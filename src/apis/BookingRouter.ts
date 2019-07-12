@@ -66,6 +66,9 @@ export default router => {
           if (!booking.code) {
             throw new HttpError(400, "优惠券不存在");
           }
+          if (booking.code.used) {
+            throw new HttpError(403, "优惠券已经使用");
+          }
         }
 
         if (booking.code && booking.code.hours) {
