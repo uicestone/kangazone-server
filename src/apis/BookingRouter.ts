@@ -59,13 +59,26 @@ export default router => {
           ? cardType.firstHourPrice
           : config.hourPrice;
 
+        let chargedHours = booking.hours;
+
+        if (booking.code) {
+          await booking.populate("code").execPopulate();
+          if (!booking.code) {
+            throw new HttpError(400, "优惠券不存在");
+          }
+        }
+
+        if (booking.code && booking.code.hours) {
+          chargedHours -= booking.code.hours;
+        }
+
         booking.price = config.hourPriceRatio
-          .slice(0, booking.hours)
+          .slice(0, chargedHours)
           .reduce((price, ratio) => {
             return +(price + firstHourPrice * ratio).toFixed(2);
           }, 0);
 
-        const { useCredit = true } = req.query;
+        const useCredit = req.query.useCredit !== "false";
 
         let creditPayAmount = 0;
 
@@ -118,6 +131,11 @@ export default router => {
               prepay_id: string;
             };
           }
+        }
+
+        if (booking.code) {
+          booking.code.used = true;
+          await booking.code.save();
         }
 
         await booking.save();

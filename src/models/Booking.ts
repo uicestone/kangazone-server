@@ -4,6 +4,7 @@ import autoPopulate from "./plugins/autoPopulate";
 import Payment, { IPayment } from "./Payment";
 import Store, { IStore } from "./Store";
 import User, { IUser } from "./User";
+import Code, { ICode } from "./Code";
 
 const Booking = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: User, required: true },
@@ -20,6 +21,7 @@ const Booking = new Schema({
     default: "PENDING"
   },
   price: { type: Number },
+  code: { type: Schema.Types.ObjectId, ref: Code },
   payments: [{ type: Schema.Types.ObjectId, ref: Payment }]
 });
 
@@ -57,6 +59,7 @@ export interface IBooking extends mongoose.Document {
   socksCount: number;
   status: string;
   price?: number;
+  code?: ICode;
   payments?: IPayment[];
   paymentSuccess: () => Promise<IBooking>;
 }

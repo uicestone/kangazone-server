@@ -17,7 +17,7 @@ export default async function(req, res, next) {
       return next(new HttpError(401, "无效登录，请重新登录"));
     }
   } else {
-    req.user = { _id: null, role: "guest" };
+    req.user = new User({ _id: Types.ObjectId(), role: "guest" });
   }
 
   next();
