@@ -26,7 +26,7 @@ const Booking = new Schema({
 Booking.index({ date: 1, checkInAt: 1, customer: 1 }, { unique: true });
 
 Booking.plugin(autoPopulate, [
-  { path: "customer", select: "name avatarUrl" },
+  { path: "customer", select: "name avatarUrl mobile" },
   "store",
   "payments"
 ]);
