@@ -52,7 +52,9 @@ export default router => {
   router.route("/auth/user").get(
     handleAsyncErrors(async (req, res) => {
       const user = await User.findOne({ _id: req.user });
-
+      if (!user) {
+        throw new HttpError(401, "用户未登录");
+      }
       let authLog = `[USR] 用户 ${user.name} 获取登录信息`;
 
       ["version", "device-serial", "system", "device-model"].forEach(field => {

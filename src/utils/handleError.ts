@@ -21,7 +21,7 @@ export default (err: Error, req, res, next) => {
   } else if (err.name === "ValidationError") {
     res.status(400).json({ message: err.message });
   } else {
-    console.error(err.message, "\n[Stack]", err.stack);
+    console.error(`${err.name}: ${err.message}`, "\n[Stack]", err.stack);
     res.status(500).send("Internal server error.");
   }
 };
