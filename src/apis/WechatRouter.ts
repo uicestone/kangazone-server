@@ -119,9 +119,20 @@ export default (router: Router) => {
             console.log(`[PAY] Booking payment success, id: ${booking._id}.`);
             break;
           case "deposit":
-            const user = await User.findOne({ _id: paymentAttach[1] });
-            await user.depositSuccess(+paymentAttach[2]);
-            console.log(`[PAY] User deposit success, id: ${user._id}.`);
+            const depositUser = await User.findOne({ _id: paymentAttach[1] });
+            await depositUser.depositSuccess(+paymentAttach[2]);
+            console.log(`[PAY] User deposit success, id: ${depositUser._id}.`);
+            break;
+          case "membership":
+            const membershipUser = await User.findOne({
+              _id: paymentAttach[1]
+            });
+            await membershipUser.membershipUpgradeSuccess(paymentAttach[2]);
+            console.log(
+              `[PAY] User membership upgrade success, id: ${
+                membershipUser._id
+              }.`
+            );
             break;
           default:
             console.error(

@@ -135,5 +135,30 @@ export default router => {
     })
   );
 
+  router.route("/user-membership").post(
+    handleAsyncErrors(async (req, res) => {
+      const cardTypeName = req.body.cardType;
+      const cardType = config.cardTypes[cardTypeName];
+
+      if (!cardType) {
+        throw new HttpError(400, "会员类型错误");
+      }
+
+      const payment = new Payment({
+        customer: req.user,
+        amount: DEBUG === "true" ? cardType.netPrice / 1e4 : cardType.netPrice,
+        title: `${cardTypeName}卡会员资格`,
+        attach: `membership ${req.user._id} ${cardTypeName}`,
+        gateway: Gateways.WechatPay // TODO more payment options
+      });
+
+      await payment.save();
+
+      console.log(`[PAY] Payment created, id: ${payment._id}.`);
+
+      res.json(payment);
+    })
+  );
+
   return router;
 };

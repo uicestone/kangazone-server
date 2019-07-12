@@ -69,6 +69,26 @@ User.methods.depositSuccess = async function(levelPrice: number) {
   await Promise.all([Code.insertMany(codes), user.save()]);
 
   // send user notification
+
+  return user;
+};
+
+User.methods.membershipUpgradeSuccess = async function(cardTypeName: string) {
+  const user = this as IUser;
+
+  const cardType = config.cardTypes[cardTypeName];
+
+  if (!cardType) {
+    throw new Error(`Card type not found for price ${cardType}.`);
+  }
+
+  user.cardType = cardTypeName;
+
+  await user.save();
+
+  // send user notification
+
+  return user;
 };
 
 export interface IUser extends mongoose.Document {
@@ -85,6 +105,7 @@ export interface IUser extends mongoose.Document {
   cardType?: string;
   codes?: ICode[];
   depositSuccess: (price: number) => Promise<IUser>;
+  membershipUpgradeSuccess: (cardTypeName: string) => Promise<IUser>;
 }
 
 export default mongoose.model<IUser>("User", User);
