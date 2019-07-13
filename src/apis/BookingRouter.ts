@@ -75,11 +75,15 @@ export default router => {
           chargedHours -= booking.code.hours;
         }
 
-        booking.price = config.hourPriceRatio
-          .slice(0, chargedHours)
-          .reduce((price, ratio) => {
-            return +(price + firstHourPrice * ratio).toFixed(2);
-          }, 0);
+        const sockPrice = 10;
+
+        booking.price =
+          config.hourPriceRatio
+            .slice(0, chargedHours)
+            .reduce((price, ratio) => {
+              return +(price + firstHourPrice * ratio).toFixed(2);
+            }, 0) +
+          (booking.socksCount || 0) * sockPrice;
 
         const useCredit = req.query.useCredit !== "false";
 
