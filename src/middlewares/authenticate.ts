@@ -16,6 +16,12 @@ export default async function(req, res, next) {
     } catch (err) {
       return next(new HttpError(401, "无效登录，请重新登录"));
     }
+  } else if (
+    ["booking(/.*)?", "payment.*"].some(pattern =>
+      req._parsedUrl.pathname.match(`^/api/${pattern}$`)
+    )
+  ) {
+    return next(new HttpError(401, "登录后才能访问此功能"));
   } else {
     req.user = new User({ _id: Types.ObjectId(), role: "guest" });
   }
