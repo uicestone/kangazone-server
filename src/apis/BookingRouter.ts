@@ -11,6 +11,11 @@ import Store from "../models/Store";
 
 const { DEBUG } = process.env;
 
+// setTimeout(async () => {
+//   const u = await User.findOne({ name: "Uice Stone" });
+//   u.depositSuccess(2000);
+// }, 500);
+
 export default router => {
   // Booking CURD
   router
@@ -105,6 +110,8 @@ export default router => {
         }
 
         const extraPayAmount = booking.price - creditPayAmount;
+        console.log(`[PAY] Extra payment amount is ${extraPayAmount}`);
+
         if (extraPayAmount < 0.01) {
           booking.status = "BOOKED";
         } else {
@@ -117,6 +124,8 @@ export default router => {
             attach: `booking ${booking._id}`,
             gateway: Gateways.WechatPay // TODO more payment options
           });
+
+          console.log(`[PAY] Extra payment: `, extraPayment.toObject());
 
           await extraPayment.save();
 
