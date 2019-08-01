@@ -1,5 +1,5 @@
 import handleSocketData from "./handleSocketData";
-import WgCtl from "../utils/wiegand-control/WgCtl";
+import WgCtl from "wiegand-control/WgCtl";
 
 export default function handleCreateServer(io) {
   return async function socket(socket) {
@@ -7,11 +7,11 @@ export default function handleCreateServer(io) {
       `[SYS] Socket connect from: ${socket.remoteAddress}:${socket.remotePort}.`
     );
 
-    const serials = [223236925];
+    const serials = [223236925, 225012725];
     const controllers = serials.map(serial => new WgCtl(socket, serial));
     await Promise.all(controllers.map(ctl => ctl.detected));
     // controllers.map(c => c.setServerAddress("192.168.3.2", 6000));
-    controllers.map(c => c.getServerAddress());
+    controllers.map(c => c.openDoor(1));
 
     // socket.setTimeout(60000);
 
