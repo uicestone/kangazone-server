@@ -1,12 +1,12 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import env from "dotenv";
 import SocketIo from "socket.io";
 import http from "http";
 import { createServer } from "net";
+import ensureEnv from "./utils/ensureEnv";
 
-env.config();
+ensureEnv();
 
 import handleError from "./utils/handleError";
 import handleCreateServer from "./socket/handleCreateServer";
