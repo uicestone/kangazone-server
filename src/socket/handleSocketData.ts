@@ -1,4 +1,4 @@
-import { parseData } from "wiegand-control/utils";
+import { parseData } from "wiegand-control";
 
 export default function handleSocketData(data) {
   // handle text message

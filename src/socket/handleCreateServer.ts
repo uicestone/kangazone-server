@@ -1,5 +1,5 @@
 import handleSocketData from "./handleSocketData";
-import WgCtl from "wiegand-control/WgCtl";
+import WgCtl from "wiegand-control";
 
 export default function handleCreateServer(io) {
   return async function socket(socket) {

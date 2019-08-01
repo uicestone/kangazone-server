@@ -769,6 +769,11 @@
   resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-11.13.15.tgz#699afb07a91adced2d6183a0ad156bf82542fc7d"
   integrity sha1-aZr7B6ka3O0tYYOgrRVr+CVC/H0=
 
+"@types/node@^12.6.8":
+  version "12.6.8"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.6.8.tgz#e469b4bf9d1c9832aee4907ba8a051494357c12c"
+  integrity sha512-aX+gFgA5GHcDi89KG5keey2zf0WfZk/HAQotEamsK2kbey+8yGKcson0hbK8E+v0NArlCJQCqMP161YhV6ZXLg==
+
 "@types/node@^8.0.7":
   version "8.10.49"
   resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-8.10.49.tgz#f331afc5efed0796798e5591d6e0ece636969b7b"
@@ -6372,11 +6377,12 @@ widest-line@^2.0.0:
     string-width "^2.1.1"
 
 wiegand-control@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/wiegand-control/-/wiegand-control-0.1.1.tgz#1a539c038859318a2676214b51b5b255f932bfa8"
-  integrity sha512-eMNOex07jT3v4/x2IhGlT/21CneSniorUSx1fAZbPbZwZA8C3qA6rS4MC/j58xd6aRYZi/1i+/vNH26YJNiTgw==
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/wiegand-control/-/wiegand-control-0.1.6.tgz#dba6c45e18f3730ba79b5eb84b8c3cb5b4cf99a2"
+  integrity sha512-uIGpyC2jRFX/4LpVK4NEBGzbFO58lWevI84YKESmVhVMbac76kbEAAHV/1caZ2UADE60Lxzyezek253NCVaGBg==
   dependencies:
     "@types/moment-timezone" "^0.5.12"
+    "@types/node" "^12.6.8"
     moment "^2.24.0"
     moment-timezone "^0.5.26"
 
