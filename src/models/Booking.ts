@@ -17,7 +17,7 @@ const Booking = new Schema({
   socksCount: { type: Number, default: 1 },
   status: {
     type: String,
-    enum: ["PENDING", "BOOKED", "IN_SERVICE", "FINISHED"],
+    enum: ["PENDING", "BOOKED", "IN_SERVICE", "FINISHED", "CANCELED"],
     default: "PENDING"
   },
   price: { type: Number },

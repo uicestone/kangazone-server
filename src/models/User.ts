@@ -9,7 +9,13 @@ const User = new Schema({
   login: { type: String, index: { unique: true, sparse: true } },
   password: { type: String, select: false },
   name: String,
-  gender: String,
+  gender: {
+    type: String,
+    set: v => {
+      const genderIndex = ["未知", "男", "女"];
+      return genderIndex[v] || v;
+    }
+  },
   mobile: String,
   avatarUrl: String,
   region: String,
