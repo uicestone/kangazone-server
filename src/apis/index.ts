@@ -4,6 +4,7 @@ import authenticate from "../middlewares/authenticate";
 import castEmbedded from "../middlewares/castEmbedded";
 import AuthRouter from "./AuthRouter";
 import BookingRouter from "./BookingRouter";
+import CodeRouter from "./CodeRouter";
 import ConfigRouter from "./ConfigRouter";
 import PaymentRouter from "./PaymentRouter";
 import StoreRouter from "./StoreRouter";
@@ -15,6 +16,7 @@ export default (app, router) => {
   [
     AuthRouter,
     BookingRouter,
+    CodeRouter,
     ConfigRouter,
     PaymentRouter,
     StoreRouter,
