@@ -22,7 +22,8 @@ const Booking = new Schema({
   },
   price: { type: Number },
   code: { type: Schema.Types.ObjectId, ref: Code },
-  payments: [{ type: Schema.Types.ObjectId, ref: Payment }]
+  payments: [{ type: Schema.Types.ObjectId, ref: Payment }],
+  remarks: String
 });
 
 Booking.index({ date: 1, checkInAt: 1, customer: 1 }, { unique: true });
@@ -62,6 +63,7 @@ export interface IBooking extends mongoose.Document {
   code?: ICode;
   payments?: IPayment[];
   paymentSuccess: () => Promise<IBooking>;
+  remarks?: string;
 }
 
 export default mongoose.model<IBooking>("Booking", Booking);

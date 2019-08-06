@@ -43,6 +43,10 @@ export default router => {
           createdAt: -1
         };
 
+        if (req.query.keyword) {
+          query.find({ name: new RegExp(req.query.keyword, "i") });
+        }
+
         let total = await query.countDocuments();
         const page = await query
           .find()
