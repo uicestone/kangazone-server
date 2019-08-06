@@ -94,7 +94,9 @@ export default router => {
 
         let creditPayAmount = 0;
 
-        if (useCredit && customer.credit) {
+        const adminAddWithoutPayment = req.user.role === "admin";
+
+        if (useCredit && customer.credit && !adminAddWithoutPayment) {
           creditPayAmount = Math.min(booking.price, customer.credit);
           const creditPayment = new Payment({
             customer: req.user,
@@ -112,7 +114,7 @@ export default router => {
         const extraPayAmount = booking.price - creditPayAmount;
         console.log(`[PAY] Extra payment amount is ${extraPayAmount}`);
 
-        if (extraPayAmount < 0.01) {
+        if (extraPayAmount < 0.01 || adminAddWithoutPayment) {
           booking.status = "BOOKED";
         } else {
           const extraPayment = new Payment({
