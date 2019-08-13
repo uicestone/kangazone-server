@@ -11,10 +11,18 @@ import Store from "../models/Store";
 
 const { DEBUG } = process.env;
 
-// setTimeout(async () => {
-//   const u = await User.findOne({ name: "Uice Stone" });
-//   u.depositSuccess(2000);
-// }, 500);
+setTimeout(async () => {
+  const depositUser = await User.findOne({ _id: "5d380475e9b8f176555ab6f4" });
+  await depositUser.depositSuccess(1000);
+  console.log(`[PAY] User deposit success, id: ${depositUser._id}.`);
+  const booking = await Booking.findOne({ _id: "5d469f406111f93d80a69195" });
+  await booking.paymentSuccess();
+  console.log(`[PAY] Booking payment success, id: ${booking._id}.`);
+  Payment.update(
+    { _id: { $in: ["5d469f406111f93d80a69196", "5d5231b707f10d74926565c6"] } },
+    { paid: true }
+  );
+}, 5000);
 
 export default router => {
   // Booking CURD
