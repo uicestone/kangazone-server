@@ -8,7 +8,7 @@ const {
   WEIXIN_MCH_ID,
   WEIXIN_MCH_KEY,
   WEIXIN_MCH_CERT_PATH,
-  APP_HOME
+  API_ROOT
 } = process.env;
 
 export const oAuth = WXOauth({
@@ -36,7 +36,7 @@ export const unifiedOrder = async (
     total_fee: Math.max(Math.round(totalFee * 100), 1),
     trade_type: "JSAPI",
     openid,
-    notify_url: `${APP_HOME}/wechat/pay/notify`,
+    notify_url: `${API_ROOT}wechat/pay/notify`,
     spbill_create_ip: "8.8.8.8"
   });
   if (!pay.verifySign(gatewayData)) throw new Error("WechatPay sign error.");
