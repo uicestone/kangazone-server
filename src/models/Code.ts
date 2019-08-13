@@ -33,4 +33,4 @@ export interface ICode extends mongoose.Document {
   expiresAt?: Date;
 }
 
-export default mongoose.model("Code", Code);
+export default mongoose.model<ICode>("Code", Code);
