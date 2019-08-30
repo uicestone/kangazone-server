@@ -25,7 +25,7 @@ export default router => {
           });
         }
         if (req.body.password) {
-          res.body.password = hashPwd(res.body.password);
+          req.body.password = await hashPwd(req.body.password);
         }
         const user = new User(req.body);
         await user.save();
