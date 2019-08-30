@@ -24,6 +24,9 @@ export default router => {
             delete req.body[f];
           });
         }
+        if (req.body.password) {
+          res.body.password = hashPwd(res.body.password);
+        }
         const user = new User(req.body);
         await user.save();
         res.json(user);
