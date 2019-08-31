@@ -16,7 +16,7 @@ const User = new Schema({
       return genderIndex[v] || v;
     }
   },
-  mobile: String,
+  mobile: { type: String, index: { unique: true, sparse: true } },
   avatarUrl: String,
   region: String,
   openid: { type: String, index: { unique: true, sparse: true } },
