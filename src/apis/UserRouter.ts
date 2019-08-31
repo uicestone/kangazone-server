@@ -47,7 +47,12 @@ export default router => {
         };
 
         if (req.query.keyword) {
-          query.find({ name: new RegExp(req.query.keyword, "i") });
+          query.find({
+            $or: [
+              { name: new RegExp(req.query.keyword, "i") },
+              { mobile: new RegExp(req.query.keyword) }
+            ]
+          });
         }
 
         let total = await query.countDocuments();
