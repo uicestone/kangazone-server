@@ -27,6 +27,12 @@ export default router => {
         if (req.body.password) {
           req.body.password = await hashPwd(req.body.password);
         }
+        if (req.body.mobile) {
+          const exists = await User.findOne({ mobile: req.body.mobile });
+          if (exists) {
+            throw new HttpError(400, `手机号${req.body.mobile}已被使用.`);
+          }
+        }
         const user = new User(req.body);
         await user.save();
         res.json(user);
