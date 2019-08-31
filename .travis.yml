@@ -8,4 +8,5 @@ after_success:
   - echo "${DEPLOY_KEY}" | base64 --decode > ~/.ssh/id_rsa
   - chmod 600 ~/.ssh/id_rsa
   - scp -r -o "StrictHostKeyChecking no" build/* ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+  - scp -r -o "StrictHostKeyChecking no" build/* ${DEPLOY_USER}@${DEPLOY_HOST_TEST}:${DEPLOY_PATH}
   - pm2 deploy testing && pm2 deploy production
