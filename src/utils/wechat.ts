@@ -11,6 +11,8 @@ const {
   API_ROOT
 } = process.env;
 
+const pfx = WEIXIN_MCH_CERT_PATH ? fs.readFileSync(WEIXIN_MCH_CERT_PATH) : null;
+
 export const oAuth = WXOauth({
   appid: WEIXIN_APPID,
   secret: WEIXIN_SECRET
@@ -19,7 +21,7 @@ export const pay = new Pay({
   appId: WEIXIN_APPID,
   mchId: WEIXIN_MCH_ID,
   key: WEIXIN_MCH_KEY,
-  pfx: fs.readFileSync(WEIXIN_MCH_CERT_PATH)
+  pfx
 });
 
 export const unifiedOrder = async (
