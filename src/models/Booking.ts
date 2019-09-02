@@ -50,6 +50,13 @@ Booking.methods.paymentSuccess = async function() {
   await booking.save();
   // send user notification
 };
+
+Booking.methods.checkIn = async function() {
+  const booking = this as IBooking;
+  // authorize band
+  // send user notification
+};
+
 export interface IBooking extends mongoose.Document {
   customer: IUser;
   store: IStore;
@@ -65,6 +72,7 @@ export interface IBooking extends mongoose.Document {
   code?: ICode;
   payments?: IPayment[];
   paymentSuccess: () => Promise<IBooking>;
+  checkIn: () => Promise<boolean>;
   remarks?: string;
 }
 

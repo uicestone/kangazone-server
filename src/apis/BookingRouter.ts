@@ -3,7 +3,7 @@ import paginatify from "../middlewares/paginatify";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
-import Booking from "../models/Booking";
+import Booking, { IBooking } from "../models/Booking";
 import Payment, { Gateways } from "../models/Payment";
 import { config } from "../models/Config";
 import User from "../models/User";
@@ -24,7 +24,12 @@ export default router => {
     // create a booking
     .post(
       handleAsyncErrors(async (req, res) => {
+        if (req.body.status && req.user.role !== "admin") {
+          throw new HttpError(403, "Only admin can set status directly.");
+        }
+
         const booking = new Booking(req.body);
+
         if (!booking.customer) {
           booking.customer = req.user;
         }
@@ -34,7 +39,7 @@ export default router => {
         }
         await booking.populate("store").execPopulate();
 
-        if (!booking.store.name) {
+        if (!booking.store || !booking.store.name) {
           throw new HttpError(400, "门店信息错误");
         }
 
@@ -247,11 +252,17 @@ export default router => {
             "Customers are not allowed to change booking for now."
           );
         }
-        const booking = req.item;
-        booking.set(req.body);
-        if (booking.payment && booking.payment.status === "COMPLETED") {
-          booking.status = "BOOKED";
+
+        if (req.body.status && req.user.role !== "admin") {
+          throw new HttpError(403, "Only admin can set status directly.");
         }
+
+        const booking = req.item as IBooking;
+
+        const statusWas = booking.status;
+
+        booking.set(req.body);
+
         if (
           req.body.bandIds &&
           req.body.bandIds.length !== booking.membersCount
@@ -261,6 +272,14 @@ export default router => {
             `手环数量必须等于玩家数量（${booking.membersCount}）`
           );
         }
+
+        if (booking.status === "IN_SERVICE" && statusWas === "BOOKED") {
+          if (!booking.bandIds.length) {
+            throw new Error("必须绑定手环才能签到入场");
+          }
+          booking.checkIn();
+        }
+
         await booking.save();
         // sendConfirmEmail(booking);
         res.json(booking);
