@@ -174,10 +174,16 @@ export default router => {
 
         let total = await query.countDocuments();
 
-        // restrict self bookings form customers
+        // restrict self bookings for customers
         if (req.user.role === "customer") {
           query.find({ customer: req.user._id });
         }
+
+        ["type", "store", "date", "status"].forEach(field => {
+          if (req.query.field) {
+            query.find({ [field]: req.query.field });
+          }
+        });
 
         // restrict self store bookings for managers
         // TODO
