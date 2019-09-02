@@ -101,9 +101,7 @@ export default router => {
           const creditPayment = new Payment({
             customer: req.user,
             amount: creditPayAmount,
-            title: `预定${booking.store.name} ${booking.date} ${
-              booking.hours
-            }小时 ${booking.checkInAt}入场`,
+            title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
             attach: `booking ${booking._id}`,
             gateway: Gateways.Credit
           });
@@ -120,9 +118,7 @@ export default router => {
           const extraPayment = new Payment({
             customer: req.user,
             amount: DEBUG === "true" ? extraPayAmount / 1e4 : extraPayAmount,
-            title: `预定${booking.store.name} ${booking.date} ${
-              booking.hours
-            }小时 ${booking.checkInAt}入场`,
+            title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
             attach: `booking ${booking._id}`,
             gateway: Gateways.WechatPay // TODO more payment options
           });
@@ -171,7 +167,6 @@ export default router => {
         const sort = parseSortString(req.query.order) || {
           createdAt: -1
         };
-
         let total = await query.countDocuments();
 
         // restrict self bookings for customers
@@ -180,8 +175,8 @@ export default router => {
         }
 
         ["type", "store", "date", "status"].forEach(field => {
-          if (req.query.field) {
-            query.find({ [field]: req.query.field });
+          if (req.query[field]) {
+            query.find({ [field]: req.query[field] });
           }
         });
 
