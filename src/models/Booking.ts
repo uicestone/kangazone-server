@@ -14,6 +14,7 @@ const Booking = new Schema({
   checkInAt: { type: String, required: true },
   hours: { type: Number, required: true },
   membersCount: { type: Number, default: 1 },
+  bandIds: { type: [String] },
   socksCount: { type: Number, default: 1 },
   status: {
     type: String,
@@ -57,6 +58,7 @@ export interface IBooking extends mongoose.Document {
   checkInAt: string;
   hours: number;
   membersCount: number;
+  bandIds: string[];
   socksCount: number;
   status: string;
   price?: number;

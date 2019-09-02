@@ -75,6 +75,9 @@ export default router => {
         throw new HttpError(403);
       }
       const user = await User.findOne({ _id: req.params.userId });
+      if (!user) {
+        throw new HttpError(404, "用户不存在");
+      }
       res.json({ token: signToken(user), user });
     })
   );

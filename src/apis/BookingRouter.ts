@@ -58,6 +58,16 @@ export default router => {
           throw new HttpError(401, "用户不存在");
         }
 
+        if (
+          req.body.bandIds &&
+          req.body.bandIds.length !== booking.membersCount
+        ) {
+          throw new HttpError(
+            400,
+            `手环数量必须等于玩家数量（${booking.membersCount}）`
+          );
+        }
+
         const cardType = config.cardTypes[customer.cardType];
 
         const firstHourPrice = cardType
@@ -167,7 +177,6 @@ export default router => {
         const sort = parseSortString(req.query.order) || {
           createdAt: -1
         };
-        let total = await query.countDocuments();
 
         // restrict self bookings for customers
         if (req.user.role === "customer") {
@@ -182,6 +191,8 @@ export default router => {
 
         // restrict self store bookings for managers
         // TODO
+
+        let total = await query.countDocuments();
 
         const page = await query
           .find()
@@ -239,7 +250,16 @@ export default router => {
         const booking = req.item;
         booking.set(req.body);
         if (booking.payment && booking.payment.status === "COMPLETED") {
-          booking.status = "paid";
+          booking.status = "BOOKED";
+        }
+        if (
+          req.body.bandIds &&
+          req.body.bandIds.length !== booking.membersCount
+        ) {
+          throw new HttpError(
+            400,
+            `手环数量必须等于玩家数量（${booking.membersCount}）`
+          );
         }
         await booking.save();
         // sendConfirmEmail(booking);
