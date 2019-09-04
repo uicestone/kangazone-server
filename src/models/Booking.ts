@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
 import autoPopulate from "./plugins/autoPopulate";
+import { config } from "../models/Config";
 import Payment, { IPayment } from "./Payment";
 import Store, { IStore } from "./Store";
 import User, { IUser } from "./User";
@@ -44,6 +45,40 @@ Booking.set("toJSON", {
   }
 });
 
+Booking.methods.calculatePrice = async function() {
+  const booking = this as IBooking;
+
+  await booking.populate("customer").execPopulate();
+
+  const cardType = config.cardTypes[booking.customer.cardType];
+
+  const firstHourPrice = cardType ? cardType.firstHourPrice : config.hourPrice;
+
+  let chargedHours = booking.hours;
+
+  if (booking.code) {
+    await booking.populate("code").execPopulate();
+    if (!booking.code) {
+      throw new Error("coupon_not_found");
+    }
+    if (booking.code.used) {
+      throw new Error("coupon_used");
+    }
+  }
+
+  if (booking.code && booking.code.hours) {
+    chargedHours -= booking.code.hours;
+  }
+
+  const sockPrice = 10;
+
+  booking.price =
+    config.hourPriceRatio.slice(0, chargedHours).reduce((price, ratio) => {
+      return +(price + firstHourPrice * ratio).toFixed(2);
+    }, 0) +
+    (booking.socksCount || 0) * sockPrice;
+};
+
 Booking.methods.paymentSuccess = async function() {
   const booking = this as IBooking;
   booking.status = "BOOKED";
@@ -71,6 +106,7 @@ export interface IBooking extends mongoose.Document {
   price?: number;
   code?: ICode;
   payments?: IPayment[];
+  calculatePrice: () => Promise<IBooking>;
   paymentSuccess: () => Promise<IBooking>;
   checkIn: () => Promise<boolean>;
   remarks?: string;

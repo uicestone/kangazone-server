@@ -33,6 +33,11 @@ export default router => {
         if (!booking.customer) {
           booking.customer = req.user;
         }
+        await booking.populate("customer").execPopulate();
+
+        if (!booking.customer) {
+          throw new HttpError(401, "客户信息错误");
+        }
 
         if (!booking.store) {
           booking.store = await Store.findOne();
@@ -68,12 +73,6 @@ export default router => {
           throw new HttpError(403, "只能为自己预订");
         }
 
-        const customer = await User.findOne({ _id: req.user._id }); // load user from db to get cardType
-
-        if (!customer) {
-          throw new HttpError(401, "用户不存在");
-        }
-
         if (
           req.body.bandIds &&
           req.body.bandIds.length !== booking.membersCount
@@ -84,37 +83,18 @@ export default router => {
           );
         }
 
-        const cardType = config.cardTypes[customer.cardType];
-
-        const firstHourPrice = cardType
-          ? cardType.firstHourPrice
-          : config.hourPrice;
-
-        let chargedHours = booking.hours;
-
-        if (booking.code) {
-          await booking.populate("code").execPopulate();
-          if (!booking.code) {
-            throw new HttpError(400, "优惠券不存在");
-          }
-          if (booking.code.used) {
-            throw new HttpError(403, "优惠券已经使用");
+        try {
+          await booking.calculatePrice();
+        } catch (err) {
+          switch (err.message) {
+            case "coupon_not_found":
+              throw new HttpError(400, "优惠券不存在");
+            case "coupon_used":
+              throw new HttpError(403, "优惠券已经使用");
+            default:
+              throw err;
           }
         }
-
-        if (booking.code && booking.code.hours) {
-          chargedHours -= booking.code.hours;
-        }
-
-        const sockPrice = 10;
-
-        booking.price =
-          config.hourPriceRatio
-            .slice(0, chargedHours)
-            .reduce((price, ratio) => {
-              return +(price + firstHourPrice * ratio).toFixed(2);
-            }, 0) +
-          (booking.socksCount || 0) * sockPrice;
 
         const useCredit = req.query.useCredit !== "false";
 
@@ -122,8 +102,8 @@ export default router => {
 
         const adminAddWithoutPayment = req.user.role === "admin";
 
-        if (useCredit && customer.credit && !adminAddWithoutPayment) {
-          creditPayAmount = Math.min(booking.price, customer.credit);
+        if (useCredit && booking.customer.credit && !adminAddWithoutPayment) {
+          creditPayAmount = Math.min(booking.price, booking.customer.credit);
           const creditPayment = new Payment({
             customer: req.user,
             amount: creditPayAmount,
