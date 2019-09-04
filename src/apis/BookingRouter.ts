@@ -253,7 +253,7 @@ export default router => {
           );
         }
 
-        if (req.body.status && req.user.role !== "admin") {
+        if (req.body.status && !["admin", "manager"].includes(req.user.role)) {
           throw new HttpError(403, "Only admin can set status directly.");
         }
 
