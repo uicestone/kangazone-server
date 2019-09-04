@@ -44,6 +44,7 @@ export default router => {
       paginatify,
       handleAsyncErrors(async (req, res) => {
         if (!["admin", "manager"].includes(req.user.role)) {
+          // TODO should restrict manager user list to own store booking
           throw new HttpError(403);
         }
         const { limit, skip } = req.pagination;

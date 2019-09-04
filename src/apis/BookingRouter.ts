@@ -254,7 +254,8 @@ export default router => {
         }
 
         if (req.body.status && !["admin", "manager"].includes(req.user.role)) {
-          throw new HttpError(403, "Only admin can set status directly.");
+          // TODO should restrict manager to own store booking
+          throw new HttpError(403, "Only admin and manager can set status.");
         }
 
         const booking = req.item as IBooking;
