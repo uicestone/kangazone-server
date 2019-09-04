@@ -43,7 +43,8 @@ export default router => {
 
     .all(
       handleAsyncErrors(async (req, res, next) => {
-        if (req.user.role !== "admin") {
+        if (req.user.role !== "admin" && req.user.role !== "manager") {
+          // TODO shop can only operate payment that is attached to booking in own store
           throw new HttpError(403);
         }
         const payment = await Payment.findById(req.params.paymentId);
@@ -68,6 +69,7 @@ export default router => {
 
     .put(
       handleAsyncErrors(async (req, res) => {
+        // TODO should restrict write access for manager
         const payment = req.item;
         payment.set(req.body);
         await payment.save();

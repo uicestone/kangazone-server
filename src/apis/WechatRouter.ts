@@ -111,34 +111,6 @@ export default (router: Router) => {
 
         payment.paid = true;
         payment.gatewayData = parsedData;
-        const paymentAttach = payment.attach.split(" ");
-        switch (paymentAttach[0]) {
-          case "booking":
-            const booking = await Booking.findOne({ _id: paymentAttach[1] });
-            await booking.paymentSuccess();
-            console.log(`[PAY] Booking payment success, id: ${booking._id}.`);
-            break;
-          case "deposit":
-            const depositUser = await User.findOne({ _id: paymentAttach[1] });
-            await depositUser.depositSuccess(+paymentAttach[2]);
-            console.log(`[PAY] User deposit success, id: ${depositUser._id}.`);
-            break;
-          case "membership":
-            const membershipUser = await User.findOne({
-              _id: paymentAttach[1]
-            });
-            await membershipUser.membershipUpgradeSuccess(paymentAttach[2]);
-            console.log(
-              `[PAY] User membership upgrade success, id: ${
-                membershipUser._id
-              }.`
-            );
-            break;
-          default:
-            console.error(
-              `[PAY] Unknown payment attach: ${JSON.stringify(payment.attach)}`
-            );
-        }
 
         await payment.save();
 
