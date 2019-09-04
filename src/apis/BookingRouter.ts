@@ -188,7 +188,7 @@ export default router => {
           query.find({ customer: req.user._id });
         }
 
-        ["type", "store", "date", "status"].forEach(field => {
+        ["type", "store", "date", "status", "customer"].forEach(field => {
           if (req.query[field]) {
             query.find({ [field]: req.query[field] });
           }

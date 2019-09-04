@@ -43,7 +43,7 @@ export default router => {
     .get(
       paginatify,
       handleAsyncErrors(async (req, res) => {
-        if (req.user.role !== "admin") {
+        if (!["admin", "manager"].includes(req.user.role)) {
           throw new HttpError(403);
         }
         const { limit, skip } = req.pagination;
