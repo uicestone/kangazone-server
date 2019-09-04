@@ -67,6 +67,12 @@ Payment.pre("save", async function(next) {
       customer.credit -= payment.amount;
       await customer.save();
       break;
+    case Gateways.Card:
+      break;
+    case Gateways.Scan:
+      break;
+    case Gateways.Cash:
+      break;
     default:
       throw Error("Payment gateway not supported.");
   }
