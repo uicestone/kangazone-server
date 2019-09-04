@@ -36,11 +36,22 @@ export default router => {
 
         if (!booking.store) {
           booking.store = await Store.findOne();
+          // TODO booking default store should be disabled
         }
         await booking.populate("store").execPopulate();
 
         if (!booking.store || !booking.store.name) {
           throw new HttpError(400, "门店信息错误");
+        }
+
+        if (!booking.date) {
+          booking.date = moment().format("YYYY-MM-DD");
+        }
+
+        if (!booking.checkInAt) {
+          booking.checkInAt = moment()
+            .add(5, "minutes")
+            .format("HH:mm:ss");
         }
 
         if (booking.hours > config.hourPriceRatio.length) {
@@ -140,26 +151,20 @@ export default router => {
 
           console.log(`[PAY] Extra payment: `, extraPayment.toObject());
 
-          await extraPayment.save();
+          try {
+            await extraPayment.save();
+          } catch (err) {
+            switch (err.message) {
+              case "no_customer_openid":
+                throw new HttpError(400, "Customer openid is missing.");
+              case "insufficient_credit":
+                throw new HttpError(400, "Customer credit is insufficient.");
+              default:
+                throw err;
+            }
+          }
 
           booking.payments.push(extraPayment);
-
-          if (extraPayment.gateway === Gateways.WechatPay) {
-            if (
-              !extraPayment.gatewayData.nonce_str ||
-              !extraPayment.gatewayData.prepay_id
-            ) {
-              throw new Error(
-                `Incomplete gateway data: ${JSON.stringify(
-                  extraPayment.gatewayData
-                )}.`
-              );
-            }
-            const wechatGatewayData = extraPayment.gatewayData as {
-              nonce_str: string;
-              prepay_id: string;
-            };
-          }
         }
 
         if (booking.code) {

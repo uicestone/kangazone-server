@@ -12,7 +12,7 @@ const Booking = new Schema({
   type: { type: String, enum: ["play", "party"], default: "play" },
   date: { type: String, required: true },
   checkInAt: { type: String, required: true },
-  hours: { type: Number, required: true },
+  hours: { type: Number, required: true, default: 1 },
   membersCount: { type: Number, default: 1 },
   bandIds: { type: [String] },
   socksCount: { type: Number, default: 1 },
