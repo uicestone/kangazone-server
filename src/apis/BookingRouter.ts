@@ -135,7 +135,7 @@ export default router => {
             amount: DEBUG === "true" ? extraPayAmount / 1e4 : extraPayAmount,
             title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
             attach: `booking ${booking._id}`,
-            gateway: Gateways.WechatPay // TODO more payment options
+            gateway: req.query.paymentGateway || Gateways.WechatPay
           });
 
           console.log(`[PAY] Extra payment: `, extraPayment.toObject());
