@@ -113,7 +113,9 @@ Payment.pre("save", async function(next) {
       }
       customer.credit -= payment.amount;
       payment.paid = true;
-      await payment.paidSuccess();
+      // await payment.paidSuccess();
+      // we don't trigger paidSuccess or booking.paidSuccess here cause booking may not be saved
+      // we need to change booking status manually after credit payment
       await customer.save();
       break;
     case Gateways.Card:
