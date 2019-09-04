@@ -105,7 +105,7 @@ export default router => {
         if (useCredit && booking.customer.credit && !adminAddWithoutPayment) {
           creditPayAmount = Math.min(booking.price, booking.customer.credit);
           const creditPayment = new Payment({
-            customer: req.user,
+            customer: booking.customer,
             amount: creditPayAmount,
             title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
             attach: `booking ${booking._id}`,
@@ -122,7 +122,7 @@ export default router => {
           booking.status = "BOOKED";
         } else {
           const extraPayment = new Payment({
-            customer: req.user,
+            customer: booking.customer,
             amount: DEBUG === "true" ? extraPayAmount / 1e4 : extraPayAmount,
             title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
             attach: `booking ${booking._id}`,

@@ -15,8 +15,8 @@ const Booking = new Schema({
   checkInAt: { type: String, required: true },
   hours: { type: Number, required: true, default: 1 },
   membersCount: { type: Number, default: 1 },
+  socksCount: { type: Number, default: 0 },
   bandIds: { type: [String] },
-  socksCount: { type: Number, default: 1 },
   status: {
     type: String,
     enum: ["PENDING", "BOOKED", "IN_SERVICE", "FINISHED", "CANCELED"],
@@ -72,11 +72,13 @@ Booking.methods.calculatePrice = async function() {
 
   const sockPrice = 10;
 
-  booking.price =
+  booking.price = +(
     config.hourPriceRatio.slice(0, chargedHours).reduce((price, ratio) => {
       return +(price + firstHourPrice * ratio).toFixed(2);
-    }, 0) +
-    (booking.socksCount || 0) * sockPrice;
+    }, 0) *
+      booking.membersCount + // WARN code will reduce each user by hour, maybe unexpected
+    (booking.socksCount || 0) * sockPrice
+  ).toFixed(2);
 };
 
 Booking.methods.paymentSuccess = async function() {
