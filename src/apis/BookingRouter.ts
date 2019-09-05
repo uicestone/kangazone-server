@@ -258,6 +258,63 @@ export default router => {
       })
     );
 
+  router.route("/booking-price").post(
+    handleAsyncErrors(async (req, res) => {
+      const booking = new Booking(req.body);
+
+      if (!booking.customer) {
+        booking.customer = req.user;
+      }
+      await booking.populate("customer").execPopulate();
+
+      if (!booking.customer) {
+        throw new HttpError(401, "客户信息错误");
+      }
+
+      if (!booking.store) {
+        booking.store = await Store.findOne();
+        // TODO booking default store should be disabled
+      }
+      await booking.populate("store").execPopulate();
+
+      if (!booking.store || !booking.store.name) {
+        throw new HttpError(400, "门店信息错误");
+      }
+
+      if (!booking.date) {
+        booking.date = moment().format("YYYY-MM-DD");
+      }
+
+      if (!booking.checkInAt) {
+        booking.checkInAt = moment()
+          .add(5, "minutes")
+          .format("HH:mm:ss");
+      }
+
+      if (booking.hours > config.hourPriceRatio.length) {
+        throw new HttpError(
+          400,
+          `预定小时数超过限制（${config.hourPriceRatio.length}小时）`
+        );
+      }
+
+      try {
+        await booking.calculatePrice();
+      } catch (err) {
+        switch (err.message) {
+          case "coupon_not_found":
+            throw new HttpError(400, "优惠券不存在");
+          case "coupon_used":
+            throw new HttpError(403, "优惠券已经使用");
+          default:
+            throw err;
+        }
+      }
+
+      res.json({ price: booking.price });
+    })
+  );
+
   router
     /**
      *  get availability of dates
