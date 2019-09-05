@@ -4,12 +4,9 @@ import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import Booking, { IBooking } from "../models/Booking";
-import Payment, { Gateways } from "../models/Payment";
 import { config } from "../models/Config";
 import User from "../models/User";
 import Store from "../models/Store";
-
-const { DEBUG } = process.env;
 
 // setTimeout(async () => {
 //   const u = await User.findOne({ name: "Uice Stone" });
@@ -96,55 +93,20 @@ export default router => {
           }
         }
 
-        const useCredit = req.query.useCredit !== "false";
-
-        let creditPayAmount = 0;
-
-        const adminAddWithoutPayment = req.user.role === "admin";
-
-        if (useCredit && booking.customer.credit && !adminAddWithoutPayment) {
-          creditPayAmount = Math.min(booking.price, booking.customer.credit);
-          const creditPayment = new Payment({
-            customer: booking.customer,
-            amount: creditPayAmount,
-            title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
-            attach: `booking ${booking._id}`,
-            gateway: Gateways.Credit
+        try {
+          await booking.createPayment({
+            paymentGateway: req.query.paymentGateway,
+            useCredit: req.query.useCredit !== "false",
+            adminAddWithoutPayment: req.user.role === "admin"
           });
-          await creditPayment.save();
-          booking.payments.push(creditPayment);
-        }
-
-        const extraPayAmount = booking.price - creditPayAmount;
-        console.log(`[PAY] Extra payment amount is ${extraPayAmount}`);
-
-        if (extraPayAmount < 0.01 || adminAddWithoutPayment) {
-          booking.status = "BOOKED";
-        } else {
-          const extraPayment = new Payment({
-            customer: booking.customer,
-            amount: DEBUG === "true" ? extraPayAmount / 1e4 : extraPayAmount,
-            title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
-            attach: `booking ${booking._id}`,
-            gateway: req.query.paymentGateway || Gateways.WechatPay
-          });
-
-          console.log(`[PAY] Extra payment: `, extraPayment.toObject());
-
-          try {
-            await extraPayment.save();
-          } catch (err) {
-            switch (err.message) {
-              case "no_customer_openid":
-                throw new HttpError(400, "Customer openid is missing.");
-              case "insufficient_credit":
-                throw new HttpError(400, "Customer credit is insufficient.");
-              default:
-                throw err;
-            }
+        } catch (err) {
+          switch (err.message) {
+            case "no_customer_openid":
+              throw new HttpError(400, "Customer openid is missing.");
+            case "insufficient_credit":
+              throw new HttpError(400, "Customer credit is insufficient.");
+            default:
           }
-
-          booking.payments.push(extraPayment);
         }
 
         if (booking.code) {
@@ -231,21 +193,12 @@ export default router => {
 
     .put(
       handleAsyncErrors(async (req, res) => {
-        if (req.user.role === "customer") {
-          throw new HttpError(
-            403,
-            "Customers are not allowed to change booking for now."
-          );
-        }
-
-        if (req.body.status && !["admin", "manager"].includes(req.user.role)) {
-          // TODO should restrict manager to own store booking
-          throw new HttpError(403, "Only admin and manager can set status.");
-        }
-
         const booking = req.item as IBooking;
 
+        // TODO restrict for roles
+
         const statusWas = booking.status;
+        const hoursWas = booking.hours;
 
         booking.set(req.body);
 
@@ -264,6 +217,27 @@ export default router => {
             throw new Error("必须绑定手环才能签到入场");
           }
           booking.checkIn();
+        }
+
+        if (hoursWas !== booking.hours) {
+          if (booking.hours < hoursWas) {
+            throw new HttpError(
+              400,
+              "Hour must greater than original if not equal."
+            );
+          }
+          const priceWas = booking.price;
+          await booking.calculatePrice();
+          await booking.createPayment(
+            {
+              paymentGateway: req.query.paymentGateway,
+              useCredit: req.query.useCredit !== "false",
+              adminAddWithoutPayment: req.user.role === "admin",
+              extendHoursBy: booking.hours - hoursWas
+            },
+            booking.price - priceWas
+          );
+          booking.hours = hoursWas;
         }
 
         await booking.save();
