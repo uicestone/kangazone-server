@@ -6,16 +6,20 @@ import HttpError from "../utils/HttpError";
 import { utils } from "@sigodenjs/wechatpay";
 import { signToken } from "../utils/helper";
 import Payment from "../models/Payment";
-import Booking from "../models/Booking";
 
 export default (router: Router) => {
   router.route("/wechat/login").post(
     handleAsyncErrors(async (req, res) => {
       const { code } = req.body;
-      if (!code) throw new Error("缺少参数");
+      if (!code) throw new HttpError(400, "OAuth code missing.");
       const userData = await oAuth.getUser(code);
       const { openid, session_key } = userData;
-      const user = await User.findOne({ openid });
+      const user = await User.findOneAndUpdate(
+        { openid },
+        {},
+        { upsert: true, new: true }
+      );
+
       res.json({
         user,
         token: user ? signToken(user) : null,
@@ -29,31 +33,33 @@ export default (router: Router) => {
     handleAsyncErrors(async (req, res) => {
       const { session_key, encryptedData, iv } = req.body;
       if (!session_key || !encryptedData || !iv) {
-        throw new Error("缺少参数");
+        throw new HttpError(400, "Incorrect request params.");
       }
 
       const userData = oAuth.decrypt(encryptedData, session_key, iv);
-      const { openId: openid } = userData;
-      let user = await User.findOne({ openid });
-      if (!user) {
-        const {
-          nickName,
-          avatarUrl,
-          gender,
-          city,
-          province,
-          country
-        } = userData;
+      const {
+        openId: openid,
+        nickName,
+        avatarUrl,
+        gender,
+        city,
+        province,
+        country
+      } = userData;
 
-        user.set({
+      const user = await User.findOneAndUpdate(
+        { openid },
+        {
           openid,
           name: nickName,
           gender,
           avatarUrl,
           region: `${country} ${province} ${city}`
-        });
-        await user.save();
-      }
+        },
+        { upsert: true, new: true }
+      );
+
+      await user.save();
 
       res.json({
         user,
