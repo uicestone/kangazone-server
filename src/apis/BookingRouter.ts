@@ -219,6 +219,14 @@ export default router => {
           booking.checkIn();
         }
 
+        if (booking.status === "CANCELED" && statusWas === "BOOKED") {
+          // TODO refund permission should be restricted
+          // TODO IN_SERVICE refund
+          console.log(`[BOK] Refund booking ${booking._id}.`);
+          booking.status = statusWas; // revert booking status and wait for refund payment
+          await booking.createRefundPayment();
+        }
+
         if (hoursWas !== booking.hours) {
           if (booking.hours < hoursWas) {
             throw new HttpError(

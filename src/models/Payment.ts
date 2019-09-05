@@ -58,8 +58,13 @@ Payment.methods.paidSuccess = async function() {
       if (paymentAttach[2] === "extend") {
         booking.hours += +paymentAttach[3];
       }
-      await booking.paymentSuccess();
-      console.log(`[PAY] Booking payment success, id: ${booking._id}.`);
+      if (payment.amount >= 0) {
+        await booking.paymentSuccess();
+        console.log(`[PAY] Booking payment success, id: ${booking._id}.`);
+      } else {
+        await booking.refundSuccess();
+        console.log(`[PAY] Booking refund success, id: ${booking._id}.`);
+      }
       break;
     case "deposit":
       const depositUser = await User.findOne({ _id: paymentAttach[1] });
@@ -89,6 +94,8 @@ Payment.pre("save", async function(next) {
     return next();
   }
 
+  console.log(`[PAY] Payment pre save ${payment._id}.`);
+
   if (payment.paid) {
     payment.paidSuccess();
     return next();
@@ -115,6 +122,9 @@ Payment.pre("save", async function(next) {
         throw new Error("insufficient_credit");
       }
       customer.credit -= payment.amount;
+      console.log(
+        `[DEBUG] Credit payment saved, customer credit set to ${customer.credit}`
+      );
       payment.paid = true;
       // await payment.paidSuccess();
       // we don't trigger paidSuccess or booking.paidSuccess here cause booking may not be saved

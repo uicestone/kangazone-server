@@ -150,6 +150,56 @@ Booking.methods.paymentSuccess = async function() {
   // send user notification
 };
 
+Booking.methods.createRefundPayment = async function() {
+  const booking = this as IBooking;
+
+  const creditPayments = booking.payments.filter(
+    p => p.gateway === Gateways.Credit
+  );
+  const extraPayments = booking.payments.filter(
+    p => p.gateway !== Gateways.Credit
+  );
+
+  await Promise.all(
+    creditPayments.map(async p => {
+      const refundPayment = new Payment({
+        customer: p.customer,
+        amount: -p.amount,
+        title: `退款：${p.title}`,
+        attach: p.attach,
+        gateway: p.gateway
+      });
+      await refundPayment.save();
+      booking.payments.push(refundPayment);
+    })
+  );
+
+  if (!extraPayments.length) {
+    booking.status = "CANCELED";
+  } else {
+    await Promise.all(
+      extraPayments.map(async p => {
+        const refundPayment = new Payment({
+          customer: p.customer,
+          amount: -p.amount,
+          title: `退款：${p.title}`,
+          attach: p.attach,
+          gateway: p.gateway
+        });
+        await refundPayment.save();
+        booking.payments.push(refundPayment);
+      })
+    );
+  }
+};
+
+Booking.methods.refundSuccess = async function() {
+  const booking = this as IBooking;
+  booking.status = "CANCELED";
+  await booking.save();
+  // send user notification
+};
+
 Booking.methods.checkIn = async function() {
   const booking = this as IBooking;
   // authorize band
@@ -181,6 +231,8 @@ export interface IBooking extends mongoose.Document {
     amount?: number
   ) => Promise<IBooking>;
   paymentSuccess: () => Promise<IBooking>;
+  createRefundPayment: () => Promise<IBooking>;
+  refundSuccess: () => Promise<IBooking>;
   checkIn: () => Promise<boolean>;
   remarks?: string;
 }
