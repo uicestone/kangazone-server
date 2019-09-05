@@ -44,13 +44,15 @@ export default (router: Router) => {
           province,
           country
         } = userData;
-        user = await User.create({
+
+        user.set({
           openid,
           name: nickName,
           gender,
           avatarUrl,
           region: `${country} ${province} ${city}`
         });
+        await user.save();
       }
 
       res.json({
