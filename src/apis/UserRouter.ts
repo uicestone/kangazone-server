@@ -114,7 +114,7 @@ export default router => {
           });
         }
         if (req.body.password) {
-          req.body.password = hashPwd(req.body.password);
+          req.body.password = await hashPwd(req.body.password);
         }
         const user = req.item;
         user.set(req.body);
