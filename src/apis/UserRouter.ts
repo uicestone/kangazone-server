@@ -85,7 +85,7 @@ export default router => {
       handleAsyncErrors(async (req, res, next) => {
         const user = await User.findById(req.params.userId);
         if (
-          req.user.role !== "admin" &&
+          !["admin", "manager"].includes(req.user.role) &&
           !req.user._id.equals(req.params.userId)
         ) {
           throw new HttpError(403);
