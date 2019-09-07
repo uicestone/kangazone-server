@@ -215,6 +215,27 @@ Booking.methods.checkIn = async function() {
   // send user notification
 };
 
+Booking.methods.cancel = async function(save = true) {
+  const booking = this as IBooking;
+
+  if (!["PENDING", "BOOKED"].includes(booking.status)) {
+    throw new Error("uncancelable_booking_status");
+  }
+  if (booking.payments.filter(p => p.paid).length) {
+    console.log(`[BOK] Refund booking ${booking._id}.`);
+    // we don't change status here, will auto change on payment fullfil
+    await booking.createRefundPayment();
+  } else {
+    booking.status = "CANCELED";
+  }
+
+  console.log(`[BOK] Cancel booking ${booking._id}.`);
+
+  if (save) {
+    await booking.save();
+  }
+};
+
 export interface IBooking extends mongoose.Document {
   customer: IUser;
   store: IStore;
@@ -243,6 +264,7 @@ export interface IBooking extends mongoose.Document {
   createRefundPayment: () => Promise<IBooking>;
   refundSuccess: () => Promise<IBooking>;
   checkIn: () => Promise<boolean>;
+  cancel: (save?: boolean) => Promise<boolean>;
   remarks?: string;
 }
 
