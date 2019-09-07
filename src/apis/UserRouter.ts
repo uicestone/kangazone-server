@@ -86,7 +86,7 @@ export default router => {
         const user = await User.findById(req.params.userId);
         if (
           !["admin", "manager"].includes(req.user.role) &&
-          !req.user._id.equals(req.params.userId)
+          req.user.id !== req.params.userId
         ) {
           throw new HttpError(403);
         }

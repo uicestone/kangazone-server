@@ -65,7 +65,7 @@ export default router => {
 
         if (
           req.user.role === "customer" &&
-          !booking.customer.equals(req.user._id)
+          !booking.customer.equals(req.user)
         ) {
           throw new HttpError(403, "只能为自己预订");
         }
@@ -168,7 +168,7 @@ export default router => {
       handleAsyncErrors(async (req, res, next) => {
         const booking = await Booking.findOne({ _id: req.params.bookingId });
         if (req.user.role === "customer") {
-          if (!booking.customer.equals(req.user._id)) {
+          if (!booking.customer.equals(req.user)) {
             throw new HttpError(403);
           }
         }
