@@ -148,6 +148,9 @@ Booking.methods.paymentSuccess = async function() {
   booking.status = "BOOKED";
   await booking.save();
   // send user notification
+  // (re)authorize band to gate controllers
+  booking.store.authBands(booking.bandIds);
+  // (re)setup revoke job at [now + hours]
 };
 
 Booking.methods.createRefundPayment = async function() {
@@ -198,6 +201,7 @@ Booking.methods.refundSuccess = async function() {
   booking.status = "CANCELED";
   await booking.save();
   // send user notification
+  // revoke band auth to gate controllers
 };
 
 Booking.methods.checkIn = async function() {

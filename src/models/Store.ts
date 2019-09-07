@@ -1,11 +1,18 @@
 import mongoose, { Schema } from "mongoose";
+import WgCtl from "wiegand-control";
 import updateTimes from "./plugins/updateTimes";
+
+export const storeGateControllers: { [serial: string]: WgCtl } = {};
 
 const Store = new Schema({
   name: String,
   address: String,
   phone: String,
-  partyRooms: Number
+  partyRooms: Number,
+  gates: {
+    entry: { type: [[Number]] },
+    exit: { type: [[Number]] }
+  }
 });
 
 Store.index({ name: 1 }, { unique: true });
@@ -20,11 +27,30 @@ Store.set("toJSON", {
   }
 });
 
+Store.methods.authBands = async function(bandIds: string[]) {
+  const store = this as IStore;
+  for (const g of store.gates.entry) {
+    for (const bandId of bandIds) {
+      await new Promise(r => {
+        setTimeout(() => {
+          storeGateControllers[g[0]].setAuth(+bandId);
+          r();
+        }, 200);
+      });
+    }
+  }
+};
+
 export interface IStore extends mongoose.Document {
   name: string;
   address: string;
   phone: string;
   partyRooms: number;
+  gates: {
+    entry: number[];
+    exit: number[];
+  };
+  authBands: (bandIds: string[]) => Promise<boolean>;
 }
 
 export default mongoose.model<IStore>("Store", Store);

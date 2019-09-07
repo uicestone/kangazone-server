@@ -1,5 +1,6 @@
 import handleSocketData from "./handleSocketData";
 import WgCtl from "wiegand-control";
+import Store, { storeGateControllers } from "../models/Store";
 
 export default function handleCreateServer(io) {
   return async function socket(socket) {
@@ -7,11 +8,26 @@ export default function handleCreateServer(io) {
       `[SYS] Socket connect from: ${socket.remoteAddress}:${socket.remotePort}.`
     );
 
-    const serials = [223236925, 225012725];
+    const stores = await Store.find();
+    const serials = Array.from(
+      stores.reduce((acc, cur) => {
+        cur.gates.entry.forEach(g => {
+          acc.add(g[0]);
+        });
+        cur.gates.exit.forEach(g => {
+          acc.add(g[0]);
+        });
+        return acc;
+      }, new Set())
+    ) as number[];
+
     const controllers = serials.map(serial => new WgCtl(socket, serial));
     await Promise.all(controllers.map(ctl => ctl.detected));
-    // controllers.map(c => c.setServerAddress("192.168.3.2", 6000));
-    controllers.map(c => c.openDoor(1));
+    // storeGateControllers["TEST"] = { test: true };
+    controllers.map(c => {
+      // c.setServerAddress("192.168.3.2", 6000);
+      storeGateControllers[c.serial] = c;
+    });
 
     // socket.setTimeout(60000);
 
@@ -21,9 +37,7 @@ export default function handleCreateServer(io) {
     // When socket send data complete.
     socket.on("close", async function() {
       console.log(
-        `[SYS] Socket disconnect from ${socket.remoteAddress}:${
-          socket.remotePort
-        }`
+        `[SYS] Socket disconnect from ${socket.remoteAddress}:${socket.remotePort}`
       );
     });
 
