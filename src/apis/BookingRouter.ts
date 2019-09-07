@@ -219,12 +219,20 @@ export default router => {
           booking.checkIn();
         }
 
-        if (booking.status === "CANCELED" && statusWas === "BOOKED") {
+        if (booking.status === "CANCELED") {
           // TODO refund permission should be restricted
           // TODO IN_SERVICE refund
-          console.log(`[BOK] Refund booking ${booking._id}.`);
-          booking.status = statusWas; // revert booking status and wait for refund payment
-          await booking.createRefundPayment();
+          if (!["PENDING", "BOOKED"].includes(statusWas)) {
+            throw new HttpError(
+              403,
+              "服务状态无法取消，只有待付款/已确认状态才能取消"
+            );
+          }
+          if (booking.payments.length) {
+            console.log(`[BOK] Refund booking ${booking._id}.`);
+            booking.status = statusWas; // revert booking status and wait for refund payment
+            await booking.createRefundPayment();
+          }
         }
 
         if (hoursWas !== booking.hours) {
