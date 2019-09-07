@@ -69,7 +69,42 @@ export default (router: Router) => {
       });
     })
   );
+  router.route("/wechat/update-mobile").post(
+    handleAsyncErrors(async (req, res) => {
+      const { encryptedData, session_key, iv, openid } = req.body;
+      if (!session_key || !encryptedData || !iv || !openid) {
+        throw new HttpError(400, "缺少参数");
+      }
+      const { phoneNumber: mobile } = oAuth.decrypt(
+        encryptedData,
+        session_key,
+        iv
+      );
+      if (!mobile) throw new HttpError(400, "数据解析异常");
+      const oldCustomer = await User.findOne({ mobile });
+      const openIdUser = await User.findOne({ openid });
+      if (oldCustomer && oldCustomer.id !== openIdUser.id) {
+        console.log(`用户迁移${mobile}`);
+        const { openid, avatarUrl, gender, region } = openIdUser;
+        oldCustomer.set({
+          openid,
+          avatarUrl,
+          gender,
+          region,
+          mobile
+        });
+        await openIdUser.remove();
+        await oldCustomer.save();
 
+        res.json(oldCustomer);
+      } else {
+        console.log(`更新手机号${mobile}`);
+        openIdUser.set({ mobile });
+        await openIdUser.save();
+        res.json(openIdUser);
+      }
+    })
+  );
   router.route("/wechat/decrypt").post(
     handleAsyncErrors(async (req, res) => {
       const { encryptedData, session_key, iv } = req.body;
