@@ -11,6 +11,7 @@ ensureEnv();
 import handleError from "./utils/handleError";
 import handleCreateServer from "./socket/handleCreateServer";
 import applyRoutes from "./apis";
+import agenda from "./utils/agenda";
 
 const app = express();
 const router = express.Router();
@@ -43,3 +44,5 @@ httpServer.listen(portHttp, () => {
 socketServer.listen(portSocket, () => {
   console.log(`[SYS] Socket server listening port: ${portSocket}.`);
 });
+
+agenda.start();

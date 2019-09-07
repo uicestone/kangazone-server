@@ -27,14 +27,16 @@ Store.set("toJSON", {
   }
 });
 
-Store.methods.authBands = async function(bandIds: string[]) {
+Store.methods.authBands = async function(bandIds: string[], revoke = false) {
   const store = this as IStore;
   for (const g of store.gates.entry) {
     for (const bandId of bandIds) {
-      await new Promise(r => {
+      await new Promise(resolve => {
         setTimeout(() => {
-          storeGateControllers[g[0]].setAuth(+bandId);
-          r();
+          revoke
+            ? storeGateControllers[g[0]].removeAuth(+bandId)
+            : storeGateControllers[g[0]].setAuth(+bandId);
+          resolve();
         }, 200);
       });
     }
@@ -50,7 +52,7 @@ export interface IStore extends mongoose.Document {
     entry: number[];
     exit: number[];
   };
-  authBands: (bandIds: string[]) => Promise<boolean>;
+  authBands: (bandIds: string[], revoke?: boolean) => Promise<boolean>;
 }
 
 export default mongoose.model<IStore>("Store", Store);

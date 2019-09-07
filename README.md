@@ -127,6 +127,8 @@ queries: `?`
 
 签到入场即`status`由`BOOKED`改为`IN_SERVICE`
 
+取消未付款的订单即`status`由`PENDING`改为`CANCELED`
+
 取消订单（全额退款）即`status`由`BOOKED`改为`CANCELED`
 
 取消订单后会自动生成`amount`为负的`booking.payments`，如果其中包含`paid:false`的`payment`则需要客户端对其手动处理退款，退款完成后通过`更新支付`接口上报支付状态。当所有`payments.paid`状态为`true`时，`booking`状态会自动更新为`CANCELED`

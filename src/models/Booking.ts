@@ -6,6 +6,7 @@ import Payment, { IPayment, Gateways } from "./Payment";
 import Store, { IStore } from "./Store";
 import User, { IUser } from "./User";
 import Code, { ICode } from "./Code";
+import agenda from "../utils/agenda";
 
 const { DEBUG } = process.env;
 
@@ -150,6 +151,10 @@ Booking.methods.paymentSuccess = async function() {
   // send user notification
   // (re)authorize band to gate controllers
   booking.store.authBands(booking.bandIds);
+  agenda.schedule("revoke band auth", `in ${booking.hours} hours`, {
+    bandIds: booking.bandIds,
+    storeId: booking.store.id
+  });
   // (re)setup revoke job at [now + hours]
 };
 

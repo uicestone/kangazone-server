@@ -679,6 +679,14 @@
     request "^2.88.0"
     xml2js "^0.4.19"
 
+"@types/agenda@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/agenda/-/agenda-2.0.5.tgz#30fee7b3139262cfe90917e9e15d32147d520680"
+  integrity sha512-2loWrgsW675/bappNGZwLeuXSPaF7b3ZxXsqFz6zmA1sY31Y8De5XZM5377EQf7VgLPRXVN6jx/V9jAYk9953A==
+  dependencies:
+    "@types/mongodb" "*"
+    "@types/node" "*"
+
 "@types/bcryptjs@^2.4.2":
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/@types/bcryptjs/-/bcryptjs-2.4.2.tgz#e3530eac9dd136bfdfb0e43df2c4c5ce1f77dfae"
@@ -1036,6 +1044,18 @@ after@0.8.2:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/after/-/after-0.8.2.tgz#fedb394f9f0e02aa9768e702bda23b505fae7e1f"
   integrity sha1-/ts5T58OAqqXaOcCvaI7UF+ufh8=
+
+agenda@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/agenda/-/agenda-2.0.2.tgz#d0571a63da613c960c69a63cc15530d78d59a069"
+  integrity sha512-iP3aFNMeGKivtSDrXuzs29w88FB47WKIRkLhnkdh4Jj4Pe2VxpM2zOnNcAQEW1qxiC0lP1wgOI1f6OfPACOPkA==
+  dependencies:
+    cron "~1.3.0"
+    date.js "~0.3.2"
+    debug "~3.1.0"
+    human-interval "~0.1.3"
+    moment-timezone "~0.5.0"
+    mongodb "~3.1"
 
 agent-base@4, agent-base@^4.2.0, agent-base@^4.3.0:
   version "4.3.0"
@@ -1520,7 +1540,7 @@ browserslist@^4.6.0, browserslist@^4.6.6:
     electron-to-chromium "^1.3.191"
     node-releases "^1.1.25"
 
-bson@^1.1.1, bson@~1.1.1:
+bson@^1.1.0, bson@^1.1.1, bson@~1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/bson/-/bson-1.1.1.tgz#4330f5e99104c4e751e7351859e2d408279f2f13"
   integrity sha512-jCGVYLoYMHDkOsbwJZBCqwMHyH4c+wzgI9hG7Z6SZJRXWr+x58pdIbm2i9a/jFGCkRJqRUr8eoI7lDWa0hTkxg==
@@ -1989,6 +2009,13 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
+cron@~1.3.0:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/cron/-/cron-1.3.1.tgz#9dd9c1c72b894df835715aad32cab62d13cf0fd8"
+  integrity sha512-iZlSOfm2IQUUMMko4Nj0+B8Sk5S/wWwJF++X+L4TfAfd3Y0i8s5beqm4nhwFyorkOOnmy8czymLyh+MeYKLxzg==
+  dependencies:
+    moment-timezone "^0.5.x"
+
 cross-spawn@^5.0.1:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-5.1.0.tgz#e8bd0efee58fcff6f8f94510a0a554bbfa235449"
@@ -2059,6 +2086,13 @@ date-now@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
   integrity sha1-6vQ5/U1ISK105cx9vvIAZyueNFs=
+
+date.js@~0.3.2:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/date.js/-/date.js-0.3.3.tgz#ef1e92332f507a638795dbb985e951882e50bbda"
+  integrity sha512-HgigOS3h3k6HnW011nAb43c5xx5rBXk8P2v/WIT9Zv4koIaVXiH2BURguI78VVp+5Qc076T7OR378JViCnZtBw==
+  dependencies:
+    debug "~3.1.0"
 
 debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.9:
   version "2.6.9"
@@ -3219,6 +3253,11 @@ https-proxy-agent@^2.2.1:
     agent-base "^4.3.0"
     debug "^3.1.0"
 
+human-interval@~0.1.3:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/human-interval/-/human-interval-0.1.6.tgz#0057973454764c3abcbeb2aed612fc9644e68488"
+  integrity sha1-AFeXNFR2TDq8vrKu1hL8lkTmhIg=
+
 humanize-ms@^1.2.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/humanize-ms/-/humanize-ms-1.2.1.tgz#c46e3159a293f6b896da29316d8b6fe8bb79bbed"
@@ -4176,7 +4215,7 @@ mkdirp@^0.5.0, mkdirp@^0.5.1:
   dependencies:
     minimist "0.0.8"
 
-moment-timezone@^0.5.26:
+moment-timezone@^0.5.26, moment-timezone@^0.5.x, moment-timezone@~0.5.0:
   version "0.5.26"
   resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.26.tgz#c0267ca09ae84631aa3dc33f65bedbe6e8e0d772"
   integrity sha512-sFP4cgEKTCymBBKgoxZjYzlSovC20Y6J7y3nanDc5RoBIXKlZhoYwBoZGe3flwU6A372AcRwScH8KiwV6zjy1g==
@@ -4187,6 +4226,17 @@ moment-timezone@^0.5.26:
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
+
+mongodb-core@3.1.11:
+  version "3.1.11"
+  resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-3.1.11.tgz#b253038dbb4d7329f3d1c2ee5400bb0c9221fde5"
+  integrity sha512-rD2US2s5qk/ckbiiGFHeu+yKYDXdJ1G87F6CG3YdaZpzdOm5zpoAZd/EKbPmFO6cQZ+XVXBXBJ660sSI0gc6qg==
+  dependencies:
+    bson "^1.1.0"
+    require_optional "^1.0.1"
+    safe-buffer "^5.1.2"
+  optionalDependencies:
+    saslprep "^1.0.0"
 
 mongodb-core@3.2.7:
   version "3.2.7"
@@ -4205,6 +4255,14 @@ mongodb@3.2.7:
   integrity sha512-2YdWrdf1PJgxcCrT1tWoL6nHuk6hCxhddAAaEh8QJL231ci4+P9FLyqopbTm2Z2sAU6mhCri+wd9r1hOcHdoMw==
   dependencies:
     mongodb-core "3.2.7"
+    safe-buffer "^5.1.2"
+
+mongodb@~3.1:
+  version "3.1.13"
+  resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-3.1.13.tgz#f8cdcbb36ad7a08b570bd1271c8525753f75f9f4"
+  integrity sha512-sz2dhvBZQWf3LRNDhbd30KHVzdjZx9IKC0L+kSZ/gzYquCF5zPOgGqRz6sSCqYZtKP2ekB4nfLxhGtzGHnIKxA==
+  dependencies:
+    mongodb-core "3.1.11"
     safe-buffer "^5.1.2"
 
 mongoose-legacy-pluralize@1.0.2:

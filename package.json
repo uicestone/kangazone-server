@@ -12,6 +12,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@sigodenjs/wechatpay": "^2.1.1",
+    "@types/agenda": "^2.0.5",
     "@types/bcryptjs": "^2.4.2",
     "@types/cors": "^2.8.5",
     "@types/dotenv": "^6.1.1",
@@ -22,6 +23,7 @@
     "@types/socket.io": "^2.1.2",
     "@types/vue-resource": "^0.9.34",
     "@xinglu/wxapp-oauth": "^1.0.1",
+    "agenda": "^2.0.2",
     "bcryptjs": "^2.4.3",
     "bluebird": "^3.5.4",
     "core-js": "^2.6.5",
