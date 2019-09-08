@@ -122,7 +122,7 @@ Booking.methods.createPayment = async function(
   console.log(`[PAY] Extra payment amount is ${extraPayAmount}`);
 
   if (extraPayAmount < 0.01 || adminAddWithoutPayment) {
-    booking.status = "BOOKED";
+    booking.status = booking.hours ? "BOOKED" : "FINISHED";
   } else {
     const extraPayment = new Payment({
       customer: booking.customer,
@@ -146,11 +146,7 @@ Booking.methods.createPayment = async function(
 
 Booking.methods.paymentSuccess = async function() {
   const booking = this as IBooking;
-  if (booking.hours === 0) {
-    booking.status = "FINISHED";
-  } else {
-    booking.status = "BOOKED";
-  }
+  booking.status = booking.hours ? "BOOKED" : "FINISHED";
   await booking.save();
   // send user notification
   // (re)authorize band to gate controllers
