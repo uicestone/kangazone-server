@@ -16,21 +16,34 @@ export default router => {
         const today = moment().format("YYYY-MM-DD");
         const bookingsToday = await Booking.find({ date: today });
         const bookingServing = await Booking.find({ status: "IN_SERVICE" });
-        const bookingDueCount = bookingServing.filter(booking => {
+        const dueCount = bookingServing.filter(booking => {
           return moment(booking.checkInAt).diff() < -booking.hours * 3600000;
         }).length;
+
+        const checkedInCount = bookingServing.reduce(
+          (count, booking) => count + booking.membersCount,
+          0
+        );
+
+        const todayCount = bookingsToday.reduce(
+          (count, booking) => count + booking.membersCount,
+          0
+        );
+
+        const todayAmount = bookingsToday.reduce((amount, booking) => {
+          return (
+            amount +
+            booking.payments
+              .filter(p => p.paid)
+              .reduce((a, p) => a + p.amount, 0)
+          );
+        }, 0);
+
         res.json({
-          checkedInCount: bookingServing.length,
-          dueCount: bookingDueCount,
-          todayCount: bookingsToday.length,
-          todayAmount: bookingsToday.reduce((amount, booking) => {
-            return (
-              amount +
-              booking.payments
-                .filter(p => p.paid)
-                .reduce((a, p) => a + p.amount, 0)
-            );
-          }, 0)
+          checkedInCount,
+          dueCount,
+          todayCount,
+          todayAmount
         });
       })
     );
