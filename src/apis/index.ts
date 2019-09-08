@@ -7,6 +7,7 @@ import BookingRouter from "./BookingRouter";
 import CodeRouter from "./CodeRouter";
 import ConfigRouter from "./ConfigRouter";
 import PaymentRouter from "./PaymentRouter";
+import StatsRouter from "./StatsRouter";
 import StoreRouter from "./StoreRouter";
 import UserRouter from "./UserRouter";
 import WechatRouter from "./WechatRouter";
@@ -19,6 +20,7 @@ export default (app, router) => {
     CodeRouter,
     ConfigRouter,
     PaymentRouter,
+    StatsRouter,
     StoreRouter,
     UserRouter,
     WechatRouter
