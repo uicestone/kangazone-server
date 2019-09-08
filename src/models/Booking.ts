@@ -146,7 +146,11 @@ Booking.methods.createPayment = async function(
 
 Booking.methods.paymentSuccess = async function() {
   const booking = this as IBooking;
-  booking.status = "BOOKED";
+  if (booking.hours === 0) {
+    booking.status = "FINISHED";
+  } else {
+    booking.status = "BOOKED";
+  }
   await booking.save();
   // send user notification
   // (re)authorize band to gate controllers
