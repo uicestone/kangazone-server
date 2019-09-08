@@ -7,7 +7,7 @@ module.exports = {
   deploy: {
     production: {
       user: "www-data",
-      host: ["kanga.uice.lu"],
+      host: ["kangazone.com"],
       ref: "origin/master",
       repo: "https://github.com/uicestone/kangazone-server",
       path: "/var/www/kangazone-server",

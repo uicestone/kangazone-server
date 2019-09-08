@@ -218,6 +218,8 @@ Booking.methods.checkIn = async function() {
 Booking.methods.cancel = async function(save = true) {
   const booking = this as IBooking;
 
+  if (booking.status === "CANCELED") return;
+
   if (!["PENDING", "BOOKED"].includes(booking.status)) {
     throw new Error("uncancelable_booking_status");
   }

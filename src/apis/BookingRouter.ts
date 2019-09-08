@@ -72,7 +72,6 @@ export default router => {
 
         if (
           req.body.bandIds &&
-          req.body.bandIds.length &&
           req.body.bandIds.length !== booking.membersCount
         ) {
           throw new HttpError(
@@ -205,6 +204,7 @@ export default router => {
 
         if (
           req.body.bandIds &&
+          req.body.bandIds.length &&
           req.body.bandIds.length !== booking.membersCount
         ) {
           throw new HttpError(
