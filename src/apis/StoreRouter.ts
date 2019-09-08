@@ -121,5 +121,12 @@ export default router => {
     })
   );
 
+  router.route("/store/open-gate/:serial/:number").post(
+    handleAsyncErrors(async (req, res) => {
+      storeGateControllers[req.params.serial].openDoor(req.params.number);
+      res.end();
+    })
+  );
+
   return router;
 };
