@@ -135,11 +135,29 @@ export default router => {
           query.find({ customer: req.user._id });
         }
 
-        ["type", "store", "date", "status", "customer"].forEach(field => {
+        ["type", "store", "date", "customer"].forEach(field => {
           if (req.query[field]) {
             query.find({ [field]: req.query[field] });
           }
         });
+
+        if (req.query.status) {
+          query.find({
+            status: {
+              $in: req.query.status.split(",").map(s => s.toUpperCase())
+            }
+          });
+        }
+
+        if (req.query.customerKeyword) {
+          const matchCustomers = await User.find({
+            $or: [
+              { name: new RegExp(req.query.customerKeyword, "i") },
+              { mobile: new RegExp(req.query.customerKeyword) }
+            ]
+          });
+          query.find({ customer: { $in: matchCustomers } });
+        }
 
         // restrict self store bookings for managers
         // TODO
