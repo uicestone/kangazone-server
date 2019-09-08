@@ -21,7 +21,7 @@ export default router => {
       ]);
 
       if (!user) {
-        throw new HttpError(401, "用户不存在");
+        throw new HttpError(404, "用户不存在");
       }
       const validPassword = await comparePwd(req.body.password, user.password);
 
