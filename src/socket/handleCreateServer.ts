@@ -25,7 +25,7 @@ export default function handleCreateServer(io) {
     await Promise.all(controllers.map(ctl => ctl.detected));
     // storeGateControllers["TEST"] = { test: true };
     controllers.map(c => {
-      c.setServerAddress("192.168.2.3", 6000);
+      c.setServerAddress("192.168.2.24", 6000);
       storeGateControllers[c.serial] = c;
     });
 
