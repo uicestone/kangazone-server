@@ -114,7 +114,7 @@ export default router => {
           setTimeout(() => {
             storeGateControllers[g[0]].openDoor(g[1]);
             r();
-          });
+          }, 200);
         });
       }
       res.end();
@@ -123,7 +123,7 @@ export default router => {
 
   router.route("/store/open-gate/:serial/:number").post(
     handleAsyncErrors(async (req, res) => {
-      storeGateControllers[req.params.serial].openDoor(req.params.number);
+      storeGateControllers[req.params.serial].openDoor(+req.params.number);
       res.end();
     })
   );
