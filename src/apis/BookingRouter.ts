@@ -7,6 +7,9 @@ import Booking, { IBooking } from "../models/Booking";
 import { config } from "../models/Config";
 import User from "../models/User";
 import Store from "../models/Store";
+import EscPosEncoder from "esc-pos-encoder-canvas";
+import { Image } from "canvas";
+import { gatewayNames } from "../models/Payment";
 
 // setTimeout(async () => {
 //   const u = await User.findOne({ name: "Uice Stone" });
@@ -296,6 +299,153 @@ export default router => {
         res.end();
       })
     );
+
+  router.route("/booking/:bookingId/receipt-data").get(
+    handleAsyncErrors(async (req, res) => {
+      if (!["manager", "admin"].includes(req.user.role)) {
+        throw new HttpError(403, "只有店员可以打印小票");
+      }
+
+      const receiptLogo = new Image();
+
+      await new Promise((resolve, reject) => {
+        receiptLogo.onload = () => {
+          resolve();
+        };
+        receiptLogo.onerror = err => {
+          reject(err);
+        };
+        receiptLogo.src = __dirname + "/../resource/images/logo-greyscale.png";
+      });
+
+      const booking = await Booking.findOne({ _id: req.params.bookingId });
+
+      if (!["IN_SERVICE", "FINISHED"].includes(booking.status)) {
+        throw new HttpError(
+          400,
+          `当前预定状态无法打印小票 (${booking.status})`
+        );
+      }
+
+      let encoder = new EscPosEncoder();
+      encoder
+        .initialize()
+        .codepage("cp936")
+        .align("center")
+        .image(receiptLogo, 384, 152, "threshold")
+        .newline()
+        .align("left")
+        .line("打印时间：" + moment().format("YYYY-MM-DD HH:mm:ss"))
+        .line(
+          "出场时间：" +
+            moment(booking.checkInAt, "HH:mm")
+              .add(10, "minutes")
+              .add(2, "hours")
+              .format("YYYY-MM-DD HH:mm:ss")
+        )
+        .line("入场人数：" + booking.membersCount);
+
+      booking.bandIds.forEach((bandId, index) => {
+        const noStr = (index + 1).toString().padStart(2, "0");
+        encoder.line(`手环号${noStr}：${bandId}`);
+      });
+
+      encoder
+        .line(`收银台号：${req.user.name}`)
+        .newline()
+        .line("付款明细：")
+        .line("-".repeat(31))
+        .newline()
+        .line(
+          " ".repeat(3) +
+            "类型" +
+            " ".repeat(7) +
+            "数量" +
+            " ".repeat(7) +
+            "金额" +
+            " ".repeat(2)
+        );
+
+      if (booking.type === "play") {
+        let playPrice = booking.price - 10 * booking.socksCount;
+        let firstHourPrice = (playPrice / (booking.hours + 1)) * 2;
+
+        for (let thHour = 1; thHour <= booking.hours; thHour++) {
+          if (thHour === 1) {
+            encoder.line(
+              "自由游玩" +
+                " ".repeat(3) +
+                `${booking.membersCount}人x小时` +
+                " ".repeat(4) +
+                `￥${firstHourPrice.toFixed(2)}`
+            );
+          } else {
+            encoder.line(
+              "自由游玩" +
+                " ".repeat(3) +
+                `${booking.membersCount}人x小时(半)` +
+                " ".repeat(4) +
+                `￥${(firstHourPrice / 2).toFixed(2)}`
+            );
+          }
+        }
+      }
+
+      encoder
+        .newline()
+        .line("-".repeat(31))
+        .newline()
+        .align("right")
+        .line(" ".repeat(3) + `合计：￥${booking.price}` + " ".repeat(4));
+
+      const creditPayment = booking.payments.filter(
+        p => p.gateway === "credit" && p.paid
+      )[0];
+      if (creditPayment) {
+        encoder.line(
+          " ".repeat(3) +
+            `余额支付：￥${creditPayment.amount.toFixed(2)}` +
+            " ".repeat(4)
+        );
+      }
+
+      const extraPayment = booking.payments.filter(
+        p => p.gateway !== "credit" && p.paid
+      )[0];
+
+      if (extraPayment) {
+        encoder.line(
+          " ".repeat(3) +
+            `${
+              gatewayNames[extraPayment.gateway]
+            }：￥${extraPayment.amount.toFixed(2)}` +
+            " ".repeat(4)
+        );
+      }
+      encoder
+        .newline()
+        .line("-".repeat(31))
+        .align("center")
+        .qrcode(
+          "https://mp.weixin.qq.com/a/~vcK_feF35uOgreEAXvwxcw~~",
+          1,
+          8,
+          "m"
+        )
+        .newline()
+        .line("扫码使用微信小程序")
+        .line("充值预定延时更方便")
+        .align("right")
+        .newline()
+        .newline()
+        .newline()
+        .newline();
+
+      const hexString = Buffer.from(encoder.encode()).toString("hex");
+
+      res.send(hexString);
+    })
+  );
 
   router.route("/booking-price").post(
     handleAsyncErrors(async (req, res) => {

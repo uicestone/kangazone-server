@@ -164,4 +164,14 @@ export enum Gateways {
   UnionPay = "unionpay"
 }
 
+export const gatewayNames = {
+  [Gateways.Credit]: "余额支付",
+  [Gateways.Scan]: "扫码支付",
+  [Gateways.Card]: "刷卡支付",
+  [Gateways.Cash]: "现金支付",
+  [Gateways.WechatPay]: "微信支付",
+  [Gateways.Alipay]: "支付宝",
+  [Gateways.UnionPay]: "银联支付"
+};
+
 export default mongoose.model<IPayment>("payment", Payment);
