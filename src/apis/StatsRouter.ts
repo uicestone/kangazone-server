@@ -17,7 +17,15 @@ export default router => {
         const bookingsToday = await Booking.find({ date: today });
         const bookingServing = await Booking.find({ status: "IN_SERVICE" });
         const dueCount = bookingServing.filter(booking => {
-          return moment(booking.checkInAt).diff() < -booking.hours * 3600000;
+          if (booking.checkInAt.length === 5) {
+            booking.checkInAt += ":00";
+            return (
+              moment(booking.checkInAt, "HH:mm:ss").diff() <
+              -booking.hours * 3600000
+            );
+          } else {
+            return false;
+          }
         }).length;
 
         const checkedInCount = bookingServing.reduce(
