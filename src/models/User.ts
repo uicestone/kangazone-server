@@ -20,8 +20,11 @@ const User = new Schema({
   avatarUrl: String,
   region: String,
   openid: { type: String, index: { unique: true, sparse: true } },
-  credit: Number, // for customer only
-  cardType: { type: String }, // for customer only
+  creditDeposit: Number, // below for customer only
+  creditReward: Number,
+  credit: Number,
+  cardType: { type: String },
+  cardNo: { type: String },
   codes: [{ type: Schema.Types.ObjectId, ref: Code }]
 });
 
@@ -108,7 +111,10 @@ export interface IUser extends mongoose.Document {
   region?: string;
   openid?: string;
   credit?: number;
+  creditDeposit?: number;
+  creditReward?: number;
   cardType?: string;
+  cardNo?: string;
   codes?: ICode[];
   depositSuccess: (price: number) => Promise<IUser>;
   membershipUpgradeSuccess: (cardTypeName: string) => Promise<IUser>;
