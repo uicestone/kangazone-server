@@ -166,10 +166,10 @@ Booking.methods.createRefundPayment = async function() {
   const booking = this as IBooking;
 
   const creditPayments = booking.payments.filter(
-    p => p.gateway === Gateways.Credit
+    p => p.gateway === Gateways.Credit && p.amount > 0 && p.paid
   );
   const extraPayments = booking.payments.filter(
-    p => p.gateway !== Gateways.Credit
+    p => p.gateway !== Gateways.Credit && p.amount > 0 && p.paid
   );
 
   await Promise.all(
