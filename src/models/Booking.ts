@@ -150,8 +150,12 @@ Booking.methods.paymentSuccess = async function() {
   await booking.save();
   // send user notification
   // (re)authorize band to gate controllers
-  booking.store.authBands(booking.bandIds);
-  agenda.schedule("revoke band auth", `in ${booking.hours} hours`, {
+  try {
+    await booking.store.authBands(booking.bandIds);
+  } catch (err) {
+    console.error(`Booking auth bands failed, id: ${booking.id}.`);
+  }
+  agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
     bandIds: booking.bandIds,
     storeId: booking.store.id
   });

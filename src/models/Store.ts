@@ -11,7 +11,10 @@ const Store = new Schema({
   partyRooms: Number,
   gates: {
     entry: { type: [[Number]] },
-    exit: { type: [[Number]] }
+    exit: { type: [[Number]] },
+    localServer: {
+      ip: String
+    }
   }
 });
 
@@ -31,14 +34,18 @@ Store.methods.authBands = async function(bandIds: string[], revoke = false) {
   const store = this as IStore;
   for (const g of store.gates.entry) {
     for (const bandId of bandIds) {
-      await new Promise(resolve => {
-        setTimeout(() => {
-          revoke
-            ? storeGateControllers[g[0]].removeAuth(+bandId)
-            : storeGateControllers[g[0]].setAuth(+bandId);
-          resolve();
-        }, 200);
-      });
+      try {
+        await new Promise(resolve => {
+          setTimeout(() => {
+            revoke
+              ? storeGateControllers[g[0]].removeAuth(+bandId)
+              : storeGateControllers[g[0]].setAuth(+bandId);
+            resolve();
+          }, 200);
+        });
+      } catch (err) {
+        throw new Error("auth_band_fail");
+      }
     }
   }
 };
