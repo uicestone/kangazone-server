@@ -22,7 +22,14 @@ const Booking = new Schema({
   bandIds: { type: [String] },
   status: {
     type: String,
-    enum: ["PENDING", "BOOKED", "IN_SERVICE", "FINISHED", "CANCELED"],
+    enum: [
+      "PENDING",
+      "BOOKED",
+      "IN_SERVICE",
+      "FINISHED",
+      "PENDING_REFUND",
+      "CANCELED"
+    ],
     default: "PENDING"
   },
   price: { type: Number },
@@ -222,7 +229,7 @@ Booking.methods.checkIn = async function() {
 Booking.methods.cancel = async function(save = true) {
   const booking = this as IBooking;
 
-  if (booking.status === "CANCELED") return;
+  if (["CANCELED", "PENDING_CANCEL"].includes(booking.status)) return;
 
   if (!["PENDING", "BOOKED"].includes(booking.status)) {
     throw new Error("uncancelable_booking_status");
@@ -231,6 +238,7 @@ Booking.methods.cancel = async function(save = true) {
     console.log(`[BOK] Refund booking ${booking._id}.`);
     // we don't change status here, will auto change on payment fullfil
     await booking.createRefundPayment();
+    booking.status = "PENDING_CANCEL";
   } else {
     booking.status = "CANCELED";
   }
