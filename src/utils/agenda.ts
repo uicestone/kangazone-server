@@ -1,7 +1,7 @@
 import Agenda from "agenda";
 import moment from "moment";
 import Store from "../models/Store";
-import Booking from "../models/Booking";
+import Booking, { BookingStatuses } from "../models/Booking";
 
 const agenda = new Agenda({ db: { address: process.env.MONGODB_URL } });
 
@@ -14,7 +14,7 @@ agenda.define("revoke band auth", async (job, done) => {
 
 agenda.define("cancel expired pending bookings", async (job, done) => {
   const bookings = await Booking.find({
-    status: "PENDING",
+    status: BookingStatuses.PENDING,
     createdAt: {
       $lt: moment()
         .subtract(1, "day")
@@ -31,7 +31,7 @@ agenda.define("cancel expired pending bookings", async (job, done) => {
 
 agenda.define("cancel expired booked bookings", async (job, done) => {
   const bookings = await Booking.find({
-    status: "BOOKED",
+    status: BookingStatuses.BOOKED,
     date: {
       $lt: moment().format("YYYY-MM-DD")
     }

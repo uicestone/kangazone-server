@@ -10,6 +10,15 @@ import agenda from "../utils/agenda";
 
 const { DEBUG } = process.env;
 
+export enum BookingStatuses {
+  PENDING = "PENDING",
+  BOOKED = "BOOKED",
+  IN_SERVICE = "IN_SERVICE",
+  PENDING_REFUND = "PENDING_REFUND",
+  FINISHED = "FINISHED",
+  CANCELED = "CANCELED"
+}
+
 const Booking = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: User, required: true },
   store: { type: Schema.Types.ObjectId, ref: Store, required: true },
@@ -22,15 +31,8 @@ const Booking = new Schema({
   bandIds: { type: [String] },
   status: {
     type: String,
-    enum: [
-      "PENDING",
-      "BOOKED",
-      "IN_SERVICE",
-      "FINISHED",
-      "PENDING_REFUND",
-      "CANCELED"
-    ],
-    default: "PENDING"
+    enum: Object.values(BookingStatuses),
+    default: BookingStatuses.PENDING
   },
   price: { type: Number },
   code: { type: Schema.Types.ObjectId, ref: Code },
@@ -129,7 +131,9 @@ Booking.methods.createPayment = async function(
   console.log(`[PAY] Extra payment amount is ${extraPayAmount}`);
 
   if (extraPayAmount < 0.01 || adminAddWithoutPayment) {
-    booking.status = booking.hours ? "BOOKED" : "FINISHED";
+    booking.status = booking.hours
+      ? BookingStatuses.BOOKED
+      : BookingStatuses.FINISHED;
   } else {
     const extraPayment = new Payment({
       customer: booking.customer,
@@ -153,7 +157,9 @@ Booking.methods.createPayment = async function(
 
 Booking.methods.paymentSuccess = async function() {
   const booking = this as IBooking;
-  booking.status = booking.hours ? "BOOKED" : "FINISHED";
+  booking.status = booking.hours
+    ? BookingStatuses.BOOKED
+    : BookingStatuses.FINISHED;
   await booking.save();
   // send user notification
   // (re)authorize band to gate controllers
@@ -194,7 +200,7 @@ Booking.methods.createRefundPayment = async function() {
   );
 
   if (!extraPayments.length) {
-    booking.status = "CANCELED";
+    booking.status = BookingStatuses.CANCELED;
   } else {
     await Promise.all(
       extraPayments.map(async p => {
@@ -214,7 +220,7 @@ Booking.methods.createRefundPayment = async function() {
 
 Booking.methods.refundSuccess = async function() {
   const booking = this as IBooking;
-  booking.status = "CANCELED";
+  booking.status = BookingStatuses.CANCELED;
   await booking.save();
   // send user notification
   // revoke band auth to gate controllers
@@ -229,18 +235,27 @@ Booking.methods.checkIn = async function() {
 Booking.methods.cancel = async function(save = true) {
   const booking = this as IBooking;
 
-  if (["CANCELED", "PENDING_CANCEL"].includes(booking.status)) return;
+  if (
+    [BookingStatuses.CANCELED, BookingStatuses.PENDING_REFUND].includes(
+      booking.status
+    )
+  )
+    return;
 
-  if (!["PENDING", "BOOKED"].includes(booking.status)) {
+  if (
+    ![BookingStatuses.PENDING_REFUND, BookingStatuses.BOOKED].includes(
+      booking.status
+    )
+  ) {
     throw new Error("uncancelable_booking_status");
   }
   if (booking.payments.filter(p => p.paid).length) {
     console.log(`[BOK] Refund booking ${booking._id}.`);
     // we don't change status here, will auto change on payment fullfil
     await booking.createRefundPayment();
-    booking.status = "PENDING_CANCEL";
+    booking.status = BookingStatuses.PENDING_REFUND;
   } else {
-    booking.status = "CANCELED";
+    booking.status = BookingStatuses.PENDING_REFUND;
   }
 
   console.log(`[BOK] Cancel booking ${booking._id}.`);
@@ -260,7 +275,7 @@ export interface IBooking extends mongoose.Document {
   membersCount: number;
   bandIds: string[];
   socksCount: number;
-  status: string;
+  status: BookingStatuses;
   price?: number;
   code?: ICode;
   payments?: IPayment[];

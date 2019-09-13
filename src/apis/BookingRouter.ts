@@ -3,7 +3,7 @@ import paginatify from "../middlewares/paginatify";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
-import Booking, { IBooking } from "../models/Booking";
+import Booking, { IBooking, BookingStatuses } from "../models/Booking";
 import { config } from "../models/Config";
 import User from "../models/User";
 import Store from "../models/Store";
@@ -234,14 +234,17 @@ export default router => {
           );
         }
 
-        if (booking.status === "IN_SERVICE" && statusWas === "BOOKED") {
+        if (
+          booking.status === BookingStatuses.IN_SERVICE &&
+          statusWas === BookingStatuses.BOOKED
+        ) {
           if (!booking.bandIds.length) {
             throw new Error("必须绑定手环才能签到入场");
           }
           booking.checkIn();
         }
 
-        if (booking.status === "CANCELED") {
+        if (booking.status === BookingStatuses.CANCELED) {
           // TODO refund permission should be restricted
           // TODO IN_SERVICE refund
 
@@ -320,7 +323,11 @@ export default router => {
 
       const booking = await Booking.findOne({ _id: req.params.bookingId });
 
-      if (!["IN_SERVICE", "FINISHED"].includes(booking.status)) {
+      if (
+        ![BookingStatuses.IN_SERVICE, BookingStatuses.FINISHED].includes(
+          booking.status
+        )
+      ) {
         throw new HttpError(
           400,
           `当前预定状态无法打印小票 (${booking.status})`

@@ -3,7 +3,7 @@ import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import Store, { storeGateControllers } from "../models/Store";
-import Booking from "../models/Booking";
+import Booking, { BookingStatuses } from "../models/Booking";
 import moment = require("moment");
 
 export default router => {
@@ -15,7 +15,9 @@ export default router => {
       handleAsyncErrors(async (req, res) => {
         const today = moment().format("YYYY-MM-DD");
         const bookingsToday = await Booking.find({ date: today });
-        const bookingServing = await Booking.find({ status: "IN_SERVICE" });
+        const bookingServing = await Booking.find({
+          status: BookingStatuses.IN_SERVICE
+        });
         const dueCount = bookingServing.filter(booking => {
           if (booking.checkInAt.length === 5) {
             booking.checkInAt += ":00";
