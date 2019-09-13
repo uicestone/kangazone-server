@@ -22,7 +22,6 @@ const User = new Schema({
   openid: { type: String, index: { unique: true, sparse: true } },
   creditDeposit: Number, // below for customer only
   creditReward: Number,
-  credit: Number,
   cardType: { type: String },
   cardNo: { type: String },
   codes: [{ type: Schema.Types.ObjectId, ref: Code }]
@@ -33,14 +32,22 @@ const User = new Schema({
 //   return (process.env.CDN_URL || req.baseUrl )+ this.avatarUri;
 // });
 
+User.virtual("credit").get(function() {
+  const user = this as IUser;
+  if (user.creditDeposit === undefined && user.creditReward === undefined) {
+    return undefined;
+  }
+  return +((user.creditDeposit || 0) + (user.creditReward || 0)).toFixed(2);
+});
+
 User.plugin(autoPopulate, ["codes"]);
 User.plugin(updateTimes);
 
 User.pre("validate", function(next) {
   const user = this as IUser;
-  if (user.credit) {
-    user.credit = +user.credit.toFixed(2);
-  }
+  // if (user.credit) {
+  //   user.credit = +user.credit.toFixed(2);
+  // }
   next();
 });
 
@@ -58,8 +65,26 @@ User.methods.depositSuccess = async function(levelPrice: number) {
   if (!level) {
     throw new Error(`Deposit level not found for price ${levelPrice}.`);
   }
+
+  if (!user.creditDeposit) {
+    user.creditDeposit = 0;
+  }
+  if (!user.creditReward) {
+    user.creditReward = 0;
+  }
+
+  console.log(
+    `[USR] User ${user.id} credit was ${user.creditDeposit}:${user.creditReward}.`
+  );
+
   user.cardType = level.cardType;
-  user.credit = user.credit ? user.credit + levelPrice : levelPrice;
+  user.creditDeposit += levelPrice;
+  user.creditReward += level.rewardCredit;
+
+  console.log(
+    `[USR] Deposit success ${user.id}, credit is now ${user.creditDeposit}:${user.creditReward}.`
+  );
+
   const codes = level.rewardCodes.reduce((codes, cur) => {
     let code;
     for (let i = 0; i < cur.count; i++) {
@@ -110,9 +135,9 @@ export interface IUser extends mongoose.Document {
   avatarUrl?: string;
   region?: string;
   openid?: string;
-  credit?: number;
   creditDeposit?: number;
   creditReward?: number;
+  credit?: number;
   cardType?: string;
   cardNo?: string;
   codes?: ICode[];

@@ -119,10 +119,12 @@ Booking.methods.createPayment = async function(
     const creditPayment = new Payment({
       customer: booking.customer,
       amount: creditPayAmount,
+      amountForceDeposit: booking.socksCount * 10,
       title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
       attach,
       gateway: Gateways.Credit
     });
+
     await creditPayment.save();
     booking.payments.push(creditPayment);
   }

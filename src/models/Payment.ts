@@ -11,6 +11,8 @@ import {
 const Payment = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: User, required: true },
   amount: { type: Number, required: true },
+  amountForceDeposit: { type: Number },
+  amountDeposit: { type: Number },
   paid: { type: Boolean, default: false },
   title: { type: String, default: " " },
   attach: { type: String },
@@ -121,10 +123,37 @@ Payment.pre("save", async function(next) {
       if (customer.credit < payment.amount) {
         throw new Error("insufficient_credit");
       }
-      customer.credit -= payment.amount;
+
       console.log(
-        `[DEBUG] Credit payment saved, customer credit set to ${customer.credit}`
+        `[PAY] D:R was ${customer.creditDeposit}:${customer.creditReward}.`
       );
+
+      if (!payment.amountForceDeposit) {
+        payment.amountForceDeposit = 0;
+      }
+
+      const depositPaymentAmount =
+        payment.amountForceDeposit +
+        ((payment.amount - payment.amountForceDeposit) *
+          customer.creditDeposit) /
+          customer.credit;
+      const rewardPaymentAmount =
+        ((payment.amount - payment.amountForceDeposit) *
+          customer.creditReward) /
+        customer.credit;
+
+      console.log(
+        `[PAY] Payment amount D:R is ${depositPaymentAmount}:${rewardPaymentAmount}.`
+      );
+
+      customer.creditDeposit -= depositPaymentAmount;
+      customer.creditReward -= rewardPaymentAmount;
+      payment.amountDeposit = depositPaymentAmount;
+
+      console.log(
+        `[DEBUG] Credit payment saved, customer credit is now ${customer.credit}`
+      );
+
       payment.paid = true;
       // await payment.paidSuccess();
       // we don't trigger paidSuccess or booking.paidSuccess here cause booking may not be saved
@@ -146,6 +175,8 @@ Payment.pre("save", async function(next) {
 export interface IPayment extends mongoose.Document {
   customer: IUser;
   amount: number;
+  amountForceDeposit?: number;
+  amountDeposit?: number;
   paid: boolean;
   title: string;
   attach: string;

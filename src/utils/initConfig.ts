@@ -18,22 +18,23 @@ export default async config => {
 const initConfig: IConfig = {
   cardTypes: {
     白金: {
-      firstHourPrice: 138,
-      netPrice: 199
+      firstHourPrice: 158,
+      netPrice: null
     },
     荣耀: {
-      firstHourPrice: 118,
-      netPrice: 219
+      firstHourPrice: 158,
+      netPrice: null
     },
     至尊: {
-      firstHourPrice: 98,
-      netPrice: 319
+      firstHourPrice: 158,
+      netPrice: null
     }
   },
   depositLevels: [
     {
       price: 1000,
       cardType: "白金",
+      rewardCredit: 350,
       rewardCodes: [
         {
           title: "1小时自由体验券",
@@ -46,6 +47,7 @@ const initConfig: IConfig = {
     {
       price: 2000,
       cardType: "荣耀",
+      rewardCredit: 1200,
       rewardCodes: [
         {
           title: "1小时自由体验券",
@@ -58,6 +60,7 @@ const initConfig: IConfig = {
     {
       price: 3000,
       cardType: "至尊",
+      rewardCredit: 3000,
       rewardCodes: [
         {
           title: "1小时自由体验券",

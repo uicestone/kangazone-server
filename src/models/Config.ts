@@ -26,6 +26,7 @@ export interface IConfig {
   depositLevels?: {
     price: number;
     cardType: string;
+    rewardCredit: number;
     rewardCodes: {
       title: string;
       type: string;
