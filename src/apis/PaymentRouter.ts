@@ -22,6 +22,14 @@ export default router => {
           createdAt: -1
         };
 
+        if (req.query.paid) {
+          if (req.query.paid === "false") {
+            query.find({ paid: false });
+          } else {
+            query.find({ paid: true });
+          }
+        }
+
         let total = await query.countDocuments();
         const page = await query
           .find()
