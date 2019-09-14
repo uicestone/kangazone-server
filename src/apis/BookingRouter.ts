@@ -325,9 +325,12 @@ export default router => {
       const booking = await Booking.findOne({ _id: req.params.bookingId });
 
       if (
-        ![BookingStatuses.IN_SERVICE, BookingStatuses.FINISHED].includes(
-          booking.status
-        )
+        ![
+          BookingStatuses.BOOKED,
+          BookingStatuses.IN_SERVICE,
+          BookingStatuses.FINISHED
+        ].includes(booking.status) &&
+        booking.bandIds.length
       ) {
         throw new HttpError(
           400,
