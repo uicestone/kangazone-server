@@ -57,7 +57,8 @@ export default router => {
           query.find({
             $or: [
               { name: new RegExp(req.query.keyword, "i") },
-              { mobile: new RegExp(req.query.keyword) }
+              { mobile: new RegExp(req.query.keyword) },
+              { cardNo: new RegExp(req.query.keyword) }
             ]
           });
         }

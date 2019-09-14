@@ -156,7 +156,8 @@ export default router => {
           const matchCustomers = await User.find({
             $or: [
               { name: new RegExp(req.query.customerKeyword, "i") },
-              { mobile: new RegExp(req.query.customerKeyword) }
+              { mobile: new RegExp(req.query.customerKeyword) },
+              { cardNo: new RegExp(req.query.customerKeyword) }
             ]
           });
           query.find({ customer: { $in: matchCustomers } });
