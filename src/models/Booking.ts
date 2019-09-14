@@ -232,7 +232,7 @@ Booking.methods.refundSuccess = async function() {
 Booking.methods.checkIn = async function(save = true) {
   const booking = this as IBooking;
   booking.status = BookingStatuses.IN_SERVICE;
-  booking.checkInAt = moment().format("HH:mm");
+  booking.checkInAt = moment().format("HH:mm:ss");
   if (save) {
     await booking.save();
   }

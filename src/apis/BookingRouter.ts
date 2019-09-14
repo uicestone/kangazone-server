@@ -356,7 +356,7 @@ export default router => {
         .line("打印时间：" + moment().format("YYYY-MM-DD HH:mm:ss"))
         .line(
           "出场时间：" +
-            moment(booking.checkInAt, "HH:mm")
+            moment(booking.checkInAt, "HH:mm:ss")
               .add(10, "minutes")
               .add(2, "hours")
               .format("YYYY-MM-DD HH:mm:ss")
@@ -568,14 +568,14 @@ export default router => {
           availability = {
             full: ["10:00", "12:00", "16:00", "20:00"],
             checkInAt: [
-              "11:00",
-              "13:00",
-              "14:00",
-              "15:00",
-              "17:00",
-              "18:00",
-              "19:00",
-              "21:00"
+              "11:00:00",
+              "13:00:00",
+              "14:00:00",
+              "15:00:00",
+              "17:00:00",
+              "18:00:00",
+              "19:00:00",
+              "21:00:00"
             ]
           };
         }

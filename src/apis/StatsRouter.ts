@@ -19,8 +19,7 @@ export default router => {
           status: BookingStatuses.IN_SERVICE
         });
         const dueCount = bookingServing.filter(booking => {
-          if (booking.checkInAt.length === 5) {
-            booking.checkInAt += ":00";
+          if (booking.checkInAt.length === 8) {
             return (
               moment(booking.checkInAt, "HH:mm:ss").diff() <
               -booking.hours * 3600000
