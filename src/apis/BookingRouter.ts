@@ -368,10 +368,10 @@ export default router => {
         encoder.line(`手环号${noStr}：${bandId}`);
       });
 
-      const counterName = await User.findOne({ _id: req.user.id });
+      const counter = await User.findOne({ _id: req.user.id });
 
       encoder
-        .line(`收银台号：${counterName}`)
+        .line(`收银台号：${counter.name}`)
         .newline()
         .line("付款明细：")
         .line("-".repeat(31))
@@ -413,9 +413,9 @@ export default router => {
         if (booking.socksCount > 0) {
           encoder.line(
             "蹦床袜" +
-              " ".repeat(4) +
+              " ".repeat(7) +
               `${booking.socksCount}双` +
-              " ".repeat(9) +
+              " ".repeat(7) +
               `￥${(10 * booking.socksCount).toFixed(2)}`
           );
         }
