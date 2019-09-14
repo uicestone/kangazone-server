@@ -9,7 +9,7 @@ import User from "../models/User";
 import Store from "../models/Store";
 import EscPosEncoder from "esc-pos-encoder-canvas";
 import { Image } from "canvas";
-import { gatewayNames } from "../models/Payment";
+import Payment, { gatewayNames } from "../models/Payment";
 
 // setTimeout(async () => {
 //   const u = await User.findOne({ name: "Uice Stone" });
@@ -298,7 +298,14 @@ export default router => {
         if (req.user.role !== "admin") {
           throw new HttpError(403);
         }
-        const booking = req.item;
+
+        const booking = req.item as IBooking;
+
+        if (booking.payments.some(p => p.paid)) {
+          throw new HttpError(403, "已有成功付款记录，无法删除");
+        }
+
+        await Payment.remove({ _id: { $in: booking.payments.map(p => p.id) } });
         await booking.remove();
         res.end();
       })
