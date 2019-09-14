@@ -229,11 +229,13 @@ Booking.methods.refundSuccess = async function() {
   // revoke band auth to gate controllers
 };
 
-Booking.methods.checkIn = async function() {
+Booking.methods.checkIn = async function(save = true) {
   const booking = this as IBooking;
   booking.status = BookingStatuses.IN_SERVICE;
   booking.checkInAt = moment().format("HH:mm");
-  await booking.save();
+  if (save) {
+    await booking.save();
+  }
   console.log(`[BOK] Booking ${booking.id} checked in, timer started.`);
   // send user notification
 };
@@ -298,7 +300,7 @@ export interface IBooking extends mongoose.Document {
   paymentSuccess: () => Promise<IBooking>;
   createRefundPayment: () => Promise<IBooking>;
   refundSuccess: () => Promise<IBooking>;
-  checkIn: () => Promise<boolean>;
+  checkIn: (save?: boolean) => Promise<boolean>;
   cancel: (save?: boolean) => Promise<boolean>;
   remarks?: string;
 }
