@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon --watch src -e ts --exec 'ts-node ./src/'",
     "start": "yarn dev",
-    "build": "tsc",
+    "build": "tsc && cp -r src/resource build/",
     "lint": "eslint ./src/*.ts ./src/*/*.ts ./src/*/*/*.ts"
   },
   "author": "Uice Lu",
