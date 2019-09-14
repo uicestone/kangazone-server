@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import moment from "moment";
 import updateTimes from "./plugins/updateTimes";
 import autoPopulate from "./plugins/autoPopulate";
 import { config } from "../models/Config";
@@ -230,7 +231,10 @@ Booking.methods.refundSuccess = async function() {
 
 Booking.methods.checkIn = async function() {
   const booking = this as IBooking;
-  // authorize band
+  booking.status = BookingStatuses.IN_SERVICE;
+  booking.checkInAt = moment().format("HH:mm");
+  await booking.save();
+  console.log(`[BOK] Booking ${booking.id} checked in, timer started.`);
   // send user notification
 };
 

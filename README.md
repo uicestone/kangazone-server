@@ -125,7 +125,7 @@ queries: `?`
 
 `useCredit=false`
 
-签到入场即`status`由`BOOKED`改为`IN_SERVICE`
+手动签到入场即`status`由`BOOKED`改为`IN_SERVICE`
 
 取消未付款的订单即`status`由`PENDING`改为`CANCELED`
 
