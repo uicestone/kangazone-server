@@ -426,7 +426,9 @@ export default router => {
         .line("-".repeat(31))
         .newline()
         .align("right")
-        .line(" ".repeat(3) + `合计：￥${booking.price}` + " ".repeat(4));
+        .line(
+          " ".repeat(3) + `合计：￥${booking.price.toFixed(2)}` + " ".repeat(4)
+        );
 
       const creditPayment = booking.payments.filter(
         p => p.gateway === "credit" && p.paid

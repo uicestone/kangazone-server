@@ -17,7 +17,8 @@ const Payment = new Schema({
   title: { type: String, default: " " },
   attach: { type: String },
   gateway: { type: String, required: true },
-  gatewayData: Object
+  gatewayData: Object,
+  original: { type: Schema.Types.ObjectId }
 });
 
 Payment.plugin(autoPopulate, [{ path: "customer", select: "name avatarUrl" }]);
@@ -182,6 +183,7 @@ export interface IPayment extends mongoose.Document {
   attach: string;
   gateway: string;
   gatewayData?: { [key: string]: any };
+  original?: string;
   paidSuccess: () => Promise<IPayment>;
 }
 

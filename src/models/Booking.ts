@@ -195,7 +195,8 @@ Booking.methods.createRefundPayment = async function() {
         amount: -p.amount,
         title: `退款：${p.title}`,
         attach: p.attach,
-        gateway: p.gateway
+        gateway: p.gateway,
+        original: p.id
       });
       await refundPayment.save();
       booking.payments.push(refundPayment);
@@ -212,7 +213,8 @@ Booking.methods.createRefundPayment = async function() {
           amount: -p.amount,
           title: `退款：${p.title}`,
           attach: p.attach,
-          gateway: p.gateway
+          gateway: p.gateway,
+          original: p.id
         });
         await refundPayment.save();
         booking.payments.push(refundPayment);
