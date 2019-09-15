@@ -40,7 +40,8 @@ export default (app, router) => {
         "accept-range",
         "items-total",
         "items-start",
-        "items-end"
+        "items-end",
+        "total-amount"
       ]
     }),
     methodOverride(),

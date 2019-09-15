@@ -3,6 +3,7 @@ import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import Payment from "../models/Payment";
+import moment = require("moment");
 
 export default router => {
   // Payment CURD
@@ -22,6 +23,12 @@ export default router => {
           createdAt: -1
         };
 
+        if (req.query.date) {
+          const startOfDay = moment(req.query.date).startOf("day");
+          const endOfDay = moment(req.query.date).endOf("day");
+          query.find({ createdAt: { $gte: startOfDay, $lte: endOfDay } });
+        }
+
         if (req.query.paid) {
           if (req.query.paid === "false") {
             query.find({ paid: false });
@@ -30,7 +37,39 @@ export default router => {
           }
         }
 
+        if (req.query.attach) {
+          query.find({ attach: new RegExp("^" + req.query.attach) });
+        }
+
+        if (req.query.gateway) {
+          query.find({
+            gateway: {
+              $in: Array.isArray(req.query.gateway)
+                ? req.query.gateway
+                : [req.query.gateway]
+            }
+          });
+        }
+
+        if (req.query.direction === "payment") {
+          query.find({
+            amount: { $gt: 0 }
+          });
+        }
+
+        if (req.query.direction === "refund") {
+          query.find({
+            amount: { $lt: 0 }
+          });
+        }
+
         let total = await query.countDocuments();
+        const [{ totalAmount } = { totalAmount: 0 }] = await Payment.aggregate([
+          //@ts-ignore
+          { $match: query._conditions },
+          { $group: { _id: null, totalAmount: { $sum: "$amount" } } }
+        ]);
+
         const page = await query
           .find()
           .sort(sort)
@@ -41,6 +80,8 @@ export default router => {
         if (skip + page.length > total) {
           total = skip + page.length;
         }
+
+        res.set("total-amount", Math.round(totalAmount));
 
         res.paginatify(limit, skip, total).json(page);
       })
