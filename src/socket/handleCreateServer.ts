@@ -22,13 +22,13 @@ export default function handleCreateServer(io) {
     ) as number[];
 
     const controllers = serials.map(serial => new WgCtl(socket, serial));
-    await new Promise(r => {
-      setTimeout(r, 1000);
+    await new Promise(resolve => {
+      setTimeout(resolve, 1000);
     });
     await Promise.all(controllers.map(ctl => ctl.detected));
     // storeGateControllers["TEST"] = { test: true };
     controllers.map(c => {
-      c.setServerAddress("192.168.3.2", 6000);
+      // c.setServerAddress("192.168.3.2", 6000);
       storeGateControllers[c.serial] = c;
     });
 
