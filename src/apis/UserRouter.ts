@@ -110,7 +110,19 @@ export default router => {
     .put(
       handleAsyncErrors(async (req, res) => {
         if (req.user.role !== "admin") {
-          ["role", "openid", "codes", "cardType", "credit"].forEach(f => {
+          [
+            "role",
+            "openid",
+            "codes",
+            "cardType",
+            "creditDeposit",
+            "creditReward"
+          ].forEach(f => {
+            delete req.body[f];
+          });
+        }
+        if (!["admin", "manager"].includes(req.user.role)) {
+          ["cardNo"].forEach(f => {
             delete req.body[f];
           });
         }
