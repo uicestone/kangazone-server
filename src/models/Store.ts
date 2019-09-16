@@ -1,14 +1,17 @@
 import mongoose, { Schema } from "mongoose";
 import WgCtl from "wiegand-control";
 import updateTimes from "./plugins/updateTimes";
+import { Socket } from "net";
 
 export const storeGateControllers: { [serial: string]: WgCtl } = {};
+export const storeServerSockets: { [storeId: string]: Socket } = {};
 
 const Store = new Schema({
   name: String,
   address: String,
   phone: String,
   partyRooms: Number,
+  ip: String,
   gates: {
     entry: { type: [[Number]] },
     exit: { type: [[Number]] },
@@ -55,6 +58,7 @@ export interface IStore extends mongoose.Document {
   address: string;
   phone: string;
   partyRooms: number;
+  ip: string;
   gates: {
     entry: number[];
     exit: number[];

@@ -2,7 +2,11 @@ import paginatify from "../middlewares/paginatify";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
-import Store, { storeGateControllers } from "../models/Store";
+import Store, {
+  storeGateControllers,
+  storeServerSockets
+} from "../models/Store";
+import WgCtl from "wiegand-control";
 
 export default router => {
   // Store CURD
@@ -117,6 +121,39 @@ export default router => {
           }, 200);
         });
       }
+      res.end();
+    })
+  );
+
+  router.route("/search-controllers").post(
+    handleAsyncErrors(async (req, res) => {
+      const store = await Store.findOne();
+      new WgCtl(storeServerSockets[store.id]).search();
+      res.end();
+    })
+  );
+
+  router.route("/set-controller-ip/:serial").put(
+    handleAsyncErrors(async (req, res) => {
+      const serial = req.params.serial;
+      const store = await Store.findOne();
+      new WgCtl(storeServerSockets[store.id], serial).setControllerAddress(
+        req.body.ip,
+        req.body.subnet || "255.255.255.0",
+        req.body.gateway || req.body.ip.replace(/\d+$/, "1")
+      );
+      res.end();
+    })
+  );
+
+  router.route("/set-server-ip/:serial").put(
+    handleAsyncErrors(async (req, res) => {
+      const serial = req.params.serial;
+      const store = await Store.findOne();
+      new WgCtl(storeServerSockets[store.id], serial).setServerAddress(
+        "192.168.2.3",
+        6000
+      );
       res.end();
     })
   );
