@@ -109,6 +109,7 @@ export default router => {
             case "insufficient_credit":
               throw new HttpError(400, "Customer credit is insufficient.");
             default:
+              throw err;
           }
         }
 

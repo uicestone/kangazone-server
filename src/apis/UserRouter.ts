@@ -136,8 +136,19 @@ export default router => {
       })
     );
 
-  router.route("/user-deposit").post(
+  router.route("/user-deposit/:userId?").post(
     handleAsyncErrors(async (req, res) => {
+      if (req.params.userId !== req.user.id && req.user.role !== "manager") {
+        throw new HttpError(
+          403,
+          "店员可以为所有人充值，其他用户只能为自己充值"
+        );
+      }
+
+      const customer = await User.findOne({
+        _id: req.params.userId || req.user.id
+      });
+
       const level = config.depositLevels.filter(
         level => level.price === +req.body.depositLevel
       )[0];
@@ -147,14 +158,23 @@ export default router => {
       }
 
       const payment = new Payment({
-        customer: req.user,
+        customer,
         amount: DEBUG === "true" ? level.price / 1e4 : level.price,
-        title: `${level.cardType}卡 充值${level.price}元`,
+        title: `充值${level.price}元送${level.rewardCredit}元`,
         attach: `deposit ${req.user._id} ${level.price}`,
-        gateway: Gateways.WechatPay // TODO more payment options
+        gateway: req.query.paymentGateway || Gateways.WechatPay // TODO more payment options
       });
 
-      await payment.save();
+      try {
+        await payment.save();
+      } catch (err) {
+        switch (err.message) {
+          case "no_customer_openid":
+            throw new HttpError(400, "Customer openid is missing.");
+          default:
+            throw err;
+        }
+      }
 
       console.log(`[PAY] Payment created, id: ${payment._id}.`);
 
