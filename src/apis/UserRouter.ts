@@ -173,7 +173,7 @@ export default router => {
         customer,
         amount: DEBUG === "true" ? level.price / 1e4 : level.price,
         title: `充值${level.price}元送${level.rewardCredit}元`,
-        attach: `deposit ${req.user._id} ${level.price}`,
+        attach: `deposit ${customer.id} ${level.price}`,
         gateway: req.query.paymentGateway || Gateways.WechatPay // TODO more payment options
       });
 
