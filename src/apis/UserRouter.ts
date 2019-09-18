@@ -172,7 +172,9 @@ export default router => {
       const payment = new Payment({
         customer,
         amount: DEBUG === "true" ? level.price / 1e4 : level.price,
-        title: `充值${level.price}元送${level.rewardCredit}元`,
+        title: `充值${level.price}元${
+          level.rewardCredit ? `送${level.rewardCredit}元` : ""
+        }`,
         attach: `deposit ${customer.id} ${level.price}`,
         gateway: req.query.paymentGateway || Gateways.WechatPay // TODO more payment options
       });
