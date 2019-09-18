@@ -137,7 +137,7 @@ export default router => {
     handleAsyncErrors(async (req, res) => {
       const serial = req.params.serial;
       const store = await Store.findOne();
-      new WgCtl(storeServerSockets[store.id], serial).setControllerAddress(
+      new WgCtl(storeServerSockets[store.id], serial).setAddress(
         req.body.ip,
         req.body.subnet || "255.255.255.0",
         req.body.gateway || req.body.ip.replace(/\d+$/, "1")

@@ -39,7 +39,7 @@
     "mongoose": "^5.5.7",
     "redis": "^2.8.0",
     "socket.io": "^2.2.0",
-    "wiegand-control": "^0.1.7"
+    "wiegand-control": "^0.1.8"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
