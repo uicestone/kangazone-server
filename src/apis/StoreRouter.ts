@@ -151,7 +151,7 @@ export default router => {
       const serial = req.params.serial;
       const store = await Store.findOne();
       new WgCtl(storeServerSockets[store.id], serial).setServerAddress(
-        "192.168.2.3",
+        "172.16.3.253",
         6000
       );
       res.end();
