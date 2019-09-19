@@ -3,10 +3,10 @@ node_js:
   - lts/*
 cache: yarn
 before_script: npm install -g pm2
-script: yarn build
 after_success:
   - echo "${DEPLOY_KEY}" | base64 --decode > ~/.ssh/id_rsa
   - chmod 600 ~/.ssh/id_rsa
-  - scp -r -o "StrictHostKeyChecking no" build/* ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
-  - scp -r -o "StrictHostKeyChecking no" build/* ${DEPLOY_USER}@${DEPLOY_HOST_TEST}:${DEPLOY_PATH}
-  - pm2 deploy testing && pm2 deploy production
+  - ssh-keyscan -H ${DEPLOY_HOST} >> ~/.ssh/known_hosts
+  - ssh-keyscan -H ${DEPLOY_HOST_TEST} >> ~/.ssh/known_hosts
+  - pm2 deploy production
+  - pm2 deploy testing

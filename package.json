@@ -1,10 +1,11 @@
 {
   "name": "kangazone-server",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Kangazone server apis.",
   "scripts": {
     "dev": "nodemon --watch src -e ts --exec 'ts-node ./src/'",
     "start": "yarn dev",
+    "test": "echo \"No test specified.\" && exit 0",
     "build": "tsc && cp -r src/resource build/",
     "lint": "eslint ./src/*.ts ./src/*/*.ts ./src/*/*/*.ts"
   },
