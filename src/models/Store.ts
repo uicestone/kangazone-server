@@ -42,7 +42,7 @@ Store.methods.authBands = async function(bandIds: string[], revoke = false) {
           setTimeout(() => {
             revoke
               ? storeGateControllers[g[0]].removeAuth(+bandId)
-              : storeGateControllers[g[0]].setAuth(+bandId);
+              : storeGateControllers[g[0]].setAuth(+bandId, 1);
             resolve();
           }, 200);
         });
