@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import WgCtl from "wiegand-control";
 import updateTimes from "./plugins/updateTimes";
 import { Socket } from "net";
+import { sleep } from "../utils/helper";
 
 export const storeGateControllers: { [serial: string]: WgCtl } = {};
 export const storeServerSockets: { [storeId: string]: Socket } = {};
@@ -33,22 +34,21 @@ Store.set("toJSON", {
   }
 });
 
-Store.methods.authBands = async function(bandIds: string[], revoke = false) {
+Store.methods.authBands = async function(
+  bandIds: string[],
+  revoke: boolean = false
+) {
   const store = this as IStore;
   for (const g of store.gates.entry) {
     for (const bandId of bandIds) {
       try {
-        await new Promise(resolve => {
-          setTimeout(() => {
-            revoke
-              ? storeGateControllers[g[0]].removeAuth(+bandId)
-              : storeGateControllers[g[0]].setAuth(+bandId, 1);
-            resolve();
-          }, 200);
-        });
+        revoke
+          ? storeGateControllers[g[0]].removeAuth(+bandId)
+          : storeGateControllers[g[0]].setAuth(+bandId, g[1]);
       } catch (err) {
         throw new Error("auth_band_fail");
       }
+      await sleep(200);
     }
   }
 };

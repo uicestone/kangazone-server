@@ -7,6 +7,7 @@ import Store, {
   storeServerSockets
 } from "../models/Store";
 import WgCtl from "wiegand-control";
+import { sleep } from "../utils/helper";
 
 export default router => {
   // Store CURD
@@ -114,12 +115,8 @@ export default router => {
     handleAsyncErrors(async (req, res) => {
       const store = await Store.findById(req.params.storeId);
       for (const g of store.gates.entry.concat(store.gates.exit).slice(1)) {
-        await new Promise(r => {
-          setTimeout(() => {
-            storeGateControllers[g[0]].openDoor(g[1]);
-            r();
-          }, 200);
-        });
+        await sleep(200);
+        storeGateControllers[g[0]].openDoor(g[1]);
       }
       res.end();
     })

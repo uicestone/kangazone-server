@@ -30,3 +30,7 @@ export const getTokenData = (token: string): TokenData => {
   token = token.replace(/^Bearer /, "");
   return verifyToken(token);
 };
+
+export const sleep = async (milliseconds = 500) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+};

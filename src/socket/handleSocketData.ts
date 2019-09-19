@@ -1,5 +1,7 @@
 import { parseData } from "wiegand-control";
 import Booking, { BookingStatuses } from "../models/Booking";
+import Store, { storeGateControllers } from "../models/Store";
+import { sleep } from "../utils/helper";
 
 export default async function handleSocketData(data) {
   // handle text message
@@ -25,5 +27,13 @@ export default async function handleSocketData(data) {
     }
 
     bookings.forEach(booking => booking.checkIn());
+
+    if (process.env.GATE_AUTO_AUTH) {
+      const store = await Store.findOne();
+      for (const g of store.gates.entry.concat(store.gates.exit)) {
+        await sleep(200);
+        // storeGateControllers[g[0]].setAuth(message.cardNo);
+      }
+    }
   }
 }

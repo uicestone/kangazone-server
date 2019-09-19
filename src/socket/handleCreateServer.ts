@@ -5,6 +5,7 @@ import Store, {
   storeServerSockets
 } from "../models/Store";
 import { Socket } from "net";
+import { sleep } from "../utils/helper";
 
 export default function handleCreateServer(io) {
   return async function socket(socket: Socket) {
@@ -51,9 +52,7 @@ export default function handleCreateServer(io) {
     ) as number[];
 
     const controllers = serials.map(serial => new WgCtl(socket, serial));
-    await new Promise(resolve => {
-      setTimeout(resolve, 1000);
-    });
+    await sleep(1000);
     await Promise.all(controllers.map(ctl => ctl.detected));
     // storeGateControllers["TEST"] = { test: true };
     controllers.map(c => {
