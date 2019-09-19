@@ -7,7 +7,6 @@ import Payment, { IPayment, Gateways } from "./Payment";
 import Store, { IStore } from "./Store";
 import User, { IUser } from "./User";
 import Code, { ICode } from "./Code";
-import agenda from "../utils/agenda";
 
 const { DEBUG } = process.env;
 
@@ -165,17 +164,6 @@ Booking.methods.paymentSuccess = async function() {
     : BookingStatuses.FINISHED;
   await booking.save();
   // send user notification
-  // (re)authorize band to gate controllers
-  try {
-    await booking.store.authBands(booking.bandIds);
-  } catch (err) {
-    console.error(`Booking auth bands failed, id: ${booking.id}.`);
-  }
-  agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
-    bandIds: booking.bandIds,
-    storeId: booking.store.id
-  });
-  // (re)setup revoke job at [now + hours]
 };
 
 Booking.methods.createRefundPayment = async function() {
@@ -228,7 +216,7 @@ Booking.methods.refundSuccess = async function() {
   booking.status = BookingStatuses.CANCELED;
   await booking.save();
   // send user notification
-  // revoke band auth to gate controllers
+  booking.store.authBands(booking.bandIds, true);
 };
 
 Booking.methods.checkIn = async function(save = true) {

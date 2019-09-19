@@ -46,7 +46,7 @@ Store.methods.authBands = async function(
           ? storeGateControllers[g[0]].removeAuth(+bandId)
           : storeGateControllers[g[0]].setAuth(+bandId);
         console.log(
-          `${revoke ? "Auth" : "Revoke"} ${bandId} to ${g[0]} (All doors).`
+          `${revoke ? "Revoke" : "Auth"} ${bandId} to ${g[0]} (All doors).`
         );
       } catch (err) {
         throw new Error("auth_band_fail");

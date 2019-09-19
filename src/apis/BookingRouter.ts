@@ -10,6 +10,7 @@ import Store from "../models/Store";
 import EscPosEncoder from "esc-pos-encoder-canvas";
 import { Image } from "canvas";
 import Payment, { gatewayNames } from "../models/Payment";
+import agenda from "../utils/agenda";
 
 // setTimeout(async () => {
 //   const u = await User.findOne({ name: "Uice Stone" });
@@ -234,6 +235,20 @@ export default router => {
             400,
             `手环数量必须等于玩家数量（${booking.membersCount}）`
           );
+        }
+
+        if (req.body.bandIds.length) {
+          // (re)authorize band to gate controllers
+          try {
+            await booking.store.authBands(booking.bandIds);
+          } catch (err) {
+            console.error(`Booking auth bands failed, id: ${booking.id}.`);
+          }
+          agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
+            bandIds: booking.bandIds,
+            storeId: booking.store.id
+          });
+          // (re)setup revoke job at [now + hours]
         }
 
         if (
