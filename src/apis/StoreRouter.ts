@@ -165,9 +165,12 @@ export default router => {
     })
   );
 
-  router.route("/store/auth-card/:serial/:cardNo").post(
+  router.route("/store/auth-card/:serial/:doorNo/:cardNo").post(
     handleAsyncErrors(async (req, res) => {
-      storeGateControllers[req.params.serial].setAuth(+req.params.cardNo);
+      storeGateControllers[req.params.serial].setAuth(
+        +req.params.cardNo,
+        +req.params.doorNo
+      );
       res.end();
     })
   );
