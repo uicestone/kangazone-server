@@ -253,9 +253,7 @@ Booking.methods.cancel = async function(save = true) {
     return;
 
   if (
-    ![BookingStatuses.PENDING_REFUND, BookingStatuses.BOOKED].includes(
-      booking.status
-    )
+    ![BookingStatuses.PENDING, BookingStatuses.BOOKED].includes(booking.status)
   ) {
     throw new Error("uncancelable_booking_status");
   }

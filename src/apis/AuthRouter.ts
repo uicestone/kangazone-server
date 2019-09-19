@@ -55,7 +55,7 @@ export default router => {
       if (!user) {
         throw new HttpError(401, "用户未登录");
       }
-      let authLog = `[USR] 用户 ${user.name} 获取登录信息`;
+      let authLog = `[USR] 用户 ${user.name || "未知名称"} 获取登录信息`;
 
       ["version", "device-serial", "system", "device-model"].forEach(field => {
         if (req.get(`x-client-${field}`)) {
