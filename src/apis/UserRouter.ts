@@ -126,11 +126,17 @@ export default router => {
             delete req.body[f];
           });
         }
+        const user = req.item;
         if (req.body.password) {
+          console.log(`[USR] User ${user.id} password reset.`);
           req.body.password = await hashPwd(req.body.password);
         }
-        const user = req.item;
         user.set(req.body);
+        if (req.body.cardNo) {
+          console.log(
+            `[USR] User ${user.id} card number set to ${user.cardNo}.`
+          );
+        }
         await user.save();
         res.json(user);
       })
