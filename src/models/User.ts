@@ -45,9 +45,11 @@ User.plugin(updateTimes);
 
 User.pre("validate", function(next) {
   const user = this as IUser;
-  // if (user.credit) {
-  //   user.credit = +user.credit.toFixed(2);
-  // }
+  ["creditDeposit", "creditReward"].forEach(field => {
+    if (user[field]) {
+      user[field] = +user[field].toFixed(2);
+    }
+  });
   next();
 });
 

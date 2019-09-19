@@ -133,15 +133,18 @@ Payment.pre("save", async function(next) {
         payment.amountForceDeposit = 0;
       }
 
-      const depositPaymentAmount =
-        payment.amountForceDeposit +
-        ((payment.amount - payment.amountForceDeposit) *
-          customer.creditDeposit) /
-          customer.credit;
-      const rewardPaymentAmount =
-        ((payment.amount - payment.amountForceDeposit) *
-          customer.creditReward) /
-        customer.credit;
+      const depositPaymentAmount = Math.max(
+        +(
+          payment.amountForceDeposit +
+          ((payment.amount - payment.amountForceDeposit) *
+            customer.creditDeposit) /
+            customer.credit
+        ).toFixed(2),
+        0.01
+      );
+      const rewardPaymentAmount = +(
+        payment.amount - depositPaymentAmount
+      ).toFixed(2);
 
       console.log(
         `[PAY] Payment amount D:R is ${depositPaymentAmount}:${rewardPaymentAmount}.`
