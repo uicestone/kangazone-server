@@ -158,9 +158,30 @@ export default router => {
     })
   );
 
-  router.route("/store/open-gate/:serial/:number").post(
+  router.route("/store/open-gate/:serial/:doorNo").post(
     handleAsyncErrors(async (req, res) => {
-      storeGateControllers[req.params.serial].openDoor(+req.params.number);
+      storeGateControllers[req.params.serial].openDoor(+req.params.doorNo);
+      res.end();
+    })
+  );
+
+  router.route("/store/auth-card/:serial/:cardNo").post(
+    handleAsyncErrors(async (req, res) => {
+      storeGateControllers[req.params.serial].setAuth(+req.params.cardNo);
+      res.end();
+    })
+  );
+
+  router.route("/store/revoke-card/:serial/:cardNo").post(
+    handleAsyncErrors(async (req, res) => {
+      storeGateControllers[req.params.serial].removeAuth(+req.params.cardNo);
+      res.end();
+    })
+  );
+
+  router.route("/store/clear-card/:serial").post(
+    handleAsyncErrors(async (req, res) => {
+      storeGateControllers[req.params.serial].clearAuth();
       res.end();
     })
   );
