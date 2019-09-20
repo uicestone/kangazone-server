@@ -156,16 +156,16 @@ export default router => {
 
   router.route("/user-deposit/:userId?").post(
     handleAsyncErrors(async (req, res) => {
-      if (req.params.userId !== req.user.id && req.user.role !== "manager") {
+      const customer = await User.findOne({
+        _id: req.params.userId || req.user.id
+      });
+
+      if (customer.id !== req.user.id && req.user.role !== "manager") {
         throw new HttpError(
           403,
           "店员可以为所有人充值，其他用户只能为自己充值"
         );
       }
-
-      const customer = await User.findOne({
-        _id: req.params.userId || req.user.id
-      });
 
       const level = config.depositLevels.filter(
         level => level.price === +req.body.depositLevel
