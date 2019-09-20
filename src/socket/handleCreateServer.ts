@@ -8,7 +8,7 @@ import { Socket } from "net";
 import { sleep } from "../utils/helper";
 
 export default function handleCreateServer(io) {
-  return async function socket(socket: Socket) {
+  return async (socket: Socket) => {
     console.log(
       `[SYS] Socket connect from: ${socket.remoteAddress}:${socket.remotePort}.`
     );
@@ -16,7 +16,7 @@ export default function handleCreateServer(io) {
     // socket.setTimeout(60000);
 
     // When receive socket data.
-    socket.on("data", handleSocketData);
+    socket.on("data", handleSocketData(socket));
 
     // When socket send data complete.
     socket.on("close", async function() {
