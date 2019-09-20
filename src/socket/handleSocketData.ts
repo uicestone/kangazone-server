@@ -14,7 +14,7 @@ export default async function handleSocketData(data) {
   const message = parseData(data);
   console.log("[SYS] Socket got message:", message);
 
-  if (message.funcName === "Status") {
+  if (message.funcName === "Status" && message.type === "card") {
     const bookings = await Booking.find({
       status: BookingStatuses.BOOKED,
       bandIds: message.cardNo
@@ -30,17 +30,9 @@ export default async function handleSocketData(data) {
 
     if (process.env.GATE_AUTO_AUTH) {
       const store = await Store.findOne();
-      const booking = await Booking.findOne(
-        { status: BookingStatuses.BOOKED, bandIds: { $size: 0 } },
-        null,
-        { sort: { updatedAt: -1 } }
-      );
-      booking.bandIds = [message.cardNo];
-      await booking.save();
-      booking.store.authBands(booking.bandIds);
       for (const g of store.gates.entry.concat(store.gates.exit)) {
         await sleep(200);
-        // storeGateControllers[g[0]].setAuth(message.cardNo);
+        storeGateControllers[g[0]].setAuth(message.cardNo);
       }
     }
   }

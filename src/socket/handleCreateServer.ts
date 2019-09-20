@@ -41,10 +41,7 @@ export default function handleCreateServer(io) {
 
     const serials = Array.from(
       stores.reduce((acc, cur) => {
-        cur.gates.entry.forEach(g => {
-          acc.add(g[0]);
-        });
-        cur.gates.exit.forEach(g => {
+        cur.gates.entry.concat(cur.gates.exit).forEach(g => {
           acc.add(g[0]);
         });
         return acc;
@@ -52,12 +49,9 @@ export default function handleCreateServer(io) {
     ) as number[];
 
     const controllers = serials.map(serial => new WgCtl(socket, serial));
-    await sleep(1000);
-    await Promise.all(controllers.map(ctl => ctl.detected));
-    // storeGateControllers["TEST"] = { test: true };
     controllers.map(c => {
-      // c.setServerAddress("172.16.3.253", 6000);
       storeGateControllers[c.serial] = c;
+      // c.getServerAddress();
     });
   };
 }
