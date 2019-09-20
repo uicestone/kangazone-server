@@ -14,7 +14,7 @@ export default router => {
     .get(
       paginatify,
       handleAsyncErrors(async (req, res) => {
-        if (req.user.role !== "admin") {
+        if (!["admin", "manager"].includes(req.user.role)) {
           throw new HttpError(403);
         }
         const { limit, skip } = req.pagination;
@@ -35,6 +35,10 @@ export default router => {
           } else {
             query.find({ paid: true });
           }
+        }
+
+        if (req.query.customer) {
+          query.find({ customer: req.query.customer });
         }
 
         if (req.query.attach) {
@@ -92,7 +96,7 @@ export default router => {
 
     .all(
       handleAsyncErrors(async (req, res, next) => {
-        if (req.user.role !== "admin" && req.user.role !== "manager") {
+        if (!["admin", "manager"].includes(req.user.role)) {
           // TODO shop can only operate payment that is attached to booking in own store
           throw new HttpError(403);
         }
