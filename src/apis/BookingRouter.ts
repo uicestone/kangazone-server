@@ -226,28 +226,24 @@ export default router => {
 
         booking.set(req.body);
 
-        if (
-          req.body.bandIds &&
-          req.body.bandIds.length &&
-          req.body.bandIds.length !== booking.membersCount
-        ) {
-          throw new HttpError(
-            400,
-            `手环数量必须等于玩家数量（${booking.membersCount}）`
-          );
-        }
-
-        if (req.body.bandIds.length) {
+        if (req.body.bandIds && req.body.bandIds.length) {
+          if (req.body.bandIds.length !== booking.membersCount) {
+            throw new HttpError(
+              400,
+              `手环数量必须等于玩家数量（${booking.membersCount}）`
+            );
+          }
           // (re)authorize band to gate controllers
           try {
             await booking.store.authBands(booking.bandIds);
+            agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
+              bandIds: booking.bandIds,
+              storeId: booking.store.id
+            });
           } catch (err) {
             console.error(`Booking auth bands failed, id: ${booking.id}.`);
+            console.error(err);
           }
-          agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
-            bandIds: booking.bandIds,
-            storeId: booking.store.id
-          });
           // (re)setup revoke job at [now + hours]
         }
 

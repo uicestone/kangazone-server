@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import WgCtl from "wiegand-control";
 import updateTimes from "./plugins/updateTimes";
 import { Socket } from "net";
-import { sleep } from "../utils/helper";
+import { sleep, icCode10To8 } from "../utils/helper";
 
 export const storeGateControllers: { [serial: string]: WgCtl } = {};
 export const storeServerSockets: { [storeId: string]: Socket } = {};
@@ -43,10 +43,12 @@ Store.methods.authBands = async function(
     for (const bandId of bandIds) {
       try {
         revoke
-          ? storeGateControllers[g[0]].removeAuth(+bandId)
-          : storeGateControllers[g[0]].setAuth(+bandId);
+          ? storeGateControllers[g[0]].removeAuth(icCode10To8(bandId))
+          : storeGateControllers[g[0]].setAuth(icCode10To8(bandId));
         console.log(
-          `${revoke ? "Revoke" : "Auth"} ${bandId} to ${g[0]} (All doors).`
+          `${revoke ? "Revoke" : "Auth"} ${bandId} (${icCode10To8(
+            bandId
+          )}) to ${g[0]} (All doors).`
         );
       } catch (err) {
         throw new Error("auth_band_fail");

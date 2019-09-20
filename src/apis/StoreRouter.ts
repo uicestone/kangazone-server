@@ -7,7 +7,7 @@ import Store, {
   storeServerSockets
 } from "../models/Store";
 import WgCtl from "wiegand-control";
-import { sleep } from "../utils/helper";
+import { sleep, icCode10To8 } from "../utils/helper";
 
 export default router => {
   // Store CURD
@@ -164,8 +164,12 @@ export default router => {
 
   router.route("/store/auth-card/:serial/:doorNo/:cardNo").post(
     handleAsyncErrors(async (req, res) => {
+      const cardNo =
+        req.params.cardNo.length === 10
+          ? icCode10To8(req.params.cardNo)
+          : +req.params.cardNo;
       storeGateControllers[req.params.serial].setAuth(
-        +req.params.cardNo,
+        cardNo,
         +req.params.doorNo
       );
       res.end();
@@ -174,7 +178,11 @@ export default router => {
 
   router.route("/store/revoke-card/:serial/:cardNo").post(
     handleAsyncErrors(async (req, res) => {
-      storeGateControllers[req.params.serial].removeAuth(+req.params.cardNo);
+      const cardNo =
+        req.params.cardNo.length === 10
+          ? icCode10To8(req.params.cardNo)
+          : +req.params.cardNo;
+      storeGateControllers[req.params.serial].removeAuth(cardNo);
       res.end();
     })
   );

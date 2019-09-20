@@ -34,3 +34,9 @@ export const getTokenData = (token: string): TokenData => {
 export const sleep = async (milliseconds = 500) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 };
+
+export const icCode10To8 = (input: string): number => {
+  const hexstring = (+input).toString(16).padStart(8, "0");
+  const buffer = Buffer.alloc(4, hexstring, "hex");
+  return +`${buffer.readUInt8(1)}${buffer.readUInt16BE(2)}`;
+};
