@@ -1,6 +1,6 @@
 {
   "name": "kangazone-server",
-  "version": "1.2.14",
+  "version": "1.2.15",
   "description": "Kangazone server apis.",
   "scripts": {
     "dev": "nodemon --watch src -e ts --exec 'ts-node ./src/'",

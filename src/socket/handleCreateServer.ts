@@ -1,25 +1,28 @@
 import handleSocketData from "./handleSocketData";
 import WgCtl from "wiegand-control";
+import moment from "moment";
 import Store, {
   storeGateControllers,
   storeServerSockets
 } from "../models/Store";
 import { Socket } from "net";
-import { sleep } from "../utils/helper";
 
 export default function handleCreateServer(io) {
   return async (socket: Socket) => {
     console.log(
       `[SYS] Socket connect from: ${socket.remoteAddress}:${socket.remotePort}.`
     );
-
-    // socket.setTimeout(60000);
+    const heartBeatInterval = setInterval(() => {
+      socket.write(`PONG. Server time is ${moment().format("HH:mm:ss")}.`);
+    }, 300000);
+    // socket.setTimeout(6000);
 
     // When receive socket data.
     socket.on("data", handleSocketData(socket));
 
     // When socket send data complete.
     socket.on("close", async function() {
+      clearInterval(heartBeatInterval);
       console.log(
         `[SYS] Socket disconnect from ${socket.remoteAddress}:${socket.remotePort}`
       );
@@ -31,7 +34,9 @@ export default function handleCreateServer(io) {
 
     // When socket timeout.
     socket.on("timeout", function() {
-      // console.log(`[SYS] Socket request time out from ${socket.remoteAddress}:${socket.remotePort}.`);
+      console.log(
+        `[SYS] Socket request time out from ${socket.remoteAddress}:${socket.remotePort}.`
+      );
     });
 
     const stores = await Store.find();
