@@ -247,11 +247,11 @@ Booking.methods.cancel = async function(save = true) {
   }
   if (booking.payments.filter(p => p.paid).length) {
     console.log(`[BOK] Refund booking ${booking._id}.`);
-    // we don't change status here, will auto change on payment fullfil
+    // we don't directly change status to canceled, will auto change on refund fullfil
     await booking.createRefundPayment();
     booking.status = BookingStatuses.PENDING_REFUND;
   } else {
-    booking.status = BookingStatuses.PENDING_REFUND;
+    booking.status = BookingStatuses.CANCELED;
   }
 
   console.log(`[BOK] Cancel booking ${booking._id}.`);
