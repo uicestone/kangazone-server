@@ -257,7 +257,10 @@ export default router => {
           booking.checkIn(false);
         }
 
-        if (booking.status === BookingStatuses.CANCELED) {
+        if (
+          booking.status === BookingStatuses.CANCELED &&
+          req.user.role !== "admin"
+        ) {
           // TODO refund permission should be restricted
           // TODO IN_SERVICE refund
 
