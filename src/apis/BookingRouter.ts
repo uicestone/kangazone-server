@@ -236,10 +236,12 @@ export default router => {
           // (re)authorize band to gate controllers
           try {
             await booking.store.authBands(booking.bandIds);
-            agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
-              bandIds: booking.bandIds,
-              storeId: booking.store.id
-            });
+            if (booking.hours) {
+              agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
+                bandIds: booking.bandIds,
+                storeId: booking.store.id
+              });
+            }
           } catch (err) {
             console.error(`Booking auth bands failed, id: ${booking.id}.`);
             console.error(err);
