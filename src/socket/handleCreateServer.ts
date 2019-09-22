@@ -15,6 +15,8 @@ export default function handleCreateServer(io) {
     const heartBeatInterval = setInterval(() => {
       socket.write(`PONG. Server time is ${moment().format("HH:mm:ss")}.`);
     }, 300000);
+
+    socket.setKeepAlive(true);
     // socket.setTimeout(6000);
 
     // When receive socket data.
