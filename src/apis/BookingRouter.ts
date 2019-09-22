@@ -254,7 +254,7 @@ export default router => {
           statusWas === BookingStatuses.BOOKED
         ) {
           if (!booking.bandIds.length) {
-            throw new Error("必须绑定手环才能签到入场");
+            throw new HttpError(400, "必须绑定手环才能签到入场");
           }
           booking.checkIn(false);
         }

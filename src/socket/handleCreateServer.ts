@@ -1,14 +1,12 @@
-import handleSocketData from "./handleSocketData";
-import WgCtl from "wiegand-control";
 import moment from "moment";
-import Store, {
-  storeGateControllers,
-  storeServerSockets
-} from "../models/Store";
 import { Socket } from "net";
+import { Server as SocketIoServer } from "socket.io";
+import handleSocketData from "./handleSocketData";
+import { IStore } from "../models/Store";
 
-export default function handleCreateServer(io) {
+export default function handleCreateServer(io: SocketIoServer) {
   return async (socket: Socket) => {
+    const client: { store: IStore } = { store: null };
     console.log(
       `[SYS] Socket connect from: ${socket.remoteAddress}:${socket.remotePort}.`
     );
@@ -17,10 +15,10 @@ export default function handleCreateServer(io) {
     }, 300000);
 
     socket.setKeepAlive(true);
-    // socket.setTimeout(6000);
+    socket.setTimeout(1000);
 
     // When receive socket data.
-    socket.on("data", handleSocketData(socket));
+    socket.on("data", handleSocketData(socket, client));
 
     // When socket send data complete.
     socket.on("close", async function() {
@@ -36,29 +34,11 @@ export default function handleCreateServer(io) {
 
     // When socket timeout.
     socket.on("timeout", function() {
+      if (client.store) return;
       console.log(
-        `[SYS] Socket request time out from ${socket.remoteAddress}:${socket.remotePort}.`
+        `[SOK] Daemon not declaring store identity, timeout ${socket.remoteAddress}:${socket.remotePort}.`
       );
-    });
-
-    const stores = await Store.find();
-    storeServerSockets[stores[0].id] = socket;
-    stores[0].ip = socket.remoteAddress;
-    await stores[0].save();
-
-    const serials = Array.from(
-      stores.reduce((acc, cur) => {
-        cur.gates.entry.concat(cur.gates.exit).forEach(g => {
-          acc.add(g[0]);
-        });
-        return acc;
-      }, new Set())
-    ) as number[];
-
-    const controllers = serials.map(serial => new WgCtl(socket, serial));
-    controllers.map(c => {
-      storeGateControllers[c.serial] = c;
-      // c.getServerAddress();
+      socket.destroy(new Error("store_unidentified"));
     });
   };
 }
