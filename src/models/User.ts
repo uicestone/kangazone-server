@@ -16,7 +16,18 @@ const User = new Schema({
       return genderIndex[v] || v;
     }
   },
-  mobile: { type: String, index: { unique: true, sparse: true } },
+  mobile: {
+    type: String,
+    index: { unique: true, sparse: true },
+    validate: {
+      validator: function(v) {
+        return v.length === 11;
+      },
+      // @ts-ignore
+      message: props =>
+        `手机号必须是11位数，输入的是${JSON.stringify(props.value)}`
+    }
+  },
   avatarUrl: String,
   region: String,
   openid: { type: String, index: { unique: true, sparse: true } },

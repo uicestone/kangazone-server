@@ -19,7 +19,13 @@ export default (err: Error, req, res, next) => {
     }
     res.status(409).json({ message });
   } else if (err.name === "ValidationError") {
-    res.status(400).json({ message: err.message });
+    res.status(400).json({
+      // @ts-ignore
+      message: Object.values(err.errors)
+        // @ts-ignore
+        .map(e => e.message)
+        .join("\n")
+    });
   } else {
     console.error(`${err.name}: ${err.message}`, "\n[Stack]", err.stack);
     res.status(500).send("Internal server error.");
