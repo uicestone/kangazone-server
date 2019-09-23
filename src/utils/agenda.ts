@@ -3,7 +3,14 @@ import moment from "moment";
 import Store from "../models/Store";
 import Booking, { BookingStatuses } from "../models/Booking";
 
-const agenda = new Agenda({ db: { address: process.env.MONGODB_URL } });
+const agenda = new Agenda({
+  db: {
+    address: process.env.MONGODB_URL,
+    options: {
+      useNewUrlParser: true
+    }
+  }
+});
 
 agenda.define("revoke band auth", async (job, done) => {
   const { bandIds, storeId } = job.attrs.data;
