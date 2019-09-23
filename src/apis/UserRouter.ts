@@ -63,6 +63,10 @@ export default router => {
           });
         }
 
+        if (req.query.role) {
+          query.find({ role: req.query.role });
+        }
+
         let total = await query.countDocuments();
         const page = await query
           .find()
