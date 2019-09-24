@@ -36,6 +36,9 @@ export const sleep = async (milliseconds = 500) => {
 };
 
 export const icCode10To8 = (input: string): number => {
+  if (input.length <= 8) {
+    return +input;
+  }
   const hexString = (+input).toString(16).padStart(8, "0");
   const buffer = Buffer.alloc(4, hexString, "hex");
   return buffer.readUInt8(1) * 1e5 + buffer.readUInt16BE(2);
