@@ -8,6 +8,7 @@ import { signToken, hashPwd } from "../utils/helper";
 import { config } from "../models/Config";
 import Payment, { Gateways } from "../models/Payment";
 import { payArgs as wechatPayArgs } from "../utils/wechat";
+import Store from "../models/Store";
 
 const { DEBUG } = process.env;
 
@@ -134,6 +135,13 @@ export default router => {
         if (req.body.password) {
           console.log(`[USR] User ${user.id} password reset.`);
           req.body.password = await hashPwd(req.body.password);
+        }
+        if (req.body.passNo) {
+          if (req.user.role !== "admin") {
+            throw new HttpError(403);
+          }
+          const store = await Store.findOne();
+          store.authBands([req.body.passNo]);
         }
         user.set(req.body);
         if (req.body.cardNo) {
