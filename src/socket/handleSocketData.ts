@@ -64,7 +64,7 @@ export default function handleSocketData(
       return socket.destroy(new Error("unknown_function"));
     }
 
-    console.log("[SOK] Got message:", message);
+    console.log("[SOK] Got message:", JSON.stringify(message));
 
     if (message.funcName === "Status" && message.type === "card") {
       const bookings = await Booking.find({
