@@ -261,6 +261,18 @@ Booking.methods.cancel = async function(save = true) {
   }
 };
 
+Booking.methods.finish = async function(save = true) {
+  const booking = this as IBooking;
+
+  booking.status = BookingStatuses.FINISHED;
+
+  console.log(`[BOK] Finish booking ${booking._id}.`);
+
+  if (save) {
+    await booking.save();
+  }
+};
+
 export interface IBooking extends mongoose.Document {
   customer: IUser;
   store: IStore;
@@ -290,6 +302,7 @@ export interface IBooking extends mongoose.Document {
   refundSuccess: () => Promise<IBooking>;
   checkIn: (save?: boolean) => Promise<boolean>;
   cancel: (save?: boolean) => Promise<boolean>;
+  finish: (save?: boolean) => Promise<boolean>;
   remarks?: string;
 }
 

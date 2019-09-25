@@ -50,9 +50,28 @@ agenda.define("cancel expired booked bookings", async (job, done) => {
   done();
 });
 
+agenda.define("finish overtime served bookings", async (job, done) => {
+  const bookings = await Booking.find({
+    status: BookingStatuses.IN_SERVICE,
+    date: moment().format("YYYY-MM-DD")
+  });
+  for (const booking of bookings) {
+    if (
+      moment()
+        .subtract(`${booking.hours + 1} hours`)
+        .format("HH:mm:ss") > booking.checkInAt
+    ) {
+      await booking.finish();
+    }
+  }
+
+  done();
+});
+
 agenda.on("ready", () => {
   agenda.every("1 hour", "cancel expired pending bookings");
-  agenda.every("1 day", "cancel expired booked bookings");
+  // agenda.every("1 day", "cancel expired booked bookings");
+  agenda.every("5 minutes", "finish overtime served bookings");
 });
 
 export default agenda;
