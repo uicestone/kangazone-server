@@ -71,7 +71,14 @@ export default router => {
         const [{ totalAmount } = { totalAmount: 0 }] = await Payment.aggregate([
           //@ts-ignore
           { $match: query._conditions },
-          { $group: { _id: null, totalAmount: { $sum: "$amount" } } }
+          {
+            $group: {
+              _id: null,
+              totalAmount: {
+                $sum: { $cond: ["$amountDeposit", "$amountDeposit", "$amount"] }
+              }
+            }
+          }
         ]);
 
         const page = await query
