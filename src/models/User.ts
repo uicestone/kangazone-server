@@ -21,11 +21,13 @@ const User = new Schema({
     index: { unique: true, sparse: true },
     validate: {
       validator: function(v) {
-        return v.length === 11;
+        return v.length === 11 || v.match(/^\+/);
       },
       // @ts-ignore
       message: props =>
-        `手机号必须是11位数，输入的是${JSON.stringify(props.value)}`
+        `手机号必须是11位数或“+”开头的国际号码，输入的是${JSON.stringify(
+          props.value
+        )}`
     }
   },
   avatarUrl: String,
