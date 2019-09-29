@@ -29,6 +29,7 @@ const Booking = new Schema({
   membersCount: { type: Number, default: 1 },
   socksCount: { type: Number, default: 0 },
   bandIds: { type: [String] },
+  bandIds8: { type: [Number] },
   status: {
     type: String,
     enum: Object.values(BookingStatuses),
@@ -282,6 +283,7 @@ export interface IBooking extends mongoose.Document {
   hours: number;
   membersCount: number;
   bandIds: string[];
+  bandIds8: number[];
   socksCount: number;
   status: BookingStatuses;
   price?: number;

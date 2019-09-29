@@ -3,8 +3,8 @@ import paginatify from "../middlewares/paginatify";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
-import User from "../models/User";
-import { signToken, hashPwd } from "../utils/helper";
+import User, { IUser } from "../models/User";
+import { signToken, hashPwd, icCode10To8 } from "../utils/helper";
 import { config } from "../models/Config";
 import Payment, { Gateways } from "../models/Payment";
 import { payArgs as wechatPayArgs } from "../utils/wechat";
@@ -131,7 +131,7 @@ export default router => {
             delete req.body[f];
           });
         }
-        const user = req.item;
+        const user = req.item as IUser;
         if (req.body.password) {
           console.log(`[USR] User ${user.id} password reset.`);
           req.body.password = await hashPwd(req.body.password);
@@ -140,6 +140,7 @@ export default router => {
           if (req.user.role !== "admin") {
             throw new HttpError(403);
           }
+          user.passNo8 = icCode10To8(req.body.passNo);
           const store = await Store.findOne();
           store.authBands([req.body.passNo]);
         }

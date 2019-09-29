@@ -69,7 +69,7 @@ export default function handleSocketData(
     if (message.funcName === "Status" && message.type === "card") {
       const bookings = await Booking.find({
         status: BookingStatuses.BOOKED,
-        bandIds: message.cardNo
+        bandIds8: +message.cardNo
       });
 
       if (bookings.length > 1) {

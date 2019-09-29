@@ -11,6 +11,7 @@ import EscPosEncoder from "esc-pos-encoder-canvas";
 import { Image } from "canvas";
 import Payment, { gatewayNames } from "../models/Payment";
 import agenda from "../utils/agenda";
+import { icCode10To8 } from "../utils/helper";
 
 // setTimeout(async () => {
 //   const u = await User.findOne({ name: "Uice Stone" });
@@ -235,6 +236,7 @@ export default router => {
           }
           // (re)authorize band to gate controllers
           try {
+            booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
             await booking.store.authBands(booking.bandIds);
             if (booking.hours) {
               agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {

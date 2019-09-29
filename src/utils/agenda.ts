@@ -2,6 +2,8 @@ import Agenda from "agenda";
 import moment from "moment";
 import Store from "../models/Store";
 import Booking, { BookingStatuses } from "../models/Booking";
+import User from "../models/User";
+import { icCode10To8 } from "./helper";
 
 const agenda = new Agenda({
   db: {
@@ -68,10 +70,35 @@ agenda.define("finish overtime served bookings", async (job, done) => {
   done();
 });
 
+agenda.define("generate 8 digit card no", async (job, done) => {
+  const users = await User.find({ passNo: { $exists: true } });
+  const promisesUsers = users.map(user => {
+    if (user.passNo8) return Promise.resolve(user);
+    user.passNo8 = icCode10To8(user.passNo);
+    return user.save();
+  });
+  await Promise.all(promisesUsers);
+
+  const bookings = await Booking.find({
+    bandIds: { $exists: true },
+    bandIds8: { $exists: false }
+  });
+  const promisesBookings = bookings.map(booking => {
+    if (booking.bandIds8 && booking.bandIds8.length)
+      return Promise.resolve(booking);
+    booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
+    return booking.save();
+  });
+  await Promise.all(promisesBookings);
+
+  done();
+});
+
 agenda.on("ready", () => {
   agenda.every("1 hour", "cancel expired pending bookings");
   // agenda.every("1 day", "cancel expired booked bookings");
   agenda.every("5 minutes", "finish overtime served bookings");
+  agenda.now("generate 8 digit card no");
 });
 
 export default agenda;
