@@ -113,6 +113,9 @@ export default router => {
 
   router.route("/store/:storeId/open-all-gates").post(
     handleAsyncErrors(async (req, res) => {
+      if (!["admin", "manager"].includes(req.user.role)) {
+        throw new HttpError(403);
+      }
       const store = await Store.findById(req.params.storeId);
       for (const g of store.gates.entry.concat(store.gates.exit).slice(1)) {
         await sleep(200);
@@ -124,6 +127,9 @@ export default router => {
 
   router.route("/search-controllers").post(
     handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
       const store = await Store.findOne();
       new WgCtl(storeServerSockets[store.id]).search();
       res.end();
@@ -132,6 +138,9 @@ export default router => {
 
   router.route("/set-controller-ip/:serial").put(
     handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
       const serial = req.params.serial;
       const store = await Store.findOne();
       new WgCtl(storeServerSockets[store.id], serial).setAddress(
@@ -145,10 +154,13 @@ export default router => {
 
   router.route("/set-server-ip/:serial").put(
     handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
       const serial = req.params.serial;
       const store = await Store.findOne();
       new WgCtl(storeServerSockets[store.id], serial).setServerAddress(
-        "172.16.3.253",
+        req.body.ip,
         6000
       );
       res.end();
@@ -157,6 +169,9 @@ export default router => {
 
   router.route("/store/open-gate/:serial/:doorNo").post(
     handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
       storeGateControllers[req.params.serial].openDoor(+req.params.doorNo);
       res.end();
     })
@@ -164,6 +179,9 @@ export default router => {
 
   router.route("/store/auth-card/:serial/:doorNo/:cardNo").post(
     handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
       const cardNo =
         req.params.cardNo.length === 10
           ? icCode10To8(req.params.cardNo)
@@ -178,6 +196,9 @@ export default router => {
 
   router.route("/store/revoke-card/:serial/:cardNo").post(
     handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
       const cardNo =
         req.params.cardNo.length === 10
           ? icCode10To8(req.params.cardNo)
@@ -189,6 +210,9 @@ export default router => {
 
   router.route("/store/clear-card/:serial").post(
     handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
       storeGateControllers[req.params.serial].clearAuth();
       res.end();
     })
