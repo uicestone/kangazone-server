@@ -51,5 +51,3 @@ export interface IConfig {
 }
 
 export const config: IConfig = {};
-
-initConfig(config);

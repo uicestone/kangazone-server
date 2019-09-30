@@ -12,6 +12,8 @@ import handleError from "./utils/handleError";
 import handleCreateServer from "./socket/handleCreateServer";
 import applyRoutes from "./apis";
 import agenda from "./utils/agenda";
+import { config } from "./models/Config";
+import initConfig from "./utils/initConfig";
 
 const app = express();
 const router = express.Router();
@@ -47,5 +49,11 @@ httpServer.listen(portHttp, () => {
 socketServer.listen(portSocket, () => {
   console.log(`[SYS] Socket server listening port: ${portSocket}.`);
 });
+
+initConfig(config);
+
+setTimeout(async () => {
+  console.log("[SYS] Config loaded:", JSON.stringify(config));
+}, 5000);
 
 agenda.start();

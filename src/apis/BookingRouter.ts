@@ -16,7 +16,6 @@ import { icCode10To8 } from "../utils/helper";
 setTimeout(async () => {
   //   const u = await User.findOne({ name: "Uice Stone" });
   //   u.depositSuccess(2000);
-  console.log(config);
 }, 500);
 
 export default router => {
