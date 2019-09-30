@@ -13,10 +13,11 @@ import Payment, { gatewayNames } from "../models/Payment";
 import agenda from "../utils/agenda";
 import { icCode10To8 } from "../utils/helper";
 
-// setTimeout(async () => {
-//   const u = await User.findOne({ name: "Uice Stone" });
-//   u.depositSuccess(2000);
-// }, 500);
+setTimeout(async () => {
+  //   const u = await User.findOne({ name: "Uice Stone" });
+  //   u.depositSuccess(2000);
+  console.log(config);
+}, 500);
 
 export default router => {
   // Booking CURD

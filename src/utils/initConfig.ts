@@ -13,7 +13,7 @@ export default async (config: IConfig) => {
       `[SYS] ${initConfigItemsInsert.length} config items initialized.`
     );
   }
-  Object.assign(config, ...initConfigItemsInsert);
+  Object.assign(config, ...initConfigItemsInsert, existingConfig);
 };
 
 const initConfig: IConfig = {
