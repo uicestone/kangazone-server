@@ -234,9 +234,6 @@ export default router => {
               `手环数量必须等于玩家数量（${booking.membersCount}）`
             );
           }
-          if (req.body.bandIds.some(b => b.length < 10)) {
-            throw new HttpError(400, "手环ID必须是10位数字");
-          }
           // (re)authorize band to gate controllers
           try {
             booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
