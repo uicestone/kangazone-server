@@ -14,11 +14,7 @@ const Store = new Schema({
   partyRooms: Number,
   ip: String,
   gates: {
-    entry: { type: [[Number]] },
-    exit: { type: [[Number]] },
-    localServer: {
-      ip: String
-    }
+    type: [{ entry: Boolean, serial: Number, number: Number, name: String }]
   }
 });
 
@@ -39,16 +35,24 @@ Store.methods.authBands = async function(
   revoke: boolean = false
 ) {
   const store = this as IStore;
-  for (const g of store.gates.entry) {
+  // control auth by controller, not door, so collect controller serials
+  const serials = Array.from(
+    store.gates.reduce((acc, cur) => {
+      acc.add(cur.serial);
+      return acc;
+    }, new Set())
+  ) as number[];
+
+  for (const serial of serials) {
     for (const bandId of bandIds) {
       try {
         revoke
-          ? storeGateControllers[g[0]].removeAuth(icCode10To8(bandId))
-          : storeGateControllers[g[0]].setAuth(icCode10To8(bandId));
+          ? storeGateControllers[serial].removeAuth(icCode10To8(bandId))
+          : storeGateControllers[serial].setAuth(icCode10To8(bandId));
         console.log(
           `${revoke ? "Revoke" : "Auth"} ${bandId} (${icCode10To8(
             bandId
-          )}) to ${g[0]} (All doors).`
+          )}) to ${serial} (All doors).`
         );
       } catch (err) {
         throw new Error("auth_band_fail");
@@ -64,10 +68,7 @@ export interface IStore extends mongoose.Document {
   phone: string;
   partyRooms: number;
   ip: string;
-  gates: {
-    entry: number[];
-    exit: number[];
-  };
+  gates: { entry: boolean; serial: number; number: number; name?: "" }[];
   authBands: (bandIds: string[], revoke?: boolean) => Promise<boolean>;
 }
 

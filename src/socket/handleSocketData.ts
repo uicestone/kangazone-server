@@ -36,18 +36,15 @@ export default function handleSocketData(
           await client.store.save();
 
           const serials = Array.from(
-            client.store.gates.entry
-              .concat(client.store.gates.exit)
-              .reduce((acc, cur) => {
-                acc.add(cur[0]);
-                return acc;
-              }, new Set())
+            client.store.gates.reduce((acc, cur) => {
+              acc.add(cur.serial);
+              return acc;
+            }, new Set())
           ) as number[];
 
           const controllers = serials.map(serial => new WgCtl(socket, serial));
           controllers.forEach(c => {
             storeGateControllers[c.serial] = c;
-            // c.getServerAddress();
           });
         } catch (err) {
           console.error(
@@ -68,9 +65,54 @@ export default function handleSocketData(
     console.log("[SOK] Got message:", JSON.stringify(message));
 
     if (message.funcName === "Status" && message.type === "card") {
-      const bookings = await Booking.find({
-        bandIds8: +message.cardNo
-      });
+      const statusMessage = message as {
+        serial: number;
+        funcName: "Status";
+        index: number;
+        type: "card";
+        allow: boolean;
+        door: number;
+        inOut: "in" | "out";
+        cardNo: number;
+        time: Date;
+      };
+
+      const bookings = await Booking.find({ bandIds8: statusMessage.cardNo });
+
+      for (const booking of bookings) {
+        if (
+          [BookingStatuses.CANCELED, BookingStatuses.PENDING].includes(
+            booking.status
+          )
+        ) {
+          return;
+        }
+        // booking bandId is active, can be logged
+
+        const gate = booking.store.gates.find(
+          g =>
+            g.serial === statusMessage.serial && g.number === statusMessage.door
+        );
+
+        if (!booking.passLogs) {
+          booking.passLogs = [];
+        }
+
+        booking.passLogs.push({
+          time: new Date(),
+          gate: gate.name,
+          entry: gate.entry,
+          allow: statusMessage.allow
+        });
+
+        console.log(
+          `[SOK] Booking ${booking.id} band ${statusMessage.cardNo} ${
+            statusMessage.allow ? "passed" : "blocked"
+          } ${gate.name}.`
+        );
+
+        await booking.save();
+      }
 
       const bookedBookings = bookings.filter(
         b => b.status === BookingStatuses.BOOKED
@@ -78,31 +120,31 @@ export default function handleSocketData(
 
       if (bookedBookings.length > 1) {
         console.error(
-          `[SOK] Card No. ${message.cardNo} matched more than one booked bookings.`
+          `[SOK] Card No. ${statusMessage.cardNo} matched more than one booked bookings.`
         );
       }
 
       bookedBookings.forEach(booking => booking.checkIn());
 
-      const matchedUsers = await User.find({ passNo8: +message.cardNo });
+      const matchedUsers = await User.find({ passNo8: statusMessage.cardNo });
 
       if (matchedUsers.length > 1) {
         console.error(
-          `[SOK] Card No. ${message.cardNo} matched more than one user.`
+          `[SOK] Card No. ${statusMessage.cardNo} matched more than one user.`
         );
       }
 
       matchedUsers.forEach(user => {
         console.log(
-          `[SOK] Card No. ${message.cardNo} matched user ${user.name}, user id: ${user.id}`
+          `[SOK] Card No. ${statusMessage.cardNo} matched user ${user.name}, user id: ${user.id}`
         );
       });
 
       if (process.env.GATE_AUTO_AUTH) {
         const store = await Store.findOne();
-        for (const g of store.gates.entry.concat(store.gates.exit)) {
+        for (const g of store.gates) {
           await sleep(200);
-          storeGateControllers[g[0]].setAuth(message.cardNo);
+          storeGateControllers[g.serial].setAuth(message.cardNo);
         }
       }
     }

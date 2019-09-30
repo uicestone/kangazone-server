@@ -35,6 +35,9 @@ const User = new Schema({
   openid: { type: String, index: { unique: true, sparse: true } },
   passNo: { type: String }, // staff only
   passNo8: { type: Number }, // staff only
+  passLogs: {
+    type: [{ time: Date, gate: String, entry: Boolean, allow: Boolean }]
+  },
   creditDeposit: Number, // below for customer only
   creditReward: Number,
   cardType: { type: String },
@@ -154,6 +157,9 @@ export interface IUser extends mongoose.Document {
   openid?: string;
   passNo?: string;
   passNo8?: number;
+  passLogs: {
+    type: [{ time: Date; gate: string; entry: boolean; allow: boolean }];
+  };
   creditDeposit?: number;
   creditReward?: number;
   credit?: number;

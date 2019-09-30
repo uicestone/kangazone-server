@@ -117,9 +117,9 @@ export default router => {
         throw new HttpError(403);
       }
       const store = await Store.findById(req.params.storeId);
-      for (const g of store.gates.entry.concat(store.gates.exit).slice(1)) {
+      for (const g of store.gates) {
         await sleep(200);
-        storeGateControllers[g[0]].openDoor(g[1]);
+        storeGateControllers[g.serial].openDoor(g.number);
       }
       res.end();
     })

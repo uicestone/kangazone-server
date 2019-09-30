@@ -39,6 +39,9 @@ const Booking = new Schema({
   code: { type: Schema.Types.ObjectId, ref: Code },
   coupon: { type: String },
   payments: [{ type: Schema.Types.ObjectId, ref: Payment }],
+  passLogs: {
+    type: [{ time: Date, gate: String, entry: Boolean, allow: Boolean }]
+  },
   remarks: String
 });
 
@@ -304,6 +307,7 @@ export interface IBooking extends mongoose.Document {
   code?: ICode;
   coupon?: string;
   payments?: IPayment[];
+  passLogs?: { time: Date; gate: string; entry: boolean; allow: boolean }[];
   calculatePrice: () => Promise<IBooking>;
   createPayment: (
     Object: {
