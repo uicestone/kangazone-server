@@ -8,6 +8,7 @@ import Store, {
 import { sleep } from "../utils/helper";
 import { Socket } from "net";
 import WgCtl from "wiegand-control";
+import User from "../models/User";
 
 export default function handleSocketData(
   socket: Socket,
@@ -68,17 +69,34 @@ export default function handleSocketData(
 
     if (message.funcName === "Status" && message.type === "card") {
       const bookings = await Booking.find({
-        status: BookingStatuses.BOOKED,
         bandIds8: +message.cardNo
       });
 
-      if (bookings.length > 1) {
+      const bookedBookings = bookings.filter(
+        b => b.status === BookingStatuses.BOOKED
+      );
+
+      if (bookedBookings.length > 1) {
         console.error(
-          `[BOK] CardNo ${message.cardNo} matched more than one bookings.`
+          `[SOK] Card No. ${message.cardNo} matched more than one booked bookings.`
         );
       }
 
       bookings.forEach(booking => booking.checkIn());
+
+      const matchedUsers = await User.find({ passNo8: +message.cardNo });
+
+      if (matchedUsers.length > 1) {
+        console.error(
+          `[SOK] Card No. ${message.cardNo} matched more than one user.`
+        );
+      }
+
+      matchedUsers.forEach(user => {
+        console.log(
+          `[SOK] Card No. ${message.cardNo} matched user ${user.name}, user id: ${user.id}`
+        );
+      });
 
       if (process.env.GATE_AUTO_AUTH) {
         const store = await Store.findOne();
