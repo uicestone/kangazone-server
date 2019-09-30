@@ -82,8 +82,10 @@ Booking.methods.calculatePrice = async function() {
 
   if (booking.coupon) {
     const coupon = config.coupons.find(c => c.slug === booking.coupon);
-    booking.price = coupon.price + booking.socksCount * 10;
-    return;
+    if (coupon.price) {
+      booking.price = coupon.price + booking.socksCount * 10;
+      return;
+    }
   }
 
   if (booking.code && booking.code.hours) {
@@ -122,7 +124,12 @@ Booking.methods.createPayment = async function(
     attach += ` extend ${extendHoursBy}`;
   }
 
-  if (useCredit && booking.customer.credit && !adminAddWithoutPayment) {
+  if (
+    totalPayAmount >= 0.01 &&
+    useCredit &&
+    booking.customer.credit &&
+    !adminAddWithoutPayment
+  ) {
     creditPayAmount = Math.min(totalPayAmount, booking.customer.credit);
     const creditPayment = new Payment({
       customer: booking.customer,
