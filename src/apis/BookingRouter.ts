@@ -61,12 +61,12 @@ export default router => {
             .format("HH:mm:ss");
         }
 
-        if (booking.hours > config.hourPriceRatio.length) {
-          throw new HttpError(
-            400,
-            `预定小时数超过限制（${config.hourPriceRatio.length}小时）`
-          );
-        }
+        // if (booking.hours > config.hourPriceRatio.length) {
+        //   throw new HttpError(
+        //     400,
+        //     `预定小时数超过限制（${config.hourPriceRatio.length}小时）`
+        //   );
+        // }
 
         if (
           req.user.role === "customer" &&
@@ -533,12 +533,12 @@ export default router => {
           .format("HH:mm:ss");
       }
 
-      if (booking.hours > config.hourPriceRatio.length) {
-        throw new HttpError(
-          400,
-          `预定小时数超过限制（${config.hourPriceRatio.length}小时）`
-        );
-      }
+      // if (booking.hours > config.hourPriceRatio.length) {
+      //   throw new HttpError(
+      //     400,
+      //     `预定小时数超过限制（${config.hourPriceRatio.length}小时）`
+      //   );
+      // }
 
       try {
         await booking.calculatePrice();
