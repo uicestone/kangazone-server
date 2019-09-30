@@ -50,10 +50,9 @@ socketServer.listen(portSocket, () => {
   console.log(`[SYS] Socket server listening port: ${portSocket}.`);
 });
 
-initConfig(config);
-
-setTimeout(async () => {
+(async () => {
+  await initConfig(config);
   console.log("[SYS] Config loaded:", JSON.stringify(config));
-}, 5000);
+})();
 
 agenda.start();
