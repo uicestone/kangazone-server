@@ -1,5 +1,6 @@
 import Config, { IConfig } from "../models/Config";
 import reduceConfig from "./reduceConfig";
+import moment = require("moment");
 
 export default async (config: IConfig) => {
   const existingConfig = reduceConfig(await Config.find());
@@ -72,5 +73,74 @@ const initConfig: IConfig = {
     }
   ],
   hourPriceRatio: [1, 0.5, 0.5],
-  hourPrice: 158
+  hourPrice: 158,
+  coupons: [
+    {
+      slug: "national-2019",
+      name: "88元全场畅玩不限时",
+      validFrom: moment("2019-10-01").toDate(),
+      validTill: moment("2019-10-07")
+        .endOf("day")
+        .toDate(),
+      type: "play",
+      hours: 12,
+      fixedHours: true,
+      price: 88
+    },
+    {
+      slug: "national-2019-family-2",
+      name: "亲子畅玩不限时 1大1小",
+      validFrom: moment("2019-10-01").toDate(),
+      validTill: moment("2019-10-07")
+        .endOf("day")
+        .toDate(),
+      type: "play",
+      hours: 12,
+      membersCount: 2,
+      fixedHours: true,
+      fixedMembersCount: true,
+      price: 158
+    },
+    {
+      slug: "national-2019-family-3",
+      name: "亲子畅玩不限时 2大1小",
+      validFrom: moment("2019-10-01").toDate(),
+      validTill: moment("2019-10-07")
+        .endOf("day")
+        .toDate(),
+      type: "play",
+      hours: 12,
+      membersCount: 3,
+      fixedHours: true,
+      fixedMembersCount: true,
+      price: 188
+    },
+    {
+      slug: "national-2019-couple",
+      name: "情侣畅玩不限时",
+      validFrom: moment("2019-10-01").toDate(),
+      validTill: moment("2019-10-07")
+        .endOf("day")
+        .toDate(),
+      type: "play",
+      hours: 12,
+      membersCount: 2,
+      fixedHours: true,
+      fixedMembersCount: true,
+      price: 159
+    },
+    {
+      slug: "national-2019-student",
+      name: "学生畅玩不限时",
+      validFrom: moment("2019-10-01").toDate(),
+      validTill: moment("2019-10-07")
+        .endOf("day")
+        .toDate(),
+      type: "play",
+      hours: 12,
+      membersCount: 1,
+      fixedHours: true,
+      price: 79
+    }
+  ]
 };

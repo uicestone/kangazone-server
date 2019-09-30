@@ -37,6 +37,7 @@ const Booking = new Schema({
   },
   price: { type: Number },
   code: { type: Schema.Types.ObjectId, ref: Code },
+  coupon: { type: String },
   payments: [{ type: Schema.Types.ObjectId, ref: Payment }],
   remarks: String
 });
@@ -72,11 +73,17 @@ Booking.methods.calculatePrice = async function() {
   if (booking.code) {
     await booking.populate("code").execPopulate();
     if (!booking.code) {
-      throw new Error("coupon_not_found");
+      throw new Error("code_not_found");
     }
     if (booking.code.used) {
-      throw new Error("coupon_used");
+      throw new Error("code_used");
     }
+  }
+
+  if (booking.coupon) {
+    const coupon = config.coupons.find(c => c.slug === booking.coupon);
+    booking.price = coupon.price + booking.socksCount * 10;
+    return;
   }
 
   if (booking.code && booking.code.hours) {
@@ -288,6 +295,7 @@ export interface IBooking extends mongoose.Document {
   status: BookingStatuses;
   price?: number;
   code?: ICode;
+  coupon?: string;
   payments?: IPayment[];
   calculatePrice: () => Promise<IBooking>;
   createPayment: (

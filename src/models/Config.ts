@@ -36,6 +36,18 @@ export interface IConfig {
   }[];
   hourPrice?: number;
   hourPriceRatio?: number[];
+  coupons?: {
+    slug: string;
+    name: string;
+    validFrom: Date;
+    validTill: Date;
+    type: string;
+    hours: number;
+    membersCount?: number;
+    fixedHours?: boolean;
+    fixedMembersCount?: boolean;
+    price?: number;
+  }[];
 }
 
 export const config: IConfig = {};

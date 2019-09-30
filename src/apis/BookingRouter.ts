@@ -89,9 +89,9 @@ export default router => {
           await booking.calculatePrice();
         } catch (err) {
           switch (err.message) {
-            case "coupon_not_found":
+            case "code_not_found":
               throw new HttpError(400, "优惠券不存在");
-            case "coupon_used":
+            case "code_used":
               throw new HttpError(403, "优惠券已经使用");
             default:
               throw err;
@@ -544,9 +544,9 @@ export default router => {
         await booking.calculatePrice();
       } catch (err) {
         switch (err.message) {
-          case "coupon_not_found":
+          case "code_not_found":
             throw new HttpError(400, "优惠券不存在");
-          case "coupon_used":
+          case "code_used":
             throw new HttpError(403, "优惠券已经使用");
           default:
             throw err;
