@@ -38,6 +38,6 @@ export interface IConfig {
   hourPriceRatio?: number[];
 }
 
-export let config: IConfig = {};
+export const config: IConfig = {};
 
 initConfig(config);

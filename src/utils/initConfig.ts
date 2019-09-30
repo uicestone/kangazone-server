@@ -1,7 +1,7 @@
 import Config, { IConfig } from "../models/Config";
 import reduceConfig from "./reduceConfig";
 
-export default async config => {
+export default async (config: IConfig) => {
   const existingConfig = reduceConfig(await Config.find());
   const initConfigItemsInsert = Object.keys(initConfig)
     .filter(key => !existingConfig[key])
@@ -12,7 +12,7 @@ export default async config => {
       `[SYS] ${initConfigItemsInsert.length} config items initialized.`
     );
   }
-  Object.assign(config, existingConfig);
+  Object.assign(config, ...initConfigItemsInsert);
 };
 
 const initConfig: IConfig = {
