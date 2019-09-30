@@ -77,6 +77,17 @@ export default function handleSocketData(
         time: Date;
       };
 
+      const store = await Store.findOne({
+        "gates.serial": statusMessage.serial
+      });
+
+      if (!store) return;
+
+      const gate = store.gates.find(
+        g =>
+          g.serial === statusMessage.serial && g.number === statusMessage.door
+      );
+
       const bookings = await Booking.find({ bandIds8: statusMessage.cardNo });
 
       for (const booking of bookings) {
@@ -85,14 +96,9 @@ export default function handleSocketData(
             booking.status
           )
         ) {
-          return;
+          continue;
         }
         // booking bandId is active, can be logged
-
-        const gate = booking.store.gates.find(
-          g =>
-            g.serial === statusMessage.serial && g.number === statusMessage.door
-        );
 
         if (!booking.passLogs) {
           booking.passLogs = [];
@@ -134,11 +140,23 @@ export default function handleSocketData(
         );
       }
 
-      matchedUsers.forEach(user => {
+      for (const user of matchedUsers) {
+        if (!user.passLogs) {
+          user.passLogs = [];
+        }
+        user.passLogs.push({
+          time: new Date(),
+          gate: gate.name,
+          entry: gate.entry,
+          allow: statusMessage.allow
+        });
+        await user.save();
         console.log(
-          `[SOK] Card No. ${statusMessage.cardNo} matched user ${user.name}, user id: ${user.id}`
+          `[SOK] User ${user.name}, id ${user.id}, band ${
+            statusMessage.cardNo
+          } ${statusMessage.allow ? "passed" : "blocked"} ${gate.name}.`
         );
-      });
+      }
 
       if (process.env.GATE_AUTO_AUTH) {
         const store = await Store.findOne();

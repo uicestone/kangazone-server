@@ -157,9 +157,7 @@ export interface IUser extends mongoose.Document {
   openid?: string;
   passNo?: string;
   passNo8?: number;
-  passLogs: {
-    type: [{ time: Date; gate: string; entry: boolean; allow: boolean }];
-  };
+  passLogs: { time: Date; gate: string; entry: boolean; allow: boolean }[];
   creditDeposit?: number;
   creditReward?: number;
   credit?: number;
