@@ -82,7 +82,7 @@ export default function handleSocketData(
         );
       }
 
-      bookings.forEach(booking => booking.checkIn());
+      bookedBookings.forEach(booking => booking.checkIn());
 
       const matchedUsers = await User.find({ passNo8: +message.cardNo });
 
