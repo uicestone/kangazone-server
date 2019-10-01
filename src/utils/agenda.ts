@@ -60,7 +60,7 @@ agenda.define("finish overtime served bookings", async (job, done) => {
   for (const booking of bookings) {
     if (
       moment()
-        .subtract(`${booking.hours + 1} hours`)
+        .subtract(booking.hours + 1, "hours")
         .format("HH:mm:ss") > booking.checkInAt
     ) {
       await booking.finish();
