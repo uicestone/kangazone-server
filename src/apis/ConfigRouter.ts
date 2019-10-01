@@ -1,9 +1,7 @@
 import paginatify from "../middlewares/paginatify";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
-import parseSortString from "../utils/parseSortString";
 import Config from "../models/Config";
 import HttpError from "../utils/HttpError";
-import { Types } from "mongoose";
 import reduceConfig from "../utils/reduceConfig";
 
 export default router => {

@@ -4,7 +4,6 @@ import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import Booking, { IBooking, BookingStatuses } from "../models/Booking";
-import { config } from "../models/Config";
 import User from "../models/User";
 import Store from "../models/Store";
 import EscPosEncoder from "esc-pos-encoder-canvas";

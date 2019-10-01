@@ -1,5 +1,5 @@
 import handleAsyncErrors from "../utils/handleAsyncErrors";
-import User, { IUser } from "../models/User";
+import User from "../models/User";
 import HttpError from "../utils/HttpError";
 import { signToken, comparePwd, hashPwd } from "../utils/helper";
 

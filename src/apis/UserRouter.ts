@@ -1,13 +1,11 @@
-import moment from "moment";
 import paginatify from "../middlewares/paginatify";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import User, { IUser } from "../models/User";
-import { signToken, hashPwd, icCode10To8 } from "../utils/helper";
+import { hashPwd, icCode10To8 } from "../utils/helper";
 import { config } from "../models/Config";
 import Payment, { Gateways } from "../models/Payment";
-import { payArgs as wechatPayArgs } from "../utils/wechat";
 import Store from "../models/Store";
 
 const { DEBUG } = process.env;
