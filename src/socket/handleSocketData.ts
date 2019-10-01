@@ -92,9 +92,11 @@ export default function handleSocketData(
 
       for (const booking of bookings) {
         if (
-          [BookingStatuses.CANCELED, BookingStatuses.PENDING].includes(
-            booking.status
-          )
+          [
+            BookingStatuses.CANCELED,
+            BookingStatuses.PENDING,
+            BookingStatuses.FINISHED
+          ].includes(booking.status)
         ) {
           continue;
         }
