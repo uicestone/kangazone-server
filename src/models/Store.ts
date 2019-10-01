@@ -50,7 +50,7 @@ Store.methods.authBands = async function(
           ? storeGateControllers[serial].removeAuth(icCode10To8(bandId))
           : storeGateControllers[serial].setAuth(icCode10To8(bandId));
         console.log(
-          `${revoke ? "Revoke" : "Auth"} ${bandId} (${icCode10To8(
+          `[STR] ${revoke ? "Revoke" : "Auth"} ${bandId} (${icCode10To8(
             bandId
           )}) to ${serial} (All doors).`
         );

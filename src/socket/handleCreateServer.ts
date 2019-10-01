@@ -15,7 +15,7 @@ export default function handleCreateServer(io: SocketIoServer) {
     }, 300000);
 
     socket.setKeepAlive(true);
-    socket.setTimeout(1000);
+    socket.setTimeout(10000);
 
     // When receive socket data.
     socket.on("data", handleSocketData(socket, client));

@@ -163,7 +163,7 @@ Booking.methods.createPayment = async function(
       gateway: paymentGateway || Gateways.WechatPay
     });
 
-    console.log(`[PAY] Extra payment: `, extraPayment.toJSON());
+    console.log(`[PAY] Extra payment: `, JSON.stringify(extraPayment));
 
     try {
       await extraPayment.save();
