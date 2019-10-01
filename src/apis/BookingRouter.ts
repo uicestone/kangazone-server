@@ -227,6 +227,9 @@ export default router => {
 
         booking.set(req.body);
 
+        await booking.populate("customer").execPopulate();
+        await booking.populate("store").execPopulate();
+
         if (req.body.bandIds && req.body.bandIds.length) {
           if (req.body.bandIds.length !== booking.membersCount) {
             throw new HttpError(
@@ -235,20 +238,29 @@ export default router => {
             );
           }
           // (re)authorize band to gate controllers
-          try {
-            booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
-            await booking.store.authBands(booking.bandIds);
-            if (booking.hours) {
-              agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
-                bandIds: booking.bandIds,
-                storeId: booking.store.id
-              });
+          if (
+            [BookingStatuses.BOOKED, BookingStatuses.IN_SERVICE].includes(
+              booking.status
+            )
+          ) {
+            try {
+              booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
+              await booking.store.authBands(booking.bandIds);
+              if (booking.hours) {
+                agenda.schedule(
+                  `in ${booking.hours} hours`,
+                  "revoke band auth",
+                  {
+                    bandIds: booking.bandIds,
+                    storeId: booking.store.id
+                  }
+                );
+              }
+            } catch (err) {
+              console.error(`Booking auth bands failed, id: ${booking.id}.`);
+              console.error(err);
             }
-          } catch (err) {
-            console.error(`Booking auth bands failed, id: ${booking.id}.`);
-            console.error(err);
           }
-          // (re)setup revoke job at [now + hours]
         }
 
         if (
