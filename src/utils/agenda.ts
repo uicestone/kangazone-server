@@ -16,12 +16,14 @@ const agenda = new Agenda({
 
 agenda.define("revoke band auth", async (job, done) => {
   const { bandIds, storeId } = job.attrs.data;
+  console.log(`[CRO] Start revoke band auth ${JSON.stringify(bandIds)}.`);
   const store = await Store.findOne({ _id: storeId });
   await store.authBands(bandIds, true);
   done();
 });
 
 agenda.define("cancel expired pending bookings", async (job, done) => {
+  console.log(`[CRO] Start cancel expired pending bookings.`);
   const bookings = await Booking.find({
     status: BookingStatuses.PENDING,
     createdAt: {
@@ -39,6 +41,7 @@ agenda.define("cancel expired pending bookings", async (job, done) => {
 });
 
 agenda.define("cancel expired booked bookings", async (job, done) => {
+  console.log(`[CRO] Start cancel expired booked bookings.`);
   const bookings = await Booking.find({
     status: BookingStatuses.BOOKED,
     date: {
@@ -53,15 +56,16 @@ agenda.define("cancel expired booked bookings", async (job, done) => {
 });
 
 agenda.define("finish overtime served bookings", async (job, done) => {
+  console.log(`[CRO] Start finish overtime served bookings.`);
   const bookings = await Booking.find({
     status: BookingStatuses.IN_SERVICE,
     date: moment().format("YYYY-MM-DD")
   });
   for (const booking of bookings) {
     if (
-      moment()
-        .subtract(booking.hours + 1, "hours")
-        .format("HH:mm:ss") > booking.checkInAt
+      moment(`${booking.date} ${booking.checkInAt}`)
+        .add(booking.hours + 1, "hours")
+        .toDate() < new Date()
     ) {
       await booking.finish();
     }

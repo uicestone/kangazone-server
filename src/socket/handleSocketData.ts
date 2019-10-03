@@ -88,6 +88,14 @@ export default function handleSocketData(
           g.serial === statusMessage.serial && g.number === statusMessage.door
       );
 
+      if (!gate) {
+        console.error(
+          `[SOK] Unmatched gate, status message:`,
+          JSON.stringify(statusMessage)
+        );
+        return;
+      }
+
       const bookings = await Booking.find({ bandIds8: statusMessage.cardNo });
 
       for (const booking of bookings) {
