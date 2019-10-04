@@ -11,6 +11,8 @@ import { Image } from "canvas";
 import Payment, { gatewayNames } from "../models/Payment";
 import agenda from "../utils/agenda";
 import { icCode10To8 } from "../utils/helper";
+import { config } from "../models/Config";
+import stringWidth from "string-width";
 
 setTimeout(async () => {
   //   const u = await User.findOne({ name: "Uice Stone" });
@@ -418,7 +420,7 @@ export default router => {
             " ".repeat(2)
         );
 
-      if (booking.type === "play") {
+      if (booking.type === "play" && !booking.coupon) {
         let playPrice = booking.price - 10 * booking.socksCount;
         let firstHourPrice = (playPrice / (booking.hours + 1)) * 2;
 
@@ -426,31 +428,49 @@ export default router => {
           if (thHour === 1) {
             encoder.line(
               "自由游玩" +
-                " ".repeat(3) +
+                " ".repeat(2) +
                 `${booking.membersCount}人x小时` +
-                " ".repeat(4) +
+                " ".repeat(5) +
                 `￥${firstHourPrice.toFixed(2)}`
             );
           } else {
             encoder.line(
               "自由游玩" +
-                " ".repeat(3) +
-                `${booking.membersCount}人x小时(半)` +
-                " ".repeat(4) +
+                " ".repeat(2) +
+                `${booking.membersCount}人x小时半价` +
+                " ".repeat(1) +
                 `￥${(firstHourPrice / 2).toFixed(2)}`
             );
           }
         }
+      }
 
-        if (booking.socksCount > 0) {
+      if (booking.coupon) {
+        const coupon = config.coupons.find(c => c.slug === booking.coupon);
+        if (coupon) {
           encoder.line(
-            "蹦床袜" +
-              " ".repeat(7) +
-              `${booking.socksCount}双` +
-              " ".repeat(7) +
-              `￥${(10 * booking.socksCount).toFixed(2)}`
+            coupon.name +
+              " ".repeat(
+                Math.max(
+                  0,
+                  31 -
+                    stringWidth(coupon.name) -
+                    stringWidth(`￥${(coupon.price / 2).toFixed(2)}`)
+                )
+              ) +
+              `￥${(coupon.price / 2).toFixed(2)}`
           );
         }
+      }
+
+      if (booking.socksCount > 0) {
+        encoder.line(
+          "蹦床袜" +
+            " ".repeat(7) +
+            `${booking.socksCount}双` +
+            " ".repeat(7) +
+            `￥${(10 * booking.socksCount).toFixed(2)}`
+        );
       }
 
       encoder
