@@ -7,6 +7,8 @@ import Payment, { IPayment, Gateways } from "./Payment";
 import Store, { IStore } from "./Store";
 import User, { IUser } from "./User";
 import Code, { ICode } from "./Code";
+import { icCode10To8 } from "../utils/helper";
+import agenda from "../utils/agenda";
 
 const { DEBUG } = process.env;
 
@@ -18,6 +20,18 @@ export enum BookingStatuses {
   FINISHED = "FINISHED",
   CANCELED = "CANCELED"
 }
+
+export const liveBookingStatuses = [
+  BookingStatuses.PENDING,
+  BookingStatuses.BOOKED,
+  BookingStatuses.IN_SERVICE,
+  BookingStatuses.PENDING_REFUND
+];
+
+export const deadBookingStatuses = [
+  BookingStatuses.FINISHED,
+  BookingStatuses.CANCELED
+];
 
 const Booking = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: User, required: true },
@@ -237,6 +251,45 @@ Booking.methods.refundSuccess = async function() {
   booking.store.authBands(booking.bandIds, true);
 };
 
+Booking.methods.bindBands = async function() {
+  const booking = this as IBooking;
+
+  if (!booking.bandIds.length) return;
+
+  if (booking.bandIds.length !== booking.membersCount) {
+    throw new Error("band_count_unmatched");
+  }
+
+  const bookingsOccupyingBand = await this.constructor.find({
+    status: {
+      $in: liveBookingStatuses
+    },
+    _id: { $ne: booking.id },
+    bandIds: { $in: booking.bandIds }
+  });
+  if (bookingsOccupyingBand.length) {
+    throw new Error("band_occupied");
+  }
+
+  booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
+
+  // (re)authorize band to gate controllers
+  if (liveBookingStatuses.includes(booking.status)) {
+    try {
+      await booking.store.authBands(booking.bandIds);
+      if (booking.hours) {
+        agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
+          bandIds: booking.bandIds,
+          storeId: booking.store.id
+        });
+      }
+    } catch (err) {
+      console.error(`Booking auth bands failed, id: ${booking.id}.`);
+      console.error(err);
+    }
+  }
+};
+
 Booking.methods.checkIn = async function(save = true) {
   const booking = this as IBooking;
   booking.status = BookingStatuses.IN_SERVICE;
@@ -321,6 +374,7 @@ export interface IBooking extends mongoose.Document {
   paymentSuccess: () => Promise<IBooking>;
   createRefundPayment: () => Promise<IBooking>;
   refundSuccess: () => Promise<IBooking>;
+  bindBands: () => Promise<boolean>;
   checkIn: (save?: boolean) => Promise<boolean>;
   cancel: (save?: boolean) => Promise<boolean>;
   finish: (save?: boolean) => Promise<boolean>;

@@ -9,8 +9,6 @@ import Store from "../models/Store";
 import EscPosEncoder from "esc-pos-encoder-canvas";
 import { Image } from "canvas";
 import Payment, { gatewayNames } from "../models/Payment";
-import agenda from "../utils/agenda";
-import { icCode10To8 } from "../utils/helper";
 import { config } from "../models/Config";
 import stringWidth from "string-width";
 
@@ -76,14 +74,25 @@ export default router => {
           throw new HttpError(403, "只能为自己预订");
         }
 
-        if (
-          req.body.bandIds &&
-          req.body.bandIds.length !== booking.membersCount
-        ) {
-          throw new HttpError(
-            400,
-            `手环数量必须等于玩家数量（${booking.membersCount}）`
-          );
+        if (req.body.bandIds) {
+          try {
+            await booking.bindBands();
+          } catch (err) {
+            switch (err.message) {
+              case "band_count_unmatched":
+                throw new HttpError(
+                  400,
+                  "`手环数量必须等于玩家数量（${booking.membersCount}）`"
+                );
+              case "band_occupied":
+                throw new HttpError(
+                  400,
+                  "一个或多个手环已被其他有效预定使用，无法绑定"
+                );
+              default:
+                console.error(err);
+            }
+          }
         }
 
         try {
@@ -231,35 +240,23 @@ export default router => {
         await booking.populate("customer").execPopulate();
         await booking.populate("store").execPopulate();
 
-        if (req.body.bandIds && req.body.bandIds.length) {
-          if (req.body.bandIds.length !== booking.membersCount) {
-            throw new HttpError(
-              400,
-              `手环数量必须等于玩家数量（${booking.membersCount}）`
-            );
-          }
-          // (re)authorize band to gate controllers
-          if (
-            [BookingStatuses.BOOKED, BookingStatuses.IN_SERVICE].includes(
-              booking.status
-            )
-          ) {
-            try {
-              booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
-              await booking.store.authBands(booking.bandIds);
-              if (booking.hours) {
-                agenda.schedule(
-                  `in ${booking.hours} hours`,
-                  "revoke band auth",
-                  {
-                    bandIds: booking.bandIds,
-                    storeId: booking.store.id
-                  }
+        if (req.body.bandIds) {
+          try {
+            await booking.bindBands();
+          } catch (err) {
+            switch (err.message) {
+              case "band_count_unmatched":
+                throw new HttpError(
+                  400,
+                  `手环数量必须等于玩家数量（${booking.membersCount}）`
                 );
-              }
-            } catch (err) {
-              console.error(`Booking auth bands failed, id: ${booking.id}.`);
-              console.error(err);
+              case "band_occupied":
+                throw new HttpError(
+                  400,
+                  "一个或多个手环已被其他有效预定使用，无法绑定"
+                );
+              default:
+                console.error(err);
             }
           }
         }
