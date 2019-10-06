@@ -59,7 +59,7 @@ agenda.define("finish overtime served bookings", async (job, done) => {
   console.log(`[CRO] Start finish overtime served bookings.`);
   const bookings = await Booking.find({
     status: BookingStatuses.IN_SERVICE,
-    date: moment().format("YYYY-MM-DD")
+    date: { $lte: moment().format("YYYY-MM-DD") }
   });
   for (const booking of bookings) {
     if (
