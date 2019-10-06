@@ -25,14 +25,23 @@ export default function handleSocketData(
     if (data.slice(-2).toString() === "\r\n") {
       const textMessage = data.slice(0, -2).toString("utf8");
       console.log("[SOK] Got text message:", textMessage);
-      const matchStoreId = textMessage.match(/^store ([\d\w]+?)$/);
-      if (matchStoreId) {
+      const matchStoreData = textMessage.match(/^store (.+?)$/);
+      if (matchStoreData) {
+        const storeData = JSON.parse(matchStoreData[1]) as {
+          storeId: string;
+          serials: number[];
+        };
+
         try {
-          client.store = await Store.findOne({ _id: matchStoreId[1] });
+          client.store = await Store.findOne({ _id: storeData.storeId });
           if (!client.store) {
             throw new Error("store_not_found");
           }
-          console.log(`[SOK] Identified store ${client.store.name}.`);
+          console.log(
+            `[SOK] Identified store ${
+              client.store.name
+            } with controllers ${storeData.serials.join(",")}.`
+          );
           storeServerSockets[client.store.id] = socket;
           client.store.ip = socket.remoteAddress;
           await client.store.save();
@@ -44,13 +53,25 @@ export default function handleSocketData(
             }, new Set())
           ) as number[];
 
+          const lostSerials = serials.filter(
+            s => !storeData.serials.includes(s)
+          );
+
+          if (lostSerials.length) {
+            console.error(
+              `[SOK] Controller ${lostSerials.join(
+                ", "
+              )} is not detected by local server at ${client.store.name}.`
+            );
+          }
+
           const controllers = serials.map(serial => new WgCtl(socket, serial));
           controllers.forEach(c => {
             storeGateControllers[c.serial] = c;
           });
         } catch (err) {
           console.error(
-            `[SOK] Fail to identity store, id: ${matchStoreId[1]}.`
+            `[SOK] Fail to identity store, id: ${storeData.storeId}.`
           );
         }
       }
