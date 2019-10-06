@@ -3,7 +3,8 @@ module.exports = {
     name: "kangazone-server",
     script: "./node_modules/.bin/ts-node",
     args: "src/index.ts",
-    log_date_format: "YYYY-MM-DD HH:mm:ss.SSS (ZZ)"
+    log_date_format: "YYYY-MM-DD HH:mm:ss.SSS (ZZ)",
+    log: true
   },
   deploy: {
     production: {

@@ -52,7 +52,9 @@ socketServer.listen(portSocket, () => {
 
 (async () => {
   await initConfig(config);
-  console.log("[SYS] Config loaded:", JSON.stringify(config));
+  if (!process.env.DEBUG) {
+    console.log("[SYS] Config loaded:", JSON.stringify(config));
+  }
 })();
 
 agenda.start();
