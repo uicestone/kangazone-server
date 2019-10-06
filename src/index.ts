@@ -8,6 +8,8 @@ import ensureEnv from "./utils/ensureEnv";
 
 ensureEnv();
 
+const { DEBUG } = process.env;
+
 import handleError from "./utils/handleError";
 import handleCreateServer from "./socket/handleCreateServer";
 import applyRoutes from "./apis";
@@ -52,7 +54,7 @@ socketServer.listen(portSocket, () => {
 
 (async () => {
   await initConfig(config);
-  if (!process.env.DEBUG) {
+  if (!DEBUG) {
     console.log("[SYS] Config loaded:", JSON.stringify(config));
   }
 })();

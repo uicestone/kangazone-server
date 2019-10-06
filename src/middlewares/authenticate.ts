@@ -3,12 +3,14 @@ import { getTokenData } from "../utils/helper";
 import { Types } from "mongoose";
 import User from "../models/User";
 
+const { DEBUG } = process.env;
+
 export default async function(req, res, next) {
   const token = req.get("authorization") || req.query.token;
 
   if (token) {
     try {
-      if (process.env.DEBUG === "true") {
+      if (DEBUG) {
         req.user = await User.findOne({ login: token.replace(/^Bearer /, "") });
         if (req.user) return next();
       }

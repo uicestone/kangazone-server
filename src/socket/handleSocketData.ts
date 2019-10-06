@@ -10,6 +10,8 @@ import { Socket } from "net";
 import WgCtl from "wiegand-control";
 import User from "../models/User";
 
+const { GATE_AUTO_AUTH } = process.env;
+
 export default function handleSocketData(
   socket: Socket,
   client: { store: IStore }
@@ -168,7 +170,7 @@ export default function handleSocketData(
         );
       }
 
-      if (process.env.GATE_AUTO_AUTH) {
+      if (GATE_AUTO_AUTH) {
         const store = await Store.findOne();
         for (const g of store.gates) {
           await sleep(200);

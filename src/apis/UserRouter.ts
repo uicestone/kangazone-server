@@ -188,7 +188,7 @@ export default router => {
 
       const payment = new Payment({
         customer,
-        amount: DEBUG === "true" ? level.price / 1e4 : level.price,
+        amount: DEBUG ? level.price / 1e4 : level.price,
         title: `充值${level.price}元${
           level.rewardCredit ? `送${level.rewardCredit}元` : ""
         }`,
@@ -224,7 +224,7 @@ export default router => {
 
       const payment = new Payment({
         customer: req.user,
-        amount: DEBUG === "true" ? cardType.netPrice / 1e4 : cardType.netPrice,
+        amount: DEBUG ? cardType.netPrice / 1e4 : cardType.netPrice,
         title: `${cardTypeName}卡会员资格`,
         attach: `membership ${req.user._id} ${cardTypeName}`,
         gateway: Gateways.WechatPay // TODO more payment options

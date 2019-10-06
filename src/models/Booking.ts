@@ -171,7 +171,7 @@ Booking.methods.createPayment = async function(
   } else {
     const extraPayment = new Payment({
       customer: booking.customer,
-      amount: DEBUG === "true" ? extraPayAmount / 1e4 : extraPayAmount,
+      amount: DEBUG ? extraPayAmount / 1e4 : extraPayAmount,
       title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
       attach,
       gateway: paymentGateway || Gateways.WechatPay
