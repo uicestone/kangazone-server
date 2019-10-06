@@ -8,6 +8,11 @@ import Store, {
 } from "../models/Store";
 import WgCtl from "wiegand-control";
 import { sleep, icCode10To8 } from "../utils/helper";
+import Booking, {
+  BookingStatuses,
+  liveBookingStatuses
+} from "../models/Booking";
+import moment = require("moment");
 
 export default router => {
   // Store CURD
@@ -120,6 +125,31 @@ export default router => {
       for (const g of store.gates) {
         await sleep(200);
         storeGateControllers[g.serial].openDoor(g.number);
+      }
+      res.end();
+    })
+  );
+
+  router.route("/store/:storeId/re-auth-all-valid-bookings").post(
+    handleAsyncErrors(async (req, res) => {
+      if (!["admin", "manager"].includes(req.user.role)) {
+        throw new HttpError(403);
+      }
+      const store = await Store.findById(req.params.storeId);
+      const bookings = await Booking.find({
+        date: moment().format("YYYY-MM-DD"),
+        status: { $in: liveBookingStatuses },
+        $where: "this.bandIds.length > 0"
+      });
+      for (let i = 0; i < bookings.length; i++) {
+        if (i > 0) {
+          await sleep(3000);
+        }
+        const booking = bookings[i];
+        if (!booking.bandIds) {
+          continue;
+        }
+        store.authBands(booking.bandIds);
       }
       res.end();
     })
