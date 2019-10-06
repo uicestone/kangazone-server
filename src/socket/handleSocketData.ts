@@ -121,7 +121,7 @@ export default function handleSocketData(
           allow: statusMessage.allow
         });
 
-        console.log(
+        console[statusMessage.allow ? "log" : "error"](
           `[SOK] Booking ${booking.id} band ${statusMessage.cardNo} ${
             statusMessage.allow ? "passed" : "blocked"
           } ${gate.name}.`
@@ -161,7 +161,7 @@ export default function handleSocketData(
           allow: statusMessage.allow
         });
         await user.save();
-        console.log(
+        console[statusMessage.allow ? "log" : "error"](
           `[SOK] User ${user.name}, id ${user.id}, band ${
             statusMessage.cardNo
           } ${statusMessage.allow ? "passed" : "blocked"} ${gate.name}.`
