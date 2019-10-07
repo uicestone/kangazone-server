@@ -6593,10 +6593,10 @@ widest-line@^2.0.0:
   dependencies:
     string-width "^2.1.1"
 
-wiegand-control@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/wiegand-control/-/wiegand-control-1.0.3.tgz#92aab3c760f39b633ff6b4ccd152ace306121999"
-  integrity sha512-Kr2lP0XhX260iuStcFcm3mpaGd1FtV4gdLPbj5sasx3IO7VP8esLbmEpEFklFTcVsOS2Ec58phxQDM0ezcyUvg==
+wiegand-control@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/wiegand-control/-/wiegand-control-1.0.5.tgz#73ec9f9ff78a1cfac7c3a39ca6fbf2c0bb2082a1"
+  integrity sha512-u8IhoCLyeI8nCsMvij9Ctud16YN/0wKUofxq2Uhzulmz9N81Dh7JinD5CeaH59X53TkVauSRbU5XsdZdNJojhQ==
   dependencies:
     "@types/moment-timezone" "^0.5.12"
     "@types/netmask" "^1.0.30"
