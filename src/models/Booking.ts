@@ -165,9 +165,7 @@ Booking.methods.createPayment = async function(
   console.log(`[PAY] Extra payment amount is ${extraPayAmount}`);
 
   if (extraPayAmount < 0.01 || adminAddWithoutPayment) {
-    booking.status = booking.hours
-      ? BookingStatuses.BOOKED
-      : BookingStatuses.FINISHED;
+    booking.status = BookingStatuses.BOOKED;
   } else {
     const extraPayment = new Payment({
       customer: booking.customer,
@@ -191,9 +189,7 @@ Booking.methods.createPayment = async function(
 
 Booking.methods.paymentSuccess = async function() {
   const booking = this as IBooking;
-  booking.status = booking.hours
-    ? BookingStatuses.BOOKED
-    : BookingStatuses.FINISHED;
+  booking.status = BookingStatuses.BOOKED;
   await booking.save();
   // send user notification
 };
