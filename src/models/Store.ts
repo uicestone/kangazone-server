@@ -57,7 +57,7 @@ Store.methods.authBands = async function(
       } catch (err) {
         throw new Error("auth_band_fail");
       }
-      await sleep(200);
+      await sleep(500 + Math.round(Math.random() * 500)); // random sleep 500~1000ms
     }
   }
 };
