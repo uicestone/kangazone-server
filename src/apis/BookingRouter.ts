@@ -176,6 +176,15 @@ export default router => {
           query.find({ customer: { $in: matchCustomers } });
         }
 
+        if (req.query.bandId) {
+          query.find({
+            $or: [
+              { bandIds: new RegExp(req.query.bandId) },
+              { bandIds8: +req.query.bandId }
+            ]
+          });
+        }
+
         // restrict self store bookings for managers
         // TODO
 
