@@ -99,7 +99,7 @@ Booking.methods.calculatePrice = async function() {
 
   if (booking.coupon) {
     const coupon = config.coupons.find(c => c.slug === booking.coupon);
-    if (coupon.price) {
+    if (coupon.price !== undefined) {
       booking.price = coupon.price + booking.socksCount * 10;
       return;
     }
