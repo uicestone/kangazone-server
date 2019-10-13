@@ -55,6 +55,7 @@ Store.methods.authBands = async function(
           )}) to ${serial} (All doors).`
         );
       } catch (err) {
+        console.error(err);
         throw new Error("auth_band_fail");
       }
       await sleep(500 + Math.round(Math.random() * 500)); // random sleep 500~1000ms

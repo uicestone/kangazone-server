@@ -281,7 +281,6 @@ Booking.methods.bindBands = async function() {
       }
     } catch (err) {
       console.error(`Booking auth bands failed, id: ${booking.id}.`);
-      console.error(err);
     }
   }
 };
