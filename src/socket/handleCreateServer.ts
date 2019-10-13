@@ -2,7 +2,7 @@ import moment from "moment";
 import { Socket } from "net";
 import { Server as SocketIoServer } from "socket.io";
 import handleSocketData from "./handleSocketData";
-import { IStore } from "../models/Store";
+import { IStore, storeServerSockets } from "../models/Store";
 
 export default function handleCreateServer(io: SocketIoServer) {
   return async (socket: Socket) => {
@@ -23,6 +23,9 @@ export default function handleCreateServer(io: SocketIoServer) {
     // When socket send data complete.
     socket.on("close", async function() {
       clearInterval(heartBeatInterval);
+      if (client.store) {
+        storeServerSockets[client.store.id] = null;
+      }
       console.log(
         `[SYS] Socket disconnect from ${socket.remoteAddress}:${socket.remotePort}`
       );

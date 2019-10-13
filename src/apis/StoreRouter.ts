@@ -8,10 +8,7 @@ import Store, {
 } from "../models/Store";
 import WgCtl from "wiegand-control";
 import { sleep, icCode10To8 } from "../utils/helper";
-import Booking, {
-  BookingStatuses,
-  liveBookingStatuses
-} from "../models/Booking";
+import Booking, { liveBookingStatuses } from "../models/Booking";
 import moment from "moment";
 
 export default router => {

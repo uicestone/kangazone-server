@@ -22,6 +22,17 @@ Store.index({ name: 1 }, { unique: true });
 
 Store.plugin(updateTimes);
 
+Store.virtual("localServer").get(function() {
+  const store = this as IStore;
+  const localServer = { ip: undefined, status: "disconnected" };
+  if (storeServerSockets[store.id]) {
+    const { remoteAddress, readable, writable } = storeServerSockets[store.id];
+    localServer.status = readable && writable ? "connected" : "died";
+    localServer.ip = remoteAddress;
+  }
+  return localServer;
+});
+
 Store.set("toJSON", {
   getters: true,
   transform: function(doc, ret, options) {
@@ -70,6 +81,7 @@ export interface IStore extends mongoose.Document {
   partyRooms: number;
   ip: string;
   gates: { entry: boolean; serial: number; number: number; name?: "" }[];
+  localServer: { ip?: string; status: string };
   authBands: (bandIds: string[], revoke?: boolean) => Promise<boolean>;
 }
 
