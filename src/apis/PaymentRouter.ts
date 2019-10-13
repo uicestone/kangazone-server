@@ -3,7 +3,7 @@ import handleAsyncErrors from "../utils/handleAsyncErrors";
 import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import Payment from "../models/Payment";
-import moment = require("moment");
+import moment from "moment";
 
 export default router => {
   // Payment CURD

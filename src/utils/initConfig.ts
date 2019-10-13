@@ -1,6 +1,6 @@
 import Config, { IConfig } from "../models/Config";
 import reduceConfig from "./reduceConfig";
-import moment = require("moment");
+import moment from "moment";
 
 export default async (config: IConfig) => {
   const existingConfig = reduceConfig(await Config.find());

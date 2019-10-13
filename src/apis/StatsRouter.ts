@@ -1,6 +1,6 @@
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import Booking, { BookingStatuses } from "../models/Booking";
-import moment = require("moment");
+import moment from "moment";
 
 export default router => {
   // Store CURD

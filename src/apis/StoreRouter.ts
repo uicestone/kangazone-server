@@ -12,7 +12,7 @@ import Booking, {
   BookingStatuses,
   liveBookingStatuses
 } from "../models/Booking";
-import moment = require("moment");
+import moment from "moment";
 
 export default router => {
   // Store CURD
