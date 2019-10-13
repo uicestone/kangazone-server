@@ -55,6 +55,21 @@ agenda.define("cancel expired booked bookings", async (job, done) => {
   done();
 });
 
+agenda.define("finish expired booked bookings", async (job, done) => {
+  console.log(`[CRO] Start finish expired booked bookings.`);
+  const bookings = await Booking.find({
+    status: BookingStatuses.BOOKED,
+    date: {
+      $lt: moment().format("YYYY-MM-DD")
+    }
+  });
+  for (const booking of bookings) {
+    await booking.finish();
+  }
+
+  done();
+});
+
 agenda.define("finish overtime served bookings", async (job, done) => {
   console.log(`[CRO] Start finish overtime served bookings.`);
   const bookings = await Booking.find({
@@ -100,6 +115,7 @@ agenda.define("generate 8 digit card no", async (job, done) => {
 
 agenda.on("ready", () => {
   agenda.every("1 hour", "cancel expired pending bookings");
+  agenda.every("1 hour", "finish expired booked bookings");
   // agenda.every("1 day", "cancel expired booked bookings");
   agenda.every("5 minutes", "finish overtime served bookings");
   // agenda.now("generate 8 digit card no");
