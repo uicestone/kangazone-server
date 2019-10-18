@@ -1,8 +1,9 @@
 import paginatify from "../middlewares/paginatify";
 import handleAsyncErrors from "../utils/handleAsyncErrors";
-import Config from "../models/Config";
+import Config, { config } from "../models/Config";
 import HttpError from "../utils/HttpError";
 import reduceConfig from "../utils/reduceConfig";
+import initConfig from "../utils/initConfig";
 
 export default router => {
   // Config CURD
@@ -74,6 +75,17 @@ export default router => {
       handleAsyncErrors(async (req, res) => {
         const config = req.item;
         await config.remove();
+        res.end();
+      })
+    );
+
+  router
+    .route("/config/load")
+
+    // load or reload config from database
+    .post(
+      handleAsyncErrors(async (req, res) => {
+        initConfig(config);
         res.end();
       })
     );

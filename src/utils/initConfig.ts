@@ -2,6 +2,8 @@ import Config, { IConfig } from "../models/Config";
 import reduceConfig from "./reduceConfig";
 import moment from "moment";
 
+const { DEBUG } = process.env;
+
 export default async (config: IConfig) => {
   const existingConfig = reduceConfig(await Config.find());
   const initConfigItemsInsert = Object.keys(initConfig)
@@ -14,6 +16,9 @@ export default async (config: IConfig) => {
     );
   }
   Object.assign(config, ...initConfigItemsInsert, existingConfig);
+  if (!DEBUG) {
+    console.log("[CFG] Loaded:", JSON.stringify(config));
+  }
 };
 
 const initConfig: IConfig = {
