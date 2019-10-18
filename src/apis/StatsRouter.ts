@@ -1,11 +1,11 @@
 import handleAsyncErrors from "../utils/handleAsyncErrors";
-import Booking, {
-  BookingStatuses,
-  paidBookingStatuses
-} from "../models/Booking";
 import moment from "moment";
-import { config } from "../models/Config";
-import Payment, { Gateways } from "../models/Payment";
+import HttpError from "../utils/HttpError";
+import EscPosEncoder from "esc-pos-encoder-canvas";
+import User from "../models/User";
+import getStats from "../utils/getStats";
+import { Gateways } from "../models/Payment";
+import { Image } from "canvas";
 
 export default router => {
   // Store CURD
@@ -15,98 +15,64 @@ export default router => {
     .get(
       handleAsyncErrors(async (req, res) => {
         const dateInput = req.params.date;
-        const dateStr = moment(dateInput).format("YYYY-MM-DD"),
-          startDate = moment(dateInput).startOf("day"),
-          endDate = moment(dateInput).endOf("day");
-
-        const coupons = config.coupons;
-
-        const bookingsPaid = await Booking.find({
-          date: dateStr,
-          status: { $in: paidBookingStatuses }
-        });
-        const payments = await Payment.find({
-          createdAt: {
-            $gte: startDate,
-            $lte: endDate
-          }
-        });
-        const bookingServing = await Booking.find({
-          status: BookingStatuses.IN_SERVICE
-        });
-        const dueCount = bookingServing.filter(booking => {
-          if (booking.checkInAt.length === 8) {
-            return (
-              moment(booking.checkInAt, "HH:mm:ss").diff() <
-              -booking.hours * 3600000
-            );
-          } else {
-            return false;
-          }
-        }).length;
-
-        const checkedInCount = bookingServing.reduce(
-          (count, booking) => count + booking.membersCount,
-          0
-        );
-
-        const customerCount = bookingsPaid.reduce(
-          (count, booking) => count + booking.membersCount,
-          0
-        );
-
-        const paidAmount = bookingsPaid.reduce((amount, booking) => {
-          return (
-            amount +
-            booking.payments
-              .filter(p => p.paid)
-              .reduce((a, p) => a + p.amount, 0)
-          );
-        }, 0);
-
-        const socksCount = bookingsPaid.reduce(
-          (socks, booking) => socks + booking.socksCount,
-          0
-        );
-
-        const paidAmountByGateways = payments
-          .filter(p => p.paid)
-          .reduce((amountByGateways, payment) => {
-            if (!amountByGateways[payment.gateway]) {
-              amountByGateways[payment.gateway] = 0;
-            }
-            amountByGateways[payment.gateway] += payment.amount;
-            return amountByGateways;
-          }, {});
-
-        const couponsCount = bookingsPaid
-          .filter(b => b.coupon)
-          .reduce((couponsCount, booking) => {
-            let couponCount = couponsCount.find(c => c.slug === booking.coupon);
-            if (!couponCount) {
-              const coupon = coupons.find(c => c.slug === booking.coupon);
-              couponCount = {
-                slug: coupon.slug,
-                name: coupon.name,
-                count: 0
-              };
-              couponsCount.push(couponCount);
-            }
-            couponCount.count++;
-            return couponsCount;
-          }, []);
-
-        res.json({
-          checkedInCount,
-          dueCount,
-          customerCount,
-          paidAmount,
-          socksCount,
-          paidAmountByGateways,
-          couponsCount
-        });
+        const stats = await getStats(dateInput);
+        res.json(stats);
       })
     );
+
+  router.route("/stats-receipt-data/:date?").get(
+    handleAsyncErrors(async (req, res) => {
+      if (!["manager", "admin"].includes(req.user.role)) {
+        throw new HttpError(403, "只有店员可以打印小票");
+      }
+
+      const receiptLogo = new Image();
+      const counter = await User.findOne({ _id: req.user.id });
+      const stats = await getStats(req.params.date);
+
+      await new Promise((resolve, reject) => {
+        receiptLogo.onload = () => {
+          resolve();
+        };
+        receiptLogo.onerror = err => {
+          reject(err);
+        };
+        receiptLogo.src = __dirname + "/../resource/images/logo-greyscale.png";
+      });
+
+      let encoder = new EscPosEncoder();
+      encoder
+        .initialize()
+        .codepage("cp936")
+        .align("center")
+        .image(receiptLogo, 384, 152, "threshold")
+        .newline()
+        .align("left")
+        .line("打印时间：" + moment().format("YYYY-MM-DD HH:mm:ss"))
+        .line(`收银台号：${counter.name}`)
+        .line(`客人数：${stats.customerCount}`)
+        .line(`袜子数${stats.socksCount}`)
+        .line(`收款金额：${stats.paidAmount}`)
+        .line(`- 现金金额：${stats.paidAmountByGateways[Gateways.Cash] || 0}`)
+        .line(`- 扫码金额：${stats.paidAmountByGateways[Gateways.Scan] || 0}`)
+        .line(`- 刷卡金额：${stats.paidAmountByGateways[Gateways.Card] || 0}`);
+
+      encoder.line(`优惠人数：`);
+      stats.couponsCount.forEach(couponCount => {
+        encoder.line(`- ${couponCount.name}：${couponCount.count}`);
+      });
+
+      encoder
+        .newline()
+        .newline()
+        .newline()
+        .newline();
+
+      const hexString = Buffer.from(encoder.encode()).toString("hex");
+
+      res.send(hexString);
+    })
+  );
 
   return router;
 };

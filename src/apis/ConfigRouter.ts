@@ -80,7 +80,7 @@ export default router => {
     );
 
   router
-    .route("/config/load")
+    .route("/config-init")
 
     // load or reload config from database
     .post(
