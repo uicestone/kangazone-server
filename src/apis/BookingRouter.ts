@@ -103,6 +103,8 @@ export default router => {
               throw new HttpError(400, "优惠券不存在");
             case "code_used":
               throw new HttpError(403, "优惠券已经使用");
+            case "coupon_not_found":
+              throw new HttpError(400, "优惠不存在");
             default:
               throw err;
           }
@@ -311,7 +313,20 @@ export default router => {
             );
           }
           const priceWas = booking.price;
-          await booking.calculatePrice();
+          try {
+            await booking.calculatePrice();
+          } catch (err) {
+            switch (err.message) {
+              case "code_not_found":
+                throw new HttpError(400, "优惠券不存在");
+              case "code_used":
+                throw new HttpError(403, "优惠券已经使用");
+              case "coupon_not_found":
+                throw new HttpError(400, "优惠不存在");
+              default:
+                throw err;
+            }
+          }
           await booking.createPayment(
             {
               paymentGateway: req.query.paymentGateway,
@@ -585,6 +600,8 @@ export default router => {
             throw new HttpError(400, "优惠券不存在");
           case "code_used":
             throw new HttpError(403, "优惠券已经使用");
+          case "coupon_not_found":
+            throw new HttpError(400, "优惠不存在");
           default:
             throw err;
         }

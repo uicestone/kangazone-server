@@ -33,6 +33,13 @@ export const deadBookingStatuses = [
   BookingStatuses.CANCELED
 ];
 
+export const paidBookingStatuses = [
+  BookingStatuses.BOOKED,
+  BookingStatuses.IN_SERVICE,
+  BookingStatuses.PENDING_REFUND,
+  BookingStatuses.FINISHED
+];
+
 const Booking = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: User, required: true },
   store: { type: Schema.Types.ObjectId, ref: Store, required: true },
@@ -86,6 +93,7 @@ Booking.methods.calculatePrice = async function() {
   const firstHourPrice = cardType ? cardType.firstHourPrice : config.hourPrice;
 
   let chargedHours = booking.hours;
+  let discountHours = 0;
 
   if (booking.code) {
     await booking.populate("code").execPopulate();
@@ -97,24 +105,30 @@ Booking.methods.calculatePrice = async function() {
     }
   }
 
-  if (booking.coupon) {
-    const coupon = config.coupons.find(c => c.slug === booking.coupon);
-    if (coupon.price !== undefined) {
-      booking.price = coupon.price + booking.socksCount * 10;
-      return;
-    }
-  }
-
   if (booking.code && booking.code.hours) {
     chargedHours -= booking.code.hours;
+    discountHours += booking.code.hours;
+  }
+
+  if (booking.coupon) {
+    const coupon = config.coupons.find(c => c.slug === booking.coupon);
+    if (!coupon) {
+      throw new Error("coupon_not_found");
+    }
+    if (coupon.hours) {
+      chargedHours -= coupon.hours;
+      discountHours += coupon.hours;
+    }
   }
 
   const sockPrice = 10;
 
   booking.price = +(
-    config.hourPriceRatio.slice(0, chargedHours).reduce((price, ratio) => {
-      return +(price + firstHourPrice * ratio).toFixed(2);
-    }, 0) *
+    config.hourPriceRatio
+      .slice(discountHours, booking.hours)
+      .reduce((price, ratio) => {
+        return +(price + firstHourPrice * ratio).toFixed(2);
+      }, 0) *
       booking.membersCount + // WARN code will reduce each user by hour, maybe unexpected
     (booking.socksCount || 0) * sockPrice
   ).toFixed(2);
