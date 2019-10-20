@@ -1,7 +1,12 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
 
-const configSchema = new Schema({}, { strict: false });
+const configSchema = new Schema(
+  {
+    desc: String
+  },
+  { strict: false }
+);
 
 configSchema.plugin(updateTimes);
 

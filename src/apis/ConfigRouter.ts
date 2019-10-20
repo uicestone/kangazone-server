@@ -30,7 +30,7 @@ export default router => {
           .sort({ createdAt: -1 })
           .exec();
 
-        res.json(reduceConfig(items));
+        res.json(req.query.seperate ? items : reduceConfig(items));
       })
     );
 
@@ -64,7 +64,10 @@ export default router => {
     .put(
       handleAsyncErrors(async (req, res) => {
         const config = req.item;
-        config.set(req.body);
+        const value = req.body[req.params.key]
+          ? req.body[req.params.key]
+          : { [req.params.key]: req.body };
+        config.set(value);
         await config.save();
         res.json(config);
       })
