@@ -64,10 +64,11 @@ export default router => {
     .put(
       handleAsyncErrors(async (req, res) => {
         const config = req.item;
-        const value = req.body[req.params.key]
-          ? req.body[req.params.key]
+        const set = req.body[req.params.key]
+          ? req.body
           : { [req.params.key]: req.body };
-        config.set(value);
+        config.set(set);
+        console.log(set);
         await config.save();
         res.json(config);
       })
