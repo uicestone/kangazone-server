@@ -68,7 +68,6 @@ export default router => {
           ? req.body
           : { [req.params.key]: req.body };
         config.set(set);
-        console.log(set);
         await config.save();
         res.json(config);
       })

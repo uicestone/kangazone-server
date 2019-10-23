@@ -51,7 +51,7 @@ export default router => {
         .line("打印时间：" + moment().format("YYYY-MM-DD HH:mm:ss"))
         .line(`收银台号：${counter.name}`)
         .line(`客人数：${stats.customerCount}`)
-        .line(`袜子数${stats.socksCount}`)
+        .line(`袜子数：${stats.socksCount}`)
         .line(`收款金额：${stats.paidAmount}`)
         .line(`- 现金金额：${stats.paidAmountByGateways[Gateways.Cash] || 0}`)
         .line(`- 扫码金额：${stats.paidAmountByGateways[Gateways.Scan] || 0}`)

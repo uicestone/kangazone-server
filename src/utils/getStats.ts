@@ -8,8 +8,12 @@ import Payment, { Gateways } from "../models/Payment";
 
 export default async (dateInput?: string | Date) => {
   const dateStr = moment(dateInput).format("YYYY-MM-DD"),
-    startDate = moment(dateInput).startOf("day"),
-    endDate = moment(dateInput).endOf("day");
+    startDate = moment(dateInput)
+      .startOf("day")
+      .toDate(),
+    endDate = moment(dateInput)
+      .endOf("day")
+      .toDate();
 
   const coupons = config.coupons;
 
@@ -85,7 +89,7 @@ export default async (dateInput?: string | Date) => {
         };
         couponsCount.push(couponCount);
       }
-      couponCount.count++;
+      couponCount.count += booking.membersCount;
       return couponsCount;
     }, []);
 
