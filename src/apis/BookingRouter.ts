@@ -408,6 +408,8 @@ export default router => {
         .image(receiptLogo, 384, 152, "threshold")
         .newline()
         .align("left")
+        .line("手机尾号：" + booking.customer.mobile.substr(-4))
+        .line("会员卡号：" + booking.customer.cardNo || "无")
         .line("打印时间：" + moment().format("YYYY-MM-DD HH:mm:ss"))
         .line(
           "出场时间：" +
