@@ -187,6 +187,10 @@ export default router => {
           });
         }
 
+        if (req.query.coupon) {
+          query.find({ coupon: new RegExp(req.query.coupon) });
+        }
+
         // restrict self store bookings for managers
         // TODO
 
