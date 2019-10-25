@@ -9,7 +9,7 @@ import {
 } from "../utils/wechat";
 
 const Payment = new Schema({
-  customer: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  customer: { type: Schema.Types.ObjectId, ref: User, required: true },
   amount: { type: Number, required: true },
   amountForceDeposit: { type: Number },
   amountDeposit: { type: Number },
