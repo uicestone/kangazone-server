@@ -1,9 +1,9 @@
 import Agenda from "agenda";
 import moment from "moment";
-import Store from "../models/Store";
+import Store, { storeGateControllers } from "../models/Store";
 import Booking, { BookingStatuses } from "../models/Booking";
 import User from "../models/User";
-import { icCode10To8 } from "./helper";
+import { icCode10To8, sleep } from "./helper";
 
 const agenda = new Agenda({
   db: {
@@ -89,6 +89,34 @@ agenda.define("finish overtime served bookings", async (job, done) => {
   done();
 });
 
+agenda.define("reset auth", async (job, done) => {
+  console.log(`[CRO] Start reset gate card auth for staff users.`);
+  const stores = await Store.find();
+  for (const store of stores) {
+    const serials = Array.from(
+      store.gates.reduce((serials, gate) => {
+        serials.add(gate.serial);
+        return serials;
+      }, new Set())
+    ) as number[];
+    for (const serial of serials) {
+      const ctl = storeGateControllers[serial];
+      if (!ctl) {
+        console.error(`[CRO] Controller ${serial} is not connected to server.`);
+        continue;
+      }
+      ctl.clearAuth();
+      await sleep(500);
+      const users = await User.find({ passNo8: { $exists: true } }); // TODO add store to condition
+      for (const user of users) {
+        ctl.setAuth(user.passNo8);
+        sleep(500);
+      }
+    }
+  }
+  done();
+});
+
 agenda.define("generate 8 digit card no", async (job, done) => {
   const users = await User.find({ passNo: { $exists: true } });
   const promisesUsers = users.map(user => {
@@ -119,6 +147,7 @@ agenda.on("ready", () => {
   // agenda.every("1 day", "cancel expired booked bookings");
   agenda.every("5 minutes", "finish overtime served bookings");
   // agenda.now("generate 8 digit card no");
+  agenda.every("* 1 * * *", "reset auth");
 });
 
 export default agenda;

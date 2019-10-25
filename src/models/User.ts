@@ -35,6 +35,7 @@ const User = new Schema({
   openid: { type: String, index: { unique: true, sparse: true } },
   passNo: { type: String }, // staff only
   passNo8: { type: Number }, // staff only
+  store: { type: Schema.Types.ObjectId, ref: "Store" }, // manager only
   passLogs: {
     type: [{ time: Date, gate: String, entry: Boolean, allow: Boolean }]
   },
@@ -42,7 +43,7 @@ const User = new Schema({
   creditReward: Number,
   cardType: { type: String },
   cardNo: { type: String },
-  codes: [{ type: Schema.Types.ObjectId, ref: Code }]
+  codes: [{ type: Schema.Types.ObjectId, ref: "Code" }]
 });
 
 // User.virtual("avatarUrl").get(function(req) {

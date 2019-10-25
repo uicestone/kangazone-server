@@ -4,11 +4,11 @@ import updateTimes from "./plugins/updateTimes";
 import autoPopulate from "./plugins/autoPopulate";
 import { config } from "../models/Config";
 import Payment, { IPayment, Gateways } from "./Payment";
-import Store, { IStore } from "./Store";
-import User, { IUser } from "./User";
-import Code, { ICode } from "./Code";
 import { icCode10To8 } from "../utils/helper";
 import agenda from "../utils/agenda";
+import { IUser } from "./User";
+import { IStore } from "./Store";
+import { ICode } from "./Code";
 
 const { DEBUG } = process.env;
 
@@ -41,8 +41,8 @@ export const paidBookingStatuses = [
 ];
 
 const Booking = new Schema({
-  customer: { type: Schema.Types.ObjectId, ref: User, required: true },
-  store: { type: Schema.Types.ObjectId, ref: Store, required: true },
+  customer: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  store: { type: Schema.Types.ObjectId, ref: "Store", required: true },
   type: { type: String, enum: ["play", "party"], default: "play" },
   date: { type: String, required: true },
   checkInAt: { type: String, required: true },
@@ -57,9 +57,9 @@ const Booking = new Schema({
     default: BookingStatuses.PENDING
   },
   price: { type: Number },
-  code: { type: Schema.Types.ObjectId, ref: Code },
+  code: { type: Schema.Types.ObjectId, ref: "Code" },
   coupon: { type: String },
-  payments: [{ type: Schema.Types.ObjectId, ref: Payment }],
+  payments: [{ type: Schema.Types.ObjectId, ref: "Payment" }],
   passLogs: {
     type: [{ time: Date, gate: String, entry: Boolean, allow: Boolean }]
   },
