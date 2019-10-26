@@ -147,7 +147,7 @@ agenda.on("ready", () => {
   // agenda.every("1 day", "cancel expired booked bookings");
   agenda.every("5 minutes", "finish overtime served bookings");
   // agenda.now("generate 8 digit card no");
-  agenda.every("* 1 * * *", "reset auth");
+  agenda.every("0 1 * * *", "reset auth");
 });
 
 export default agenda;
