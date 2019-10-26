@@ -110,7 +110,7 @@ agenda.define("reset auth", async (job, done) => {
       const users = await User.find({ passNo8: { $exists: true } }); // TODO add store to condition
       for (const user of users) {
         ctl.setAuth(user.passNo8);
-        sleep(500);
+        await sleep(500);
       }
     }
   }
