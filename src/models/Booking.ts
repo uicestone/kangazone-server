@@ -128,6 +128,7 @@ Booking.methods.calculatePrice = async function() {
           return +(price + firstHourPrice * ratio).toFixed(2);
         }, 0) * booking.membersCount; // WARN code will reduce each user by hour, maybe unexpected
   } else if (booking.code && !booking.code.hours) {
+    booking.price = 0;
   } else {
     // unlimited hours
     booking.price = config.unlimitedPrice * booking.membersCount;

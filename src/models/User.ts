@@ -100,7 +100,8 @@ User.methods.depositSuccess = async function(levelPrice: number) {
   );
 
   user.cardType = level.cardType;
-  user.creditDeposit += level.depositCredit ? level.depositCredit : levelPrice;
+  user.creditDeposit +=
+    level.depositCredit === undefined ? levelPrice : level.depositCredit;
   user.creditReward += level.rewardCredit;
 
   console.log(
