@@ -316,6 +316,12 @@ export default router => {
               "Hour must greater than original if not equal."
             );
           }
+          if (!hoursWas) {
+            throw new HttpError(
+              400,
+              "Cannot extend hours for unlimited booking."
+            );
+          }
           const priceWas = booking.price;
           try {
             await booking.calculatePrice();
@@ -447,7 +453,7 @@ export default router => {
             " ".repeat(2)
         );
 
-      if (booking.type === "play" && !booking.coupon) {
+      if (booking.type === "play" && !booking.coupon && booking.hours) {
         let playPrice = booking.price - 10 * booking.socksCount;
         let firstHourPrice = (playPrice / (booking.hours + 1)) * 2;
 
@@ -470,6 +476,16 @@ export default router => {
             );
           }
         }
+      }
+
+      if (!booking.hours) {
+        encoder.line(
+          "自由游玩" +
+            " ".repeat(2) +
+            `${booking.membersCount}人 畅玩` +
+            " ".repeat(5) +
+            `￥${config.unlimitedPrice.toFixed(2)}`
+        );
       }
 
       if (booking.coupon) {

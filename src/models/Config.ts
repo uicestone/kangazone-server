@@ -28,17 +28,23 @@ export default mongoose.model("Config", configSchema);
 export interface IConfig {
   cardTypes?: { [name: string]: { firstHourPrice: number; netPrice: number } };
   depositLevels?: {
+    desc?: string;
     price: number;
     cardType: string;
+    depositCredit?: number;
     rewardCredit: number;
     rewardCodes: {
       title: string;
       type: string;
       hours: number;
+      membersCount?: number;
+      fixedMembersCount?: boolean;
       count: number;
     }[];
   }[];
   hourPrice?: number;
+  sockPrice?: number;
+  unlimitedPrice?: number;
   hourPriceRatio?: number[];
   coupons?: {
     slug: string;

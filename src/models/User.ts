@@ -100,7 +100,7 @@ User.methods.depositSuccess = async function(levelPrice: number) {
   );
 
   user.cardType = level.cardType;
-  user.creditDeposit += levelPrice;
+  user.creditDeposit += level.depositCredit ? level.depositCredit : levelPrice;
   user.creditReward += level.rewardCredit;
 
   console.log(
@@ -121,6 +121,8 @@ User.methods.depositSuccess = async function(levelPrice: number) {
     }
     return codes;
   }, []);
+
+  console.log(`[USR] ${codes.length} codes was rewarded to user ${user._id}`);
 
   await Promise.all([Code.insertMany(codes), user.save()]);
 

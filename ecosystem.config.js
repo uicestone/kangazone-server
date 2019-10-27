@@ -21,7 +21,7 @@ module.exports = {
     testing: {
       user: "www-data",
       host: ["stirad.com"],
-      ref: "origin/master",
+      ref: "origin/testing",
       repo: "https://github.com/uicestone/kangazone-server",
       path: "/var/www/kangazone-server",
       "post-deploy": "yarn && pm2 startOrRestart ecosystem.config.js"

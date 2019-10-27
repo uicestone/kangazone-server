@@ -46,11 +46,13 @@ const Booking = new Schema({
   type: { type: String, enum: ["play", "party"], default: "play" },
   date: { type: String, required: true },
   checkInAt: { type: String, required: true },
-  hours: { type: Number, required: true, default: 1 },
+  hours: { type: Number, default: 1 },
   membersCount: { type: Number, default: 1 },
   socksCount: { type: Number, default: 0 },
   bandIds: { type: [String] },
   bandIds8: { type: [Number] },
+  bandIds8In: { type: [Number] },
+  bandIds8Out: { type: [Number] },
   status: {
     type: String,
     enum: Object.values(BookingStatuses),
@@ -92,7 +94,6 @@ Booking.methods.calculatePrice = async function() {
 
   const firstHourPrice = cardType ? cardType.firstHourPrice : config.hourPrice;
 
-  let chargedHours = booking.hours;
   let discountHours = 0;
 
   if (booking.code) {
@@ -106,7 +107,6 @@ Booking.methods.calculatePrice = async function() {
   }
 
   if (booking.code && booking.code.hours) {
-    chargedHours -= booking.code.hours;
     discountHours += booking.code.hours;
   }
 
@@ -116,22 +116,24 @@ Booking.methods.calculatePrice = async function() {
       throw new Error("coupon_not_found");
     }
     if (coupon.hours) {
-      chargedHours -= coupon.hours;
       discountHours += coupon.hours;
     }
   }
 
-  const sockPrice = 10;
-
-  booking.price = +(
-    config.hourPriceRatio
-      .slice(discountHours, booking.hours)
-      .reduce((price, ratio) => {
-        return +(price + firstHourPrice * ratio).toFixed(2);
-      }, 0) *
-      booking.membersCount + // WARN code will reduce each user by hour, maybe unexpected
-    (booking.socksCount || 0) * sockPrice
-  ).toFixed(2);
+  if (booking.hours) {
+    booking.price =
+      config.hourPriceRatio
+        .slice(discountHours, booking.hours)
+        .reduce((price, ratio) => {
+          return +(price + firstHourPrice * ratio).toFixed(2);
+        }, 0) * booking.membersCount; // WARN code will reduce each user by hour, maybe unexpected
+  } else if (booking.code && !booking.code.hours) {
+  } else {
+    // unlimited hours
+    booking.price = config.unlimitedPrice * booking.membersCount;
+  }
+  booking.price += (booking.socksCount || 0) * config.sockPrice;
+  booking.price = +booking.price.toFixed(2);
 };
 
 Booking.methods.createPayment = async function(
@@ -166,7 +168,9 @@ Booking.methods.createPayment = async function(
       customer: booking.customer,
       amount: creditPayAmount,
       amountForceDeposit: booking.socksCount * 10,
-      title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
+      title: `预定${booking.store.name} ${booking.date} ${
+        booking.hours ? booking.hours + "小时" : "畅玩"
+      } ${booking.checkInAt}入场`,
       attach,
       gateway: Gateways.Credit
     });
@@ -184,7 +188,9 @@ Booking.methods.createPayment = async function(
     const extraPayment = new Payment({
       customer: booking.customer,
       amount: DEBUG ? extraPayAmount / 1e4 : extraPayAmount,
-      title: `预定${booking.store.name} ${booking.date} ${booking.hours}小时 ${booking.checkInAt}入场`,
+      title: `预定${booking.store.name} ${booking.date} ${
+        booking.hours ? booking.hours + "小时" : "畅玩"
+      } ${booking.checkInAt}入场`,
       attach,
       gateway: paymentGateway || Gateways.WechatPay
     });
@@ -359,10 +365,12 @@ export interface IBooking extends mongoose.Document {
   type: string;
   date: string;
   checkInAt: string;
-  hours: number;
+  hours?: number; // undefined hours means unlimited hours
   membersCount: number;
   bandIds: string[];
   bandIds8: number[];
+  bandIds8In: number[];
+  bandIds8Out: number[];
   socksCount: number;
   status: BookingStatuses;
   price?: number;
@@ -370,6 +378,7 @@ export interface IBooking extends mongoose.Document {
   coupon?: string;
   payments?: IPayment[];
   passLogs?: { time: Date; gate: string; entry: boolean; allow: boolean }[];
+  remarks?: string;
   calculatePrice: () => Promise<IBooking>;
   createPayment: (
     Object: {
@@ -387,7 +396,6 @@ export interface IBooking extends mongoose.Document {
   checkIn: (save?: boolean) => Promise<boolean>;
   cancel: (save?: boolean) => Promise<boolean>;
   finish: (save?: boolean) => Promise<boolean>;
-  remarks?: string;
 }
 
 export default mongoose.model<IBooking>("Booking", Booking);
