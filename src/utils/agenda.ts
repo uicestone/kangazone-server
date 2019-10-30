@@ -141,23 +141,12 @@ agenda.define("generate 8 digit card no", async (job, done) => {
   done();
 });
 
-agenda.define("set unlimited hour bookings", async (job, done) => {
-  console.log(`[CRO] Start set unlimited hour bookings.`);
-  const result = await Booking.updateMany(
-    { hours: 12 },
-    { $unset: { hours: true }, $set: { hoursUnlimited: true } }
-  );
-  console.log(`[CRO] Finished set unlimited hour bookings:`, result);
-  done();
-});
-
 agenda.on("ready", () => {
   agenda.every("1 hour", "cancel expired pending bookings");
   agenda.every("1 hour", "finish expired booked bookings");
   // agenda.every("1 day", "cancel expired booked bookings");
   agenda.every("5 minutes", "finish overtime served bookings");
   // agenda.now("generate 8 digit card no");
-  agenda.now("set unlimited hour bookings");
   agenda.every("0 1 * * *", "reset auth");
 });
 
