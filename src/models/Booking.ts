@@ -110,8 +110,10 @@ Booking.methods.calculatePrice = async function() {
     discountHours += booking.code.hours;
   }
 
+  let coupon;
+
   if (booking.coupon) {
-    const coupon = config.coupons.find(c => c.slug === booking.coupon);
+    coupon = config.coupons.find(c => c.slug === booking.coupon);
     if (!coupon) {
       throw new Error("coupon_not_found");
     }
@@ -128,6 +130,8 @@ Booking.methods.calculatePrice = async function() {
           return +(price + firstHourPrice * ratio).toFixed(2);
         }, 0) * booking.membersCount; // WARN code will reduce each user by hour, maybe unexpected
   } else if (booking.code && !booking.code.hours) {
+    booking.price = 0;
+  } else if (coupon && !coupon.hours) {
     booking.price = 0;
   } else {
     // unlimited hours
