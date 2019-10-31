@@ -58,9 +58,33 @@ export default router => {
         .line(`- 刷卡金额：${stats.paidAmountByGateways[Gateways.Card] || 0}`);
 
       encoder.line(`优惠人数：`);
-      stats.couponsCount.forEach(couponCount => {
-        encoder.line(`- ${couponCount.name}：${couponCount.count}`);
-      });
+      if (stats.couponsCount) {
+        stats.couponsCount.forEach(couponCount => {
+          encoder.line(`- ${couponCount.name}：${couponCount.count}`);
+        });
+      } else {
+        encoder.line("- 无");
+      }
+
+      encoder.line(`次卡券码：`);
+      if (stats.codesCount) {
+        stats.codesCount.forEach(codeCount => {
+          encoder.line(`- ${codeCount.title}：${codeCount.count}`);
+        });
+      } else {
+        encoder.line("- 无");
+      }
+
+      encoder.line(`充值开卡：`);
+      if (stats.depositsCount) {
+        stats.depositsCount.forEach(depositCount => {
+          encoder.line(
+            `- ${depositCount.desc}（${depositCount.price}）：${depositCount.count}`
+          );
+        });
+      } else {
+        encoder.line("- 无");
+      }
 
       encoder
         .newline()

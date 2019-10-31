@@ -21,6 +21,13 @@ export default async (dateInput?: string | Date) => {
     date: dateStr,
     status: { $in: paidBookingStatuses }
   });
+
+  for (const booking of bookingsPaid) {
+    if (booking.code) {
+      await booking.populate("code").execPopulate();
+    }
+  }
+
   const payments = await Payment.find({
     createdAt: {
       $gte: startDate,
@@ -93,6 +100,51 @@ export default async (dateInput?: string | Date) => {
       return couponsCount;
     }, []);
 
+  const codesCount: {
+    title: string;
+    count: number;
+  }[] = bookingsPaid
+    .filter(b => b.code)
+    .reduce((codesCount, booking) => {
+      let codeCount = codesCount.find(c => c.title === booking.code.title);
+      if (!codeCount) {
+        codeCount = {
+          title: booking.code.title,
+          count: 0
+        };
+        codesCount.push(codeCount);
+      }
+      codeCount.count += booking.membersCount;
+      return codesCount;
+    }, []);
+
+  const depositsCount: {
+    desc: string;
+    price: number;
+    count: number;
+  }[] = [];
+
+  payments
+    .filter(p => p.attach.match(/^deposit /))
+    .reduce((depositsCount, payment) => {
+      const [, levelPrice] = payment.attach.match(/^deposit [\d\w]+ (\d+)/);
+      let depositCount = depositsCount.find(c => c.price === +levelPrice);
+      if (!depositCount) {
+        const level = config.depositLevels.find(l => l.price === +levelPrice);
+        if (!level) {
+          throw new Error(`Level not found for price ${levelPrice}`);
+        }
+        depositCount = {
+          desc: level.desc,
+          price: level.price,
+          count: 0
+        };
+        depositsCount.push(depositCount);
+      }
+      depositCount.count++;
+      return depositsCount;
+    }, depositsCount);
+
   return {
     checkedInCount,
     dueCount,
@@ -100,6 +152,8 @@ export default async (dateInput?: string | Date) => {
     paidAmount,
     socksCount,
     paidAmountByGateways,
-    couponsCount
+    couponsCount,
+    codesCount,
+    depositsCount
   };
 };
