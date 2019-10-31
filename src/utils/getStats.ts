@@ -32,7 +32,8 @@ export default async (dateInput?: string | Date) => {
     createdAt: {
       $gte: startDate,
       $lte: endDate
-    }
+    },
+    paid: true
   });
   const bookingServing = await Booking.find({
     status: BookingStatuses.IN_SERVICE
@@ -69,15 +70,16 @@ export default async (dateInput?: string | Date) => {
     0
   );
 
-  const paidAmountByGateways: { [gateway: string]: number } = payments
-    .filter(p => p.paid)
-    .reduce((amountByGateways, payment) => {
+  const paidAmountByGateways: { [gateway: string]: number } = payments.reduce(
+    (amountByGateways, payment) => {
       if (!amountByGateways[payment.gateway]) {
         amountByGateways[payment.gateway] = 0;
       }
       amountByGateways[payment.gateway] += payment.amount;
       return amountByGateways;
-    }, {});
+    },
+    {}
+  );
 
   const couponsCount: {
     slug: string;

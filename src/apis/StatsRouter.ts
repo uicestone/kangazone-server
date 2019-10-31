@@ -58,7 +58,7 @@ export default router => {
         .line(`- 刷卡金额：${stats.paidAmountByGateways[Gateways.Card] || 0}`);
 
       encoder.line(`优惠人数：`);
-      if (stats.couponsCount) {
+      if (stats.couponsCount.length) {
         stats.couponsCount.forEach(couponCount => {
           encoder.line(`- ${couponCount.name}：${couponCount.count}`);
         });
@@ -67,7 +67,7 @@ export default router => {
       }
 
       encoder.line(`次卡券码：`);
-      if (stats.codesCount) {
+      if (stats.codesCount.length) {
         stats.codesCount.forEach(codeCount => {
           encoder.line(`- ${codeCount.title}：${codeCount.count}`);
         });
@@ -76,7 +76,7 @@ export default router => {
       }
 
       encoder.line(`充值开卡：`);
-      if (stats.depositsCount) {
+      if (stats.depositsCount.length) {
         stats.depositsCount.forEach(depositCount => {
           encoder.line(
             `- ${depositCount.desc}（${depositCount.price}）：${depositCount.count}`
