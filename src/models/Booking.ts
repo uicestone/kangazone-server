@@ -131,13 +131,24 @@ Booking.methods.calculatePrice = async function() {
           return +(price + firstHourPrice * ratio).toFixed(2);
         }, 0) * booking.membersCount; // WARN code will reduce each user by hour, maybe unexpected
   } else if (booking.code && !booking.code.hours) {
+    // unlimited hours with code
     booking.price = 0;
   } else if (coupon && !coupon.hours) {
+    // unlimited hours with coupon
     booking.price = 0;
   } else {
-    // unlimited hours
+    // unlimited hours standard
     booking.price = config.unlimitedPrice * booking.membersCount;
   }
+
+  if (coupon && coupon.discountAmount) {
+    booking.price -= coupon.discountAmount;
+  }
+
+  if (coupon && coupon.discountRate) {
+    booking.price = booking.price * (1 - coupon.discountAmount);
+  }
+
   booking.price += (booking.socksCount || 0) * config.sockPrice;
   booking.price = +booking.price.toFixed(2);
 };

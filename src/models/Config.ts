@@ -57,6 +57,8 @@ export interface IConfig {
     fixedHours?: boolean;
     fixedMembersCount?: boolean;
     price?: number;
+    discountAmount?: number;
+    discountRate?: number;
   }[];
 }
 
