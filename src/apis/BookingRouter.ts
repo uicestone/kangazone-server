@@ -478,7 +478,7 @@ export default router => {
         }
       }
 
-      if (!booking.hours) {
+      if (!booking.hours && !booking.coupon && !booking.code) {
         encoder.line(
           "自由游玩" +
             " ".repeat(2) +
@@ -498,12 +498,28 @@ export default router => {
                   0,
                   31 -
                     stringWidth(coupon.name) -
-                    stringWidth(`￥${(coupon.price / 2).toFixed(2)}`)
+                    stringWidth(`￥${coupon.price.toFixed(2)}`)
                 )
               ) +
-              `￥${(coupon.price / 2).toFixed(2)}`
+              `￥${coupon.price.toFixed(2)}`
           );
         }
+      }
+
+      if (booking.code) {
+        await booking.populate("code").execPopulate();
+        encoder.line(
+          booking.code.title +
+            " ".repeat(
+              Math.max(
+                0,
+                31 -
+                  stringWidth(booking.code.title) -
+                  stringWidth(`￥${(0).toFixed(2)}`)
+              )
+            ) +
+            `￥${(0).toFixed(2)}`
+        );
       }
 
       if (booking.socksCount > 0) {
