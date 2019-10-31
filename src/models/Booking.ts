@@ -73,7 +73,8 @@ Booking.index({ date: 1, checkInAt: 1, customer: 1 }, { unique: true });
 Booking.plugin(autoPopulate, [
   { path: "customer", select: "name avatarUrl mobile" },
   "store",
-  { path: "payments", options: { sort: { _id: -1 } } }
+  { path: "payments", options: { sort: { _id: -1 } } },
+  { path: "code" }
 ]);
 Booking.plugin(updateTimes);
 
