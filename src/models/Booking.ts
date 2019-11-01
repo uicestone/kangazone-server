@@ -94,7 +94,8 @@ Booking.methods.calculatePrice = async function() {
 
   const cardType = config.cardTypes[booking.customer.cardType];
 
-  const firstHourPrice = cardType ? cardType.firstHourPrice : config.hourPrice;
+  const firstHourPrice =
+    (cardType && cardType.firstHourPrice) || config.hourPrice;
   const kidFirstHourPrice = config.kidHourPrice;
 
   let discountHours = 0;
