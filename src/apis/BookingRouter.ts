@@ -531,10 +531,12 @@ export default router => {
                   0,
                   31 -
                     stringWidth(coupon.name) -
-                    stringWidth(`￥${coupon.price.toFixed(2)}`)
+                    stringWidth(
+                      coupon.price ? `￥${coupon.price.toFixed(2)}` : ""
+                    )
                 )
               ) +
-              `￥${coupon.price.toFixed(2)}`
+              (coupon.price ? `￥${coupon.price.toFixed(2)}` : "")
           );
         }
       }
