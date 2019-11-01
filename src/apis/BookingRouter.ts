@@ -465,9 +465,8 @@ export default router => {
       ) {
         const cardType = config.cardTypes[booking.customer.cardType];
 
-        const firstHourPrice = cardType
-          ? cardType.firstHourPrice
-          : config.hourPrice;
+        const firstHourPrice =
+          (cardType && cardType.firstHourPrice) || config.hourPrice;
         const kidFirstHourPrice = config.kidHourPrice;
 
         for (let thHour = 0; thHour <= booking.hours; thHour++) {
