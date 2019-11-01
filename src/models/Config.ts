@@ -46,6 +46,7 @@ export interface IConfig {
   sockPrice?: number;
   unlimitedPrice?: number;
   kidHourPrice?: number;
+  kidUnlimitedPrice?: number;
   hourPriceRatio?: number[];
   coupons?: {
     slug: string;

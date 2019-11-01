@@ -147,7 +147,9 @@ Booking.methods.calculatePrice = async function() {
     booking.price = 0;
   } else {
     // unlimited hours standard
-    booking.price = config.unlimitedPrice * booking.membersCount;
+    booking.price =
+      config.unlimitedPrice * booking.membersCount +
+      config.kidUnlimitedPrice * booking.kidsCount;
   }
 
   if (coupon && coupon.discountAmount) {

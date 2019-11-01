@@ -482,17 +482,19 @@ export default router => {
                 booking.membersCount
               ).toFixed(2)}`
           );
-          encoder.line(
-            "自由游玩" +
-              " ".repeat(2) +
-              `${booking.kidsCount}儿童第${thHour + 1}小时` +
-              " ".repeat(2) +
-              `￥${(
-                kidFirstHourPrice *
-                config.hourPriceRatio[thHour] *
-                booking.kidsCount
-              ).toFixed(2)}`
-          );
+          if (booking.kidsCount) {
+            encoder.line(
+              "自由游玩" +
+                " ".repeat(2) +
+                `${booking.kidsCount}儿童第${thHour + 1}小时` +
+                " ".repeat(2) +
+                `￥${(
+                  kidFirstHourPrice *
+                  config.hourPriceRatio[thHour] *
+                  booking.kidsCount
+                ).toFixed(2)}`
+            );
+          }
         }
       }
 
@@ -505,10 +507,19 @@ export default router => {
         encoder.line(
           "自由游玩" +
             " ".repeat(2) +
-            `${booking.membersCount}人 畅玩` +
-            " ".repeat(5) +
-            `￥${config.unlimitedPrice.toFixed(2)}`
+            `${booking.membersCount}成人 畅玩` +
+            " ".repeat(4) +
+            `￥${(config.unlimitedPrice * booking.membersCount).toFixed(2)}`
         );
+        if (booking.kidsCount) {
+          encoder.line(
+            "自由游玩" +
+              " ".repeat(2) +
+              `${booking.membersCount}儿童 畅玩` +
+              " ".repeat(4) +
+              `￥${(config.kidUnlimitedPrice * booking.kidsCount).toFixed(2)}`
+          );
+        }
       }
 
       if (booking.coupon) {
