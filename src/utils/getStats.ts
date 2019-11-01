@@ -49,12 +49,12 @@ export default async (dateInput?: string | Date) => {
   }).length;
 
   const checkedInCount = bookingServing.reduce(
-    (count, booking) => count + booking.membersCount,
+    (count, booking) => count + booking.membersCount + booking.kidsCount,
     0
   );
 
   const customerCount = bookingsPaid.reduce(
-    (count, booking) => count + booking.membersCount,
+    (count, booking) => count + booking.membersCount + booking.kidsCount,
     0
   );
 
@@ -98,7 +98,7 @@ export default async (dateInput?: string | Date) => {
         };
         couponsCount.push(couponCount);
       }
-      couponCount.count += booking.membersCount;
+      couponCount.count += booking.membersCount + booking.kidsCount;
       return couponsCount;
     }, []);
 
@@ -116,7 +116,7 @@ export default async (dateInput?: string | Date) => {
         };
         codesCount.push(codeCount);
       }
-      codeCount.count += booking.membersCount;
+      codeCount.count++;
       return codesCount;
     }, []);
 

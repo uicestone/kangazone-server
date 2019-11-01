@@ -38,6 +38,7 @@ export interface IConfig {
       type: string;
       hours: number;
       membersCount?: number;
+      kidsCount?: number;
       fixedMembersCount?: boolean;
       count: number;
     }[];
@@ -56,6 +57,7 @@ export interface IConfig {
     type: string;
     hours: number;
     membersCount?: number;
+    kidsCount?: number;
     fixedHours?: boolean;
     fixedMembersCount?: boolean;
     price?: number;

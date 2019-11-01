@@ -86,7 +86,8 @@ export default router => {
               case "band_count_unmatched":
                 throw new HttpError(
                   400,
-                  "`手环数量必须等于玩家数量（${booking.membersCount}）`"
+                  `手环数量必须等于玩家数量（${booking.membersCount +
+                    booking.kidsCount}）`
                 );
               case "band_occupied":
                 throw new HttpError(
@@ -267,7 +268,8 @@ export default router => {
               case "band_count_unmatched":
                 throw new HttpError(
                   400,
-                  `手环数量必须等于玩家数量（${booking.membersCount}）`
+                  `手环数量必须等于玩家数量（${booking.membersCount +
+                    booking.kidsCount}）`
                 );
               case "band_occupied":
                 throw new HttpError(
@@ -432,7 +434,7 @@ export default router => {
               .add(2, "hours")
               .format("YYYY-MM-DD HH:mm:ss")
         )
-        .line("入场人数：" + booking.membersCount);
+        .line("入场人数：" + booking.membersCount + booking.kidsCount);
 
       booking.bandIds.forEach((bandId, index) => {
         const noStr = (index + 1).toString().padStart(2, "0");
@@ -514,7 +516,7 @@ export default router => {
           encoder.line(
             "自由游玩" +
               " ".repeat(2) +
-              `${booking.membersCount}儿童 畅玩` +
+              `${booking.kidsCount}儿童 畅玩` +
               " ".repeat(4) +
               `￥${(config.kidUnlimitedPrice * booking.kidsCount).toFixed(2)}`
           );

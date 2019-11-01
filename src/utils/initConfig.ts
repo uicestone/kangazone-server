@@ -105,7 +105,8 @@ const initConfig: IConfig = {
         .toDate(),
       type: "play",
       hours: 12,
-      membersCount: 2,
+      membersCount: 1,
+      kidsCount: 1,
       fixedHours: true,
       fixedMembersCount: true,
       price: 158
@@ -119,7 +120,8 @@ const initConfig: IConfig = {
         .toDate(),
       type: "play",
       hours: 12,
-      membersCount: 3,
+      membersCount: 2,
+      kidsCount: 1,
       fixedHours: true,
       fixedMembersCount: true,
       price: 188
