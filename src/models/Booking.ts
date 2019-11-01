@@ -155,10 +155,13 @@ Booking.methods.calculatePrice = async function() {
 
   if (coupon && coupon.discountAmount) {
     booking.price -= coupon.discountAmount;
+    if (booking.price < 0) {
+      booking.price = 0;
+    }
   }
 
   if (coupon && coupon.discountRate) {
-    booking.price = booking.price * (1 - coupon.discountAmount);
+    booking.price = booking.price * (1 - coupon.discountRate);
   }
 
   booking.price += (booking.socksCount || 0) * config.sockPrice;
