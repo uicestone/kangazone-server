@@ -16,9 +16,9 @@ export default router => {
         if (req.user.role !== "admin") {
           throw new HttpError(403);
         }
-        const config = new Config(req.body);
-        await config.save();
-        res.json(config);
+        const configItem = new Config(req.body);
+        await configItem.save();
+        res.json(configItem);
       })
     )
 
@@ -56,28 +56,29 @@ export default router => {
     // get the config with that id
     .get(
       handleAsyncErrors(async (req, res) => {
-        const config = req.item;
-        res.json(config);
+        const configItem = req.item;
+        res.json(configItem);
       })
     )
 
     .put(
       handleAsyncErrors(async (req, res) => {
-        const config = req.item;
+        const configItem = req.item;
         const set = req.body[req.params.key]
           ? req.body
           : { [req.params.key]: req.body };
-        config.set(set);
-        await config.save();
-        res.json(config);
+        configItem.set(set);
+        await configItem.save();
+        res.json(configItem);
+        initConfig(config);
       })
     )
 
     // delete the config with this id
     .delete(
       handleAsyncErrors(async (req, res) => {
-        const config = req.item;
-        await config.remove();
+        const configItem = req.item;
+        await configItem.remove();
         res.end();
       })
     );
