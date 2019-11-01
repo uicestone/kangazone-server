@@ -74,6 +74,10 @@ export default router => {
           throw new HttpError(403, "只能为自己预订");
         }
 
+        if (req.body.membersCount === 0 && req.body.kidsCount === 0) {
+          throw new HttpError(400, "成人和儿童数不能都为0");
+        }
+
         if (req.body.bandIds) {
           try {
             await booking.bindBands();
@@ -453,32 +457,51 @@ export default router => {
             " ".repeat(2)
         );
 
-      if (booking.type === "play" && !booking.coupon && booking.hours) {
-        let playPrice = booking.price - 10 * booking.socksCount;
-        let firstHourPrice = (playPrice / (booking.hours + 1)) * 2;
+      if (
+        booking.type === "play" &&
+        !booking.coupon &&
+        !booking.code &&
+        booking.hours
+      ) {
+        const cardType = config.cardTypes[booking.customer.cardType];
 
-        for (let thHour = 1; thHour <= booking.hours; thHour++) {
-          if (thHour === 1) {
-            encoder.line(
-              "自由游玩" +
-                " ".repeat(2) +
-                `${booking.membersCount}人x小时` +
-                " ".repeat(5) +
-                `￥${firstHourPrice.toFixed(2)}`
-            );
-          } else {
-            encoder.line(
-              "自由游玩" +
-                " ".repeat(2) +
-                `${booking.membersCount}人x小时半价` +
-                " ".repeat(1) +
-                `￥${(firstHourPrice / 2).toFixed(2)}`
-            );
-          }
+        const firstHourPrice = cardType
+          ? cardType.firstHourPrice
+          : config.hourPrice;
+        const kidFirstHourPrice = config.kidHourPrice;
+
+        for (let thHour = 0; thHour <= booking.hours; thHour++) {
+          encoder.line(
+            "自由游玩" +
+              " ".repeat(2) +
+              `${booking.membersCount}成人第${thHour + 1}小时` +
+              " ".repeat(2) +
+              `￥${(
+                firstHourPrice *
+                config.hourPriceRatio[thHour] *
+                booking.membersCount
+              ).toFixed(2)}`
+          );
+          encoder.line(
+            "自由游玩" +
+              " ".repeat(2) +
+              `${booking.kidsCount}儿童第${thHour + 1}小时` +
+              " ".repeat(2) +
+              `￥${(
+                kidFirstHourPrice *
+                config.hourPriceRatio[thHour] *
+                booking.kidsCount
+              ).toFixed(2)}`
+          );
         }
       }
 
-      if (!booking.hours && !booking.coupon && !booking.code) {
+      if (
+        booking.type === "play" &&
+        !booking.hours &&
+        !booking.coupon &&
+        !booking.code
+      ) {
         encoder.line(
           "自由游玩" +
             " ".repeat(2) +
@@ -528,7 +551,7 @@ export default router => {
             " ".repeat(7) +
             `${booking.socksCount}双` +
             " ".repeat(7) +
-            `￥${(10 * booking.socksCount).toFixed(2)}`
+            `￥${(config.sockPrice * booking.socksCount).toFixed(2)}`
         );
       }
 

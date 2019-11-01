@@ -48,6 +48,7 @@ const Booking = new Schema({
   checkInAt: { type: String, required: true },
   hours: { type: Number, default: 1 },
   membersCount: { type: Number, default: 1 },
+  kidsCount: { type: Number, default: 0 },
   socksCount: { type: Number, default: 0 },
   bandIds: { type: [String] },
   bandIds8: { type: [Number] },
@@ -94,6 +95,7 @@ Booking.methods.calculatePrice = async function() {
   const cardType = config.cardTypes[booking.customer.cardType];
 
   const firstHourPrice = cardType ? cardType.firstHourPrice : config.hourPrice;
+  const kidFirstHourPrice = config.kidHourPrice;
 
   let discountHours = 0;
 
@@ -128,8 +130,15 @@ Booking.methods.calculatePrice = async function() {
       config.hourPriceRatio
         .slice(discountHours, booking.hours)
         .reduce((price, ratio) => {
-          return +(price + firstHourPrice * ratio).toFixed(2);
-        }, 0) * booking.membersCount; // WARN code will reduce each user by hour, maybe unexpected
+          return price + firstHourPrice * ratio;
+        }, 0) *
+        booking.membersCount +
+      config.hourPriceRatio
+        .slice(discountHours, booking.hours)
+        .reduce((price, ratio) => {
+          return price + kidFirstHourPrice * ratio;
+        }, 0) *
+        booking.kidsCount; // WARN code will reduce each user by hour, maybe unexpected
   } else if (booking.code && !booking.code.hours) {
     // unlimited hours with code
     booking.price = 0;
@@ -384,6 +393,7 @@ export interface IBooking extends mongoose.Document {
   checkInAt: string;
   hours?: number; // undefined hours means unlimited hours
   membersCount: number;
+  kidsCount: number;
   bandIds: string[];
   bandIds8: number[];
   bandIds8In: number[];

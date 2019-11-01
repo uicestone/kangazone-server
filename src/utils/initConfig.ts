@@ -81,6 +81,7 @@ const initConfig: IConfig = {
   hourPrice: 158,
   sockPrice: 10,
   unlimitedPrice: 200,
+  kidHourPrice: 33,
   coupons: [
     {
       slug: "national-2019",
