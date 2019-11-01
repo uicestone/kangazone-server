@@ -304,7 +304,7 @@ Booking.methods.bindBands = async function() {
 
   if (!booking.bandIds.length) return;
 
-  if (booking.bandIds.length !== booking.membersCount) {
+  if (booking.bandIds.length !== booking.membersCount + booking.kidsCount) {
     throw new Error("band_count_unmatched");
   }
 
