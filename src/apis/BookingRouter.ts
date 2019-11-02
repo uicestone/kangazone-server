@@ -213,7 +213,7 @@ export default router => {
         }
 
         const result = page.map(i => {
-          const o = i.toObject();
+          const o = i.toJSON();
           if (o.store && o.store.localServer) {
             delete o.store.localServer;
           }
