@@ -21,7 +21,9 @@ const Payment = new Schema({
   original: { type: Schema.Types.ObjectId }
 });
 
-Payment.plugin(autoPopulate, [{ path: "customer", select: "name avatarUrl" }]);
+Payment.plugin(autoPopulate, [
+  { path: "customer", select: "name avatarUrl mobile" }
+]);
 Payment.plugin(updateTimes);
 
 Payment.virtual("payArgs").get(function() {

@@ -212,7 +212,15 @@ export default router => {
           total = skip + page.length;
         }
 
-        res.paginatify(limit, skip, total).json(page);
+        const result = page.map(i => {
+          const o = i.toObject();
+          if (o.store && o.store.localServer) {
+            delete o.store.localServer;
+          }
+          return o;
+        });
+
+        res.paginatify(limit, skip, total).json(result);
       })
     );
 
