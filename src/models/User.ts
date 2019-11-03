@@ -150,6 +150,7 @@ User.methods.depositSuccess = async function(levelPrice: number) {
     .toFixed(2);
 
   user.codeAmount = +user.codes
+    .filter(c => !c.used)
     .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
     .toFixed(2);
 

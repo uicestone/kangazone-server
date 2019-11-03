@@ -66,7 +66,30 @@ export default router => {
           query.find({ role: req.query.role });
         }
 
+        if (req.query.membership) {
+          const membershipConditions = {
+            code: { codeAmount: { $gt: 0 } },
+            deposit: { creditDeposit: { $gt: 0 } }
+          };
+          query.find({
+            $or: req.query.membership.map(type => membershipConditions[type])
+          });
+        }
+
         let total = await query.countDocuments();
+        const [{ totalCredit } = { totalCredit: 0 }] = await User.aggregate([
+          //@ts-ignore
+          { $match: query._conditions },
+          {
+            $group: {
+              _id: null,
+              totalCredit: {
+                $sum: { $sum: ["$creditDeposit", "$codeAmount"] }
+              }
+            }
+          }
+        ]);
+
         const page = await query
           .find()
           .sort(sort)
@@ -77,6 +100,8 @@ export default router => {
         if (skip + page.length > total) {
           total = skip + page.length;
         }
+
+        res.set("total-credit", Math.round(totalCredit));
 
         res.paginatify(limit, skip, total).json(page);
       })

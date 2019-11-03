@@ -41,7 +41,8 @@ export default (app, router) => {
         "items-total",
         "items-start",
         "items-end",
-        "total-amount"
+        "total-amount",
+        "total-credit"
       ]
     }),
     methodOverride(),
