@@ -8,6 +8,7 @@ const Code = new Schema({
   title: { type: String, required: true },
   type: { type: String, enum: ["play"], default: "play" },
   num: String,
+  amount: { type: Number, default: 0 },
   hours: Number,
   used: { type: Boolean, default: false },
   expiresAt: { type: Date }
@@ -28,6 +29,7 @@ export interface ICode extends mongoose.Document {
   title: string;
   type: string;
   num?: string;
+  amount: number;
   hours?: number;
   used: boolean;
   expiresAt?: Date;

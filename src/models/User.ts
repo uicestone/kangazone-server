@@ -42,6 +42,7 @@ const User = new Schema({
   },
   creditDeposit: Number, // below for customer only
   creditReward: Number,
+  codeAmount: Number, // sum of amount of unused code
   cardType: { type: String },
   cardNo: { type: String },
   codes: [{ type: Schema.Types.ObjectId, ref: Code }]
@@ -108,24 +109,53 @@ User.methods.depositSuccess = async function(levelPrice: number) {
     `[USR] Deposit success ${user.id}, credit is now ${user.creditDeposit}:${user.creditReward}.`
   );
 
-  const codes = level.rewardCodes.reduce((codes, cur) => {
-    let code;
-    for (let i = 0; i < cur.count; i++) {
-      code = new Code({
-        title: cur.title,
-        type: cur.type,
-        hours: cur.hours,
+  const codeWeights = level.rewardCodes.reduce(
+    (weights, template) =>
+      weights + (template.amountWeight || 1) * template.count,
+    0
+  );
+
+  // console.log(`CodeWeights is ${codeWeights}.`);
+
+  let amountPerWeight: number;
+
+  if (level.depositCredit === undefined || level.depositCredit > 0) {
+    amountPerWeight = 0;
+  } else {
+    amountPerWeight = +(levelPrice / codeWeights).toFixed(2);
+  }
+
+  // console.log(`[USR] AmountPerWeight is ${amountPerWeight}.`);
+
+  const codes = level.rewardCodes.reduce((codes, template) => {
+    for (let i = 0; i < template.count; i++) {
+      const code = new Code({
+        title: template.title,
+        type: template.type,
+        amount: amountPerWeight * (template.amountWeight || 1),
+        hours: template.hours,
         customer: user
       });
+      console.log(`[USR] Code amount is ${code.amount}`);
       codes.push(code);
       user.codes.push(code);
     }
     return codes;
   }, []);
 
-  console.log(`[USR] ${codes.length} codes was rewarded to user ${user._id}`);
-
   await Promise.all([Code.insertMany(codes), user.save()]);
+
+  const codeAmount = +codes
+    .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
+    .toFixed(2);
+
+  user.codeAmount = +user.codes
+    .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
+    .toFixed(2);
+
+  console.log(
+    `[USR] ${codes.length} codes was rewarded to user ${user._id}, amount: ${codeAmount}, user total: ${user.codeAmount}.`
+  );
 
   // send user notification
 
@@ -167,6 +197,7 @@ export interface IUser extends mongoose.Document {
   creditDeposit?: number;
   creditReward?: number;
   credit?: number;
+  codeAmount?: number;
   cardType?: string;
   cardNo?: string;
   codes?: ICode[];
