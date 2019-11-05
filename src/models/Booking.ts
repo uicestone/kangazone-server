@@ -121,7 +121,7 @@ Booking.methods.calculatePrice = async function() {
     if (!coupon) {
       throw new Error("coupon_not_found");
     }
-    if (coupon.hours) {
+    if (coupon.hours && !coupon.discountAmount && !coupon.discountRate) {
       discountHours += coupon.hours;
     }
   }
