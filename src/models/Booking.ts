@@ -153,6 +153,10 @@ Booking.methods.calculatePrice = async function() {
       config.kidUnlimitedPrice * booking.kidsCount;
   }
 
+  if (coupon && coupon.price) {
+    booking.price += coupon.price;
+  }
+
   if (coupon && coupon.discountAmount) {
     booking.price -= coupon.discountAmount;
     if (booking.price < 0) {
