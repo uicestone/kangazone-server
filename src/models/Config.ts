@@ -40,7 +40,6 @@ export interface IConfig {
       amountWeight?: number;
       membersCount?: number;
       kidsCount?: number;
-      fixedMembersCount?: boolean;
       count: number;
     }[];
   }[];

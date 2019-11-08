@@ -9,7 +9,9 @@ const Code = new Schema({
   type: { type: String, enum: ["play"], default: "play" },
   num: String,
   amount: { type: Number, default: 0 },
-  hours: Number,
+  hours: { type: Number },
+  membersCount: { type: Number, default: 1 },
+  kidsCount: { type: Number, default: 0 },
   used: { type: Boolean, default: false },
   expiresAt: { type: Date }
 });
@@ -31,6 +33,8 @@ export interface ICode extends mongoose.Document {
   num?: string;
   amount: number;
   hours?: number;
+  membersCount: number;
+  kidsCount: number;
   used: boolean;
   expiresAt?: Date;
 }
