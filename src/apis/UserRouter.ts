@@ -52,8 +52,10 @@ export default router => {
           createdAt: -1
         };
 
+        const $and = []; // combine all $or conditions into one $and
+
         if (req.query.keyword) {
-          query.find({
+          $and.push({
             $or: [
               { name: new RegExp(req.query.keyword, "i") },
               { mobile: new RegExp(req.query.keyword) },
@@ -71,10 +73,12 @@ export default router => {
             code: { codeAmount: { $gt: 0 } },
             deposit: { creditDeposit: { $gt: 0 } }
           };
-          query.find({
+          $and.push({
             $or: req.query.membership.map(type => membershipConditions[type])
           });
         }
+
+        query.find($and);
 
         let total = await query.countDocuments();
         const [{ totalCredit } = { totalCredit: 0 }] = await User.aggregate([
