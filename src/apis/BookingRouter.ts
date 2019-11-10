@@ -78,11 +78,17 @@ export default router => {
           throw new HttpError(400, "成人和儿童数不能都为0");
         }
 
-        if (req.body.bandIds) {
+        if (req.query.bypassBandIdsCheck && req.user.role !== "admin") {
+          throw new HttpError(403);
+        }
+
+        if (req.body.bandIds && !req.query.bypassBandIdsCheck) {
           try {
             await booking.bindBands();
           } catch (err) {
             switch (err.message) {
+              case "duplicate_band_id":
+                throw new HttpError(400, `手环号重复`);
               case "band_count_unmatched":
                 throw new HttpError(
                   400,
@@ -273,6 +279,8 @@ export default router => {
             await booking.bindBands();
           } catch (err) {
             switch (err.message) {
+              case "duplicate_band_id":
+                throw new HttpError(400, `手环号重复`);
               case "band_count_unmatched":
                 throw new HttpError(
                   400,

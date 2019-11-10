@@ -308,6 +308,10 @@ Booking.methods.bindBands = async function() {
 
   if (!booking.bandIds.length) return;
 
+  if (Array.from(new Set(booking.bandIds)).length < booking.bandIds.length) {
+    throw new Error("duplicate_band_id");
+  }
+
   if (booking.bandIds.length !== booking.membersCount + booking.kidsCount) {
     throw new Error("band_count_unmatched");
   }
