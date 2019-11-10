@@ -129,7 +129,7 @@ export default async (dateInput?: string | Date) => {
   payments
     .filter(p => p.attach.match(/^deposit /))
     .reduce((depositsCount, payment) => {
-      const [, levelPrice] = payment.attach.match(/^deposit [\-\d\w]+ (\d+)/);
+      const [, levelPrice] = payment.attach.match(/^deposit [\d\w]+ (\-?\d+)/);
       let depositCount = depositsCount.find(c => c.price === +levelPrice);
       if (!depositCount) {
         const level = config.depositLevels.find(l => l.price === +levelPrice);
