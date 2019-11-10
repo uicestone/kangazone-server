@@ -84,7 +84,7 @@ export default router => {
 
         if (req.body.bandIds && !req.query.bypassBandIdsCheck) {
           try {
-            await booking.bindBands();
+            await booking.bindBands(req.query.authBands !== "false");
           } catch (err) {
             switch (err.message) {
               case "duplicate_band_id":
@@ -276,7 +276,7 @@ export default router => {
 
         if (req.body.bandIds) {
           try {
-            await booking.bindBands();
+            await booking.bindBands(req.query.authBands !== "false");
           } catch (err) {
             switch (err.message) {
               case "duplicate_band_id":

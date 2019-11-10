@@ -303,7 +303,7 @@ Booking.methods.refundSuccess = async function() {
   booking.store.authBands(booking.bandIds, true);
 };
 
-Booking.methods.bindBands = async function() {
+Booking.methods.bindBands = async function(auth = true) {
   const booking = this as IBooking;
 
   if (!booking.bandIds.length) return;
@@ -330,7 +330,7 @@ Booking.methods.bindBands = async function() {
   booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
 
   // (re)authorize band to gate controllers
-  if (liveBookingStatuses.includes(booking.status)) {
+  if (auth && liveBookingStatuses.includes(booking.status)) {
     try {
       await booking.store.authBands(booking.bandIds);
       if (booking.hours) {
@@ -433,7 +433,7 @@ export interface IBooking extends mongoose.Document {
   paymentSuccess: () => Promise<IBooking>;
   createRefundPayment: () => Promise<IBooking>;
   refundSuccess: () => Promise<IBooking>;
-  bindBands: () => Promise<boolean>;
+  bindBands: (auth?: boolean) => Promise<boolean>;
   checkIn: (save?: boolean) => Promise<boolean>;
   cancel: (save?: boolean) => Promise<boolean>;
   finish: (save?: boolean) => Promise<boolean>;
