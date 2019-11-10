@@ -78,7 +78,9 @@ export default router => {
           });
         }
 
-        query.find({ $and });
+        if ($and.length) {
+          query.find({ $and });
+        }
 
         let total = await query.countDocuments();
         const [{ totalCredit } = { totalCredit: 0 }] = await User.aggregate([
