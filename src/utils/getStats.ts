@@ -8,11 +8,18 @@ import Payment, { Gateways } from "../models/Payment";
 
 export default async (dateInput?: string | Date) => {
   const dateStr = moment(dateInput).format("YYYY-MM-DD"),
-    startDate = moment(dateInput)
+    startOfDay = moment(dateInput)
       .startOf("day")
       .toDate(),
-    endDate = moment(dateInput)
+    endOfDay = moment(dateInput)
       .endOf("day")
+      .toDate(),
+    dateRangeStartStr = moment(dateInput)
+      .subtract(6, "days")
+      .format("YYYY-MM-DD"),
+    startOfDateRange = moment(dateInput)
+      .subtract(6, "days")
+      .startOf("day")
       .toDate();
 
   const coupons = config.coupons;
@@ -30,8 +37,8 @@ export default async (dateInput?: string | Date) => {
 
   const payments = await Payment.find({
     createdAt: {
-      $gte: startDate,
-      $lte: endDate
+      $gte: startOfDay,
+      $lte: endOfDay
     },
     paid: true
   });
@@ -58,12 +65,25 @@ export default async (dateInput?: string | Date) => {
     0
   );
 
+  const kidsCount = bookingsPaid.reduce(
+    (count, booking) => count + booking.kidsCount,
+    0
+  );
+
   const paidAmount = bookingsPaid.reduce((amount, booking) => {
     return (
       amount +
       booking.payments.filter(p => p.paid).reduce((a, p) => a + p.amount, 0)
     );
   }, 0);
+
+  const depositAmount = payments
+    .filter(p => p.attach.match(/deposit /))
+    .reduce((amount, p) => amount + p.amount, 0);
+
+  const codeDepositAmount = payments
+    .filter(p => p.attach.match(/deposit /) && p.amount.toString().match(/80$/))
+    .reduce((amount, p) => amount + p.amount, 0);
 
   const socksCount = bookingsPaid.reduce(
     (socks, booking) => socks + booking.socksCount,
@@ -134,7 +154,8 @@ export default async (dateInput?: string | Date) => {
       if (!depositCount) {
         const level = config.depositLevels.find(l => l.price === +levelPrice);
         if (!level) {
-          throw new Error(`Level not found for price ${levelPrice}`);
+          // throw new Error(`Level not found for price ${levelPrice}`);
+          return;
         }
         depositCount = {
           desc: level.desc,
@@ -147,15 +168,186 @@ export default async (dateInput?: string | Date) => {
       return depositsCount;
     }, depositsCount);
 
+  const dailyCustomers = await Booking.aggregate([
+    { $match: { date: { $gte: dateRangeStartStr, $lte: dateStr } } },
+    {
+      $project: {
+        membersCount: 1,
+        kidsCount: 1,
+        date: {
+          $dateToParts: {
+            date: {
+              $dateFromString: {
+                dateString: "$date",
+                timezone: "Asia/Shanghai"
+              }
+            },
+            timezone: "Asia/Shanghai"
+          }
+        }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          y: "$date.year",
+          m: "$date.month",
+          d: "$date.day"
+        },
+        membersCount: {
+          $sum: "$membersCount"
+        },
+        kidsCount: {
+          $sum: "$kidsCount"
+        }
+      }
+    },
+    {
+      $sort: { _id: 1 }
+    },
+    {
+      $project: {
+        _id: 0,
+        day: {
+          $dayOfWeek: {
+            date: {
+              $dateFromParts: {
+                year: "$_id.y",
+                month: "$_id.m",
+                day: "$_id.d",
+                timezone: "Asia/Shanghai"
+              }
+            }
+          }
+        },
+        membersCount: 1,
+        kidsCount: 1
+      }
+    }
+  ]);
+
+  const dailyBookingPayment = await Payment.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startOfDateRange, $lte: endOfDay },
+        attach: { $regex: /^booking / }
+      }
+    },
+    {
+      $project: {
+        amountDeposit: 1,
+        amount: 1,
+        date: {
+          $dateToParts: {
+            date: "$createdAt",
+            timezone: "Asia/Shanghai"
+          }
+        }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          y: "$date.year",
+          m: "$date.month",
+          d: "$date.day"
+        },
+        amount: {
+          $sum: { $cond: ["$amountDeposit", "$amountDeposit", "$amount"] }
+        }
+      }
+    },
+    {
+      $sort: { _id: 1 }
+    },
+    {
+      $project: {
+        _id: 0,
+        day: {
+          $dayOfWeek: {
+            date: {
+              $dateFromParts: {
+                year: "$_id.y",
+                month: "$_id.m",
+                day: "$_id.d",
+                timezone: "Asia/Shanghai"
+              }
+            }
+          }
+        },
+        amount: 1
+      }
+    }
+  ]);
+
+  const dailyDepositPayment = await Payment.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startOfDateRange, $lte: endOfDay },
+        attach: { $regex: /^deposit / }
+      }
+    },
+    {
+      $project: {
+        amount: 1,
+        date: {
+          $dateToParts: {
+            date: "$createdAt",
+            timezone: "Asia/Shanghai"
+          }
+        }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          y: "$date.year",
+          m: "$date.month",
+          d: "$date.day"
+        },
+        amount: {
+          $sum: "$amount"
+        }
+      }
+    },
+    {
+      $sort: { _id: 1 }
+    },
+    {
+      $project: {
+        _id: 0,
+        day: {
+          $dayOfWeek: {
+            date: {
+              $dateFromParts: {
+                year: "$_id.y",
+                month: "$_id.m",
+                day: "$_id.d",
+                timezone: "Asia/Shanghai"
+              }
+            }
+          }
+        },
+        amount: 1
+      }
+    }
+  ]);
+
   return {
     checkedInCount,
     dueCount,
     customerCount,
+    kidsCount,
     paidAmount,
+    depositAmount,
+    codeDepositAmount,
     socksCount,
     paidAmountByGateways,
     couponsCount,
     codesCount,
-    depositsCount
+    depositsCount,
+    dailyCustomers,
+    dailyBookingPayment,
+    dailyDepositPayment
   };
 };
