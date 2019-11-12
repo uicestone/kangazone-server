@@ -155,13 +155,18 @@ export default async (dateInput?: string | Date) => {
         const level = config.depositLevels.find(l => l.price === +levelPrice);
         if (!level) {
           // throw new Error(`Level not found for price ${levelPrice}`);
-          return;
+          depositCount = {
+            desc: "已下架等级",
+            price: +levelPrice,
+            count: 0
+          };
+        } else {
+          depositCount = {
+            desc: level.desc,
+            price: level.price,
+            count: 0
+          };
         }
-        depositCount = {
-          desc: level.desc,
-          price: level.price,
-          count: 0
-        };
         depositsCount.push(depositCount);
       }
       depositCount.count++;
