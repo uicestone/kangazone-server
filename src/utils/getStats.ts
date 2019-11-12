@@ -235,7 +235,8 @@ export default async (dateInput?: string | Date) => {
     {
       $match: {
         createdAt: { $gte: startOfDateRange, $lte: endOfDay },
-        attach: { $regex: /^booking / }
+        attach: { $regex: /^booking / },
+        paid: true
       }
     },
     {
@@ -289,7 +290,8 @@ export default async (dateInput?: string | Date) => {
     {
       $match: {
         createdAt: { $gte: startOfDateRange, $lte: endOfDay },
-        attach: { $regex: /^deposit / }
+        attach: { $regex: /^deposit / },
+        paid: true
       }
     },
     {
