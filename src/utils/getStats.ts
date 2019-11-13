@@ -95,7 +95,11 @@ export default async (dateInput?: string | Date) => {
       if (!amountByGateways[payment.gateway]) {
         amountByGateways[payment.gateway] = 0;
       }
-      amountByGateways[payment.gateway] += payment.amount;
+      if (payment.gateway === Gateways.Credit) {
+        amountByGateways[payment.gateway] += payment.amountDeposit;
+      } else {
+        amountByGateways[payment.gateway] += payment.amount;
+      }
       return amountByGateways;
     },
     {}

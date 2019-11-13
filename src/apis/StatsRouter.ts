@@ -50,12 +50,16 @@ export default router => {
         .align("left")
         .line("打印时间：" + moment().format("YYYY-MM-DD HH:mm:ss"))
         .line(`收银台号：${counter.name}`)
-        .line(`客人数：${stats.customerCount}`)
+        .line(`成人数：${stats.customerCount}`)
+        .line(`儿童数：${stats.kidsCount}`)
         .line(`袜子数：${stats.socksCount}`)
-        .line(`收款金额：${stats.paidAmount}`)
-        .line(`- 现金金额：${stats.paidAmountByGateways[Gateways.Cash] || 0}`)
-        .line(`- 扫码金额：${stats.paidAmountByGateways[Gateways.Scan] || 0}`)
-        .line(`- 刷卡金额：${stats.paidAmountByGateways[Gateways.Card] || 0}`);
+        .line(`门票收入：${stats.paidAmount}`)
+        .line(`充值收入：${stats.depositAmount}`)
+        .line(`收款方式：`)
+        .line(`- 余额：${stats.paidAmountByGateways[Gateways.Credit] || 0}`)
+        .line(`- 扫码：${stats.paidAmountByGateways[Gateways.Scan] || 0}`)
+        .line(`- 现金：${stats.paidAmountByGateways[Gateways.Cash] || 0}`)
+        .line(`- 刷卡：${stats.paidAmountByGateways[Gateways.Card] || 0}`);
 
       encoder.line(`优惠人数：`);
       if (stats.couponsCount.length) {
