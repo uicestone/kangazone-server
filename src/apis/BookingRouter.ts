@@ -159,6 +159,8 @@ export default router => {
           createdAt: -1
         };
 
+        const $and = []; // combine all $or conditions into one $and
+
         // restrict self bookings for customers
         if (req.user.role === "customer") {
           query.find({ customer: req.user._id });
@@ -178,6 +180,26 @@ export default router => {
           });
         }
 
+        if (req.query.due) {
+          query.find({
+            status: BookingStatuses.IN_SERVICE
+          });
+          $and.push({
+            $or: config.hourPriceRatio.map((ratio, index) => {
+              const hours = index + 1;
+              return {
+                hours,
+                checkInAt: {
+                  $lt: moment()
+                    .subtract(hours, "hours")
+                    .subtract(5, "minutes")
+                    .format("HH:mm:ss")
+                }
+              };
+            })
+          });
+        }
+
         if (req.query.customerKeyword) {
           const matchCustomers = await User.find({
             $or: [
@@ -190,7 +212,7 @@ export default router => {
         }
 
         if (req.query.bandId) {
-          query.find({
+          $and.push({
             $or: [
               { bandIds: new RegExp(req.query.bandId) },
               { bandIds8: +req.query.bandId }
@@ -204,6 +226,10 @@ export default router => {
 
         // restrict self store bookings for managers
         // TODO
+
+        if ($and.length) {
+          query.find({ $and });
+        }
 
         let total = await query.countDocuments();
 

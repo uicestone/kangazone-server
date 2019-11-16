@@ -45,15 +45,21 @@ export default async (dateInput?: string | Date) => {
   const bookingServing = await Booking.find({
     status: BookingStatuses.IN_SERVICE
   });
-  const dueCount = bookingServing.filter(booking => {
-    if (booking.checkInAt.length === 8) {
-      return (
-        moment(booking.checkInAt, "HH:mm:ss").diff() < -booking.hours * 3600000
-      );
-    } else {
-      return false;
-    }
-  }).length;
+  const dueCount = bookingServing
+    .filter(booking => {
+      if (booking.checkInAt.length === 8) {
+        return (
+          moment(booking.checkInAt, "HH:mm:ss").diff() <
+          -booking.hours * 3600000
+        );
+      } else {
+        return false;
+      }
+    })
+    .reduce(
+      (count, booking) => count + booking.membersCount + booking.kidsCount,
+      0
+    );
 
   const checkedInCount = bookingServing.reduce(
     (count, booking) => count + booking.membersCount + booking.kidsCount,
