@@ -469,14 +469,16 @@ export default router => {
         .line("手机尾号：" + booking.customer.mobile.substr(-4))
         .line("会员卡号：" + (booking.customer.cardNo || "无"))
         .line("打印时间：" + moment().format("YYYY-MM-DD HH:mm:ss"))
-        .line(
+        .line("入场人数：" + booking.membersCount + booking.kidsCount);
+
+      if (booking.hours) {
+        encoder.line(
           "出场时间：" +
             moment(booking.checkInAt, "HH:mm:ss")
-              .add(10, "minutes")
-              .add(2, "hours")
+              .add(booking.hours, "hours")
               .format("YYYY-MM-DD HH:mm:ss")
-        )
-        .line("入场人数：" + booking.membersCount + booking.kidsCount);
+        );
+      }
 
       booking.bandIds.forEach((bandId, index) => {
         const noStr = (index + 1).toString().padStart(2, "0");
