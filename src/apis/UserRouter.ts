@@ -27,9 +27,19 @@ export default router => {
           req.body.password = await hashPwd(req.body.password);
         }
         if (req.body.mobile) {
-          const exists = await User.findOne({ mobile: req.body.mobile });
-          if (exists) {
+          const userMobileExists = await User.findOne({
+            mobile: req.body.mobile
+          });
+          if (userMobileExists) {
             throw new HttpError(409, `手机号${req.body.mobile}已被使用.`);
+          }
+        }
+        if (req.body.cardNo) {
+          const userCardNoExists = await User.findOne({
+            cardNo: req.body.cardNo
+          });
+          if (userCardNoExists) {
+            throw new HttpError(409, `会员卡号${req.body.cardNo}已被使用.`);
           }
         }
         const user = new User(req.body);
@@ -164,6 +174,24 @@ export default router => {
         if (req.body.password) {
           console.log(`[USR] User ${user.id} password reset.`);
           req.body.password = await hashPwd(req.body.password);
+        }
+        if (req.body.mobile) {
+          const userMobileExists = await User.findOne({
+            mobile: req.body.mobile,
+            _id: { $ne: user.id }
+          });
+          if (userMobileExists) {
+            throw new HttpError(409, `手机号${req.body.mobile}已被使用.`);
+          }
+        }
+        if (req.body.cardNo) {
+          const userCardNoExists = await User.findOne({
+            cardNo: req.body.cardNo,
+            _id: { $ne: user.id }
+          });
+          if (userCardNoExists) {
+            throw new HttpError(409, `会员卡号${req.body.cardNo}已被使用.`);
+          }
         }
         if (req.body.passNo) {
           if (req.user.role !== "admin") {

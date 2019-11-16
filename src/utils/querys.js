@@ -24,6 +24,14 @@ db.payments.find({ attach: /^booking/ }).forEach(p => {
   }
 });
 
+// find deposit payment that cannot attach to a customer
+db.payments.find({ attach: /^deposit/ }).forEach(p => {
+  const c = db.users.findOne({ _id: p.customer });
+  if (!c) {
+    print(`Payment ${p._id}: customer not found.`);
+  }
+});
+
 // get gate pass stats of today
 const date = new Date().toISOString().substr(0, 10);
 const total = db.bookings.find({ date }).count();
