@@ -211,6 +211,7 @@ export interface IPayment extends mongoose.Document {
 export enum Gateways {
   Credit = "credit",
   Code = "code",
+  Coupon = "coupon",
   Scan = "scan",
   Card = "card",
   Cash = "cash",
@@ -220,14 +221,15 @@ export enum Gateways {
 }
 
 export const gatewayNames = {
-  [Gateways.Credit]: "余额支付",
-  [Gateways.Code]: "券码支付",
-  [Gateways.Scan]: "扫码支付",
-  [Gateways.Card]: "刷卡支付",
-  [Gateways.Cash]: "现金支付",
-  [Gateways.WechatPay]: "微信支付",
+  [Gateways.Credit]: "充值余额",
+  [Gateways.Code]: "次卡券码",
+  [Gateways.Coupon]: "团购优惠券",
+  [Gateways.Scan]: "现场扫码",
+  [Gateways.Card]: "现场刷卡",
+  [Gateways.Cash]: "现场现金",
+  [Gateways.WechatPay]: "微信小程序",
   [Gateways.Alipay]: "支付宝",
-  [Gateways.UnionPay]: "银联支付"
+  [Gateways.UnionPay]: "银联"
 };
 
 export default mongoose.model<IPayment>("payment", Payment);

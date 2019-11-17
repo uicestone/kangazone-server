@@ -56,6 +56,7 @@ export interface IConfig {
     validTill: Date;
     type: string;
     hours: number;
+    amount: number; // value of the coupon itself
     membersCount?: number;
     kidsCount?: number;
     fixedHours?: boolean;

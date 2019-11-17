@@ -117,6 +117,7 @@ export default async (dateInput?: string | Date) => {
     slug: string;
     name: string;
     count: number;
+    amount: number;
   }[] = bookingsPaid
     .filter(b => b.coupon)
     .reduce((couponsCount, booking) => {
@@ -126,13 +127,20 @@ export default async (dateInput?: string | Date) => {
         couponCount = {
           slug: coupon.slug,
           name: coupon.name,
+          price: coupon.amount,
           count: 0
         };
         couponsCount.push(couponCount);
       }
       couponCount.count += booking.membersCount + booking.kidsCount;
       return couponsCount;
-    }, []);
+    }, [])
+    .map(couponCount => {
+      couponCount.amount = couponCount.price * couponCount.count;
+      return couponCount;
+    });
+
+  paidAmountByGateways.coupon = couponsCount.reduce((a, c) => a + c.amount, 0);
 
   const codesCount: {
     title: string;
