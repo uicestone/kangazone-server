@@ -333,12 +333,6 @@ Booking.methods.bindBands = async function(auth = true) {
   if (auth && liveBookingStatuses.includes(booking.status)) {
     try {
       await booking.store.authBands(booking.bandIds);
-      if (booking.hours) {
-        agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
-          bandIds: booking.bandIds,
-          storeId: booking.store.id
-        });
-      }
     } catch (err) {
       console.error(`Booking auth bands failed, id: ${booking.id}.`);
     }
@@ -349,6 +343,12 @@ Booking.methods.checkIn = async function(save = true) {
   const booking = this as IBooking;
   booking.status = BookingStatuses.IN_SERVICE;
   booking.checkInAt = moment().format("HH:mm:ss");
+  if (booking.hours) {
+    agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
+      bandIds: booking.bandIds,
+      storeId: booking.store.id
+    });
+  }
   if (save) {
     await booking.save();
   }
