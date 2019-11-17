@@ -92,7 +92,7 @@ export default router => {
           total = skip + page.length;
         }
 
-        res.set("total-amount", Math.round(totalAmount));
+        res.set("total-amount", totalAmount.toFixed(2));
 
         res.paginatify(limit, skip, total).json(page);
       })

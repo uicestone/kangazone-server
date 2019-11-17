@@ -79,7 +79,9 @@ export default async (dateInput?: string | Date) => {
   const paidAmount = bookingsPaid.reduce((amount, booking) => {
     return (
       amount +
-      booking.payments.filter(p => p.paid).reduce((a, p) => a + p.amount, 0)
+      booking.payments
+        .filter(p => p.paid)
+        .reduce((a, p) => a + (p.amountDeposit || p.amount), 0)
     );
   }, 0);
 
