@@ -57,6 +57,7 @@ export default router => {
         .line(`充值收入：${stats.depositAmount}`)
         .line(`收款方式：`)
         .line(`- 余额：${stats.paidAmountByGateways[Gateways.Credit] || 0}`)
+        .line(`- 券码：${stats.paidAmountByGateways[Gateways.Code] || 0}`)
         .line(`- 扫码：${stats.paidAmountByGateways[Gateways.Scan] || 0}`)
         .line(`- 现金：${stats.paidAmountByGateways[Gateways.Cash] || 0}`)
         .line(`- 刷卡：${stats.paidAmountByGateways[Gateways.Card] || 0}`);

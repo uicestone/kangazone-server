@@ -62,3 +62,58 @@ const blockNoPass = db.bookings
     percent: ((blockNoPass / total) * 100).toFixed(2) + "%"
   }
 ];
+
+// check unexpectedly used codes
+db.bookings
+  .find({ code: { $ne: null }, status: { $in: ["PENDING", "CANCELED"] } })
+  .forEach(booking => {
+    const code = db.codes.findOne({ _id: booking.code });
+    if (code.used) {
+      throw `booking not paid but code used: ${booking._id} ${code._id}`;
+    }
+  });
+
+// set used code 'usedAt' and 'usedInBooking', create code payment in booking
+db.bookings
+  .find({
+    code: { $ne: null },
+    status: { $in: ["BOOKED", "IN_SERVICE", "FINISHED", "PENDING_REFUND"] }
+  })
+  .forEach(booking => {
+    const code = db.codes.findOne({ _id: booking.code });
+    if (!code.used) {
+      throw `booking paid but code not used: ${booking._id} ${code._id}`;
+    }
+    db.codes.update(
+      { _id: code._id },
+      {
+        $set: {
+          usedAt: booking.createdAt,
+          usedInBooking: booking._id
+        }
+      }
+    );
+    print(`code ${code._id} set usedAt and usedInBooking`);
+    const paymentData = {
+      paid: true,
+      title: `预定南京砂之船店 ${booking.date} ${
+        booking.hours ? booking.hours + "小时" : "畅玩"
+      } ${booking.checkInAt}入场`,
+      customer: booking.customer,
+      amount: code.amount || 0,
+      attach: `booking ${booking._id + ""}`,
+      gateway: "credit",
+      gatewayData: { bookingId: booking._id, codeId: code._id },
+      updatedAt: new Date(),
+      createdAt: booking.createdAt
+    };
+    const { insertedId: paymentId } = db.payments.insertOne(paymentData);
+    if (!booking.payments || !booking.payments.push) {
+      throw "booking payments null";
+    }
+    db.bookings.update(
+      { _id: booking._id },
+      { $push: { payments: paymentId } }
+    );
+    print("inserted payment", paymentData);
+  });
