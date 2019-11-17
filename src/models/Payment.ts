@@ -3,6 +3,7 @@ import updateTimes from "./plugins/updateTimes";
 import autoPopulate from "./plugins/autoPopulate";
 import User, { IUser } from "./User";
 import Booking from "./Booking";
+import Code from "./Code";
 import {
   unifiedOrder as wechatUnifiedOrder,
   payArgs as wechatPayArgs
@@ -166,6 +167,21 @@ Payment.pre("save", async function(next) {
       // we need to change booking status manually after credit payment
       await customer.save();
       break;
+    case Gateways.Code:
+      if (
+        !payment.gatewayData ||
+        !payment.gatewayData.bookingId ||
+        !payment.gatewayData.codeId
+      ) {
+        throw new Error("invalid_code_payment_gateway_data");
+      }
+      const code = await Code.findOne({ _id: payment.gatewayData.codeId });
+      code.used = true;
+      code.usedAt = new Date();
+      code.usedInBooking = payment.gatewayData.bookingId;
+      await code.save();
+      payment.paid = true;
+      break;
     case Gateways.Card:
       break;
     case Gateways.Scan:
@@ -194,6 +210,7 @@ export interface IPayment extends mongoose.Document {
 
 export enum Gateways {
   Credit = "credit",
+  Code = "code",
   Scan = "scan",
   Card = "card",
   Cash = "cash",
@@ -204,6 +221,7 @@ export enum Gateways {
 
 export const gatewayNames = {
   [Gateways.Credit]: "余额支付",
+  [Gateways.Code]: "券码支付",
   [Gateways.Scan]: "扫码支付",
   [Gateways.Card]: "刷卡支付",
   [Gateways.Cash]: "现金支付",

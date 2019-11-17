@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import updateTimes from "./plugins/updateTimes";
 import { IUser } from "./User";
+import { IBooking } from "./Booking";
 
 const Code = new Schema({
   customer: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -13,6 +14,8 @@ const Code = new Schema({
   membersCount: { type: Number, default: 1 },
   kidsCount: { type: Number, default: 0 },
   used: { type: Boolean, default: false },
+  usedAt: Date,
+  usedInBooking: { type: Schema.Types.ObjectId, ref: "Booking" },
   expiresAt: { type: Date }
 });
 
@@ -36,6 +39,8 @@ export interface ICode extends mongoose.Document {
   membersCount: number;
   kidsCount: number;
   used: boolean;
+  usedAt?: Date;
+  usedInBooking?: IBooking;
   expiresAt?: Date;
 }
 

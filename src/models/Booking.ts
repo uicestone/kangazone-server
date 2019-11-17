@@ -193,6 +193,23 @@ Booking.methods.createPayment = async function(
     attach += ` extend ${extendHoursBy}`;
   }
 
+  const title = `预定${booking.store.name} ${booking.date} ${
+    booking.hours ? booking.hours + "小时" : "畅玩"
+  } ${booking.checkInAt}入场`;
+
+  if (booking.code) {
+    const codePayment = new Payment({
+      customer: booking.customer,
+      amount: booking.code.amount || 0,
+      title,
+      attach,
+      gateway: Gateways.Code,
+      gatewayData: { codeId: booking.code.id, bookingId: booking.id }
+    });
+    await codePayment.save();
+    booking.payments.push(codePayment);
+  }
+
   if (
     totalPayAmount >= 0.01 &&
     useCredit &&
@@ -204,9 +221,7 @@ Booking.methods.createPayment = async function(
       customer: booking.customer,
       amount: creditPayAmount,
       amountForceDeposit: booking.socksCount * 10,
-      title: `预定${booking.store.name} ${booking.date} ${
-        booking.hours ? booking.hours + "小时" : "畅玩"
-      } ${booking.checkInAt}入场`,
+      title,
       attach,
       gateway: Gateways.Credit
     });
@@ -224,9 +239,7 @@ Booking.methods.createPayment = async function(
     const extraPayment = new Payment({
       customer: booking.customer,
       amount: DEBUG ? extraPayAmount / 1e4 : extraPayAmount,
-      title: `预定${booking.store.name} ${booking.date} ${
-        booking.hours ? booking.hours + "小时" : "畅玩"
-      } ${booking.checkInAt}入场`,
+      title,
       attach,
       gateway: paymentGateway || Gateways.WechatPay
     });

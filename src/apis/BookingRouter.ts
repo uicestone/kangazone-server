@@ -138,11 +138,6 @@ export default router => {
           }
         }
 
-        if (booking.code) {
-          booking.code.used = true;
-          await booking.code.save();
-        }
-
         await booking.save();
 
         res.json(booking);
