@@ -107,6 +107,10 @@ Payment.pre("save", async function(next) {
     return next();
   }
 
+  await payment.populate("customer").execPopulate();
+
+  const customer = payment.customer;
+
   switch (payment.gateway) {
     case Gateways.WechatPay:
       if (payment.gatewayData) return next();
@@ -123,7 +127,6 @@ Payment.pre("save", async function(next) {
       );
       break;
     case Gateways.Credit:
-      const customer = await User.findOne({ _id: payment.customer });
       if (customer.credit < payment.amount) {
         throw new Error("insufficient_credit");
       }
@@ -180,6 +183,7 @@ Payment.pre("save", async function(next) {
       code.usedAt = new Date();
       code.usedInBooking = payment.gatewayData.bookingId;
       await code.save();
+      await customer.updateCodeAmount();
       payment.paid = true;
       break;
     case Gateways.Card:

@@ -149,10 +149,7 @@ User.methods.depositSuccess = async function(levelPrice: number) {
     .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
     .toFixed(2);
 
-  user.codeAmount = +user.codes
-    .filter(c => !c.used)
-    .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
-    .toFixed(2);
+  await user.updateCodeAmount();
 
   console.log(
     `[USR] ${codes.length} codes was rewarded to user ${user._id}, amount: ${codeAmount}, user total: ${user.codeAmount}.`
@@ -181,6 +178,20 @@ User.methods.membershipUpgradeSuccess = async function(cardTypeName: string) {
   return user;
 };
 
+User.methods.updateCodeAmount = async function(save = true) {
+  const user = this as IUser;
+  user.codeAmount = +user.codes
+    .filter(c => !c.used)
+    .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
+    .toFixed(2);
+
+  if (save) {
+    await user.save();
+  }
+
+  return user;
+};
+
 export interface IUser extends mongoose.Document {
   role: string;
   login?: string;
@@ -204,6 +215,7 @@ export interface IUser extends mongoose.Document {
   codes?: ICode[];
   depositSuccess: (price: number) => Promise<IUser>;
   membershipUpgradeSuccess: (cardTypeName: string) => Promise<IUser>;
+  updateCodeAmount: (save?: boolean) => Promise<IUser>;
 }
 
 export default mongoose.model<IUser>("User", User);
