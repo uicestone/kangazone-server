@@ -7,6 +7,7 @@ import { hashPwd, icCode10To8 } from "../utils/helper";
 import { config } from "../models/Config";
 import Payment, { Gateways } from "../models/Payment";
 import Store from "../models/Store";
+import idCard from "idcard";
 
 const { DEBUG } = process.env;
 
@@ -42,7 +43,27 @@ export default router => {
             throw new HttpError(409, `会员卡号${req.body.cardNo}已被使用.`);
           }
         }
+        if (req.body.idCardNo) {
+          const userIdCardNoExists = await User.findOne({
+            idCardNo: req.body.idCardNo
+          });
+          if (userIdCardNoExists) {
+            throw new HttpError(409, `身份证号${req.body.idCardNo}已被使用.`);
+          }
+        }
         const user = new User(req.body);
+        if (req.body.idCardNo) {
+          const idCardInfo = idCard.info(req.body.idCardNo);
+          if (!idCardInfo.valid) {
+            throw new HttpError(400, `非法身份证号`);
+          }
+          user.gender = idCardInfo.gender === "M" ? "男" : "女";
+          user.region = `${idCardInfo.province.text} ${idCardInfo.city.text} ${idCardInfo.area.text}`;
+          user.constellation = idCardInfo.constellation;
+          user.birthday = idCardInfo.birthday
+            .toString()
+            .replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
+        }
         await user.save();
         res.json(user);
       })
@@ -193,6 +214,15 @@ export default router => {
             throw new HttpError(409, `会员卡号${req.body.cardNo}已被使用.`);
           }
         }
+        if (req.body.idCardNo) {
+          const userIdCardNoExists = await User.findOne({
+            idCardNo: req.body.idCardNo,
+            _id: { $ne: user.id }
+          });
+          if (userIdCardNoExists) {
+            throw new HttpError(409, `身份证号${req.body.idCardNo}已被使用.`);
+          }
+        }
         if (req.body.passNo) {
           if (req.user.role !== "admin") {
             throw new HttpError(403);
@@ -201,7 +231,22 @@ export default router => {
           const store = await Store.findOne();
           store.authBands([req.body.passNo]);
         }
+
         user.set(req.body);
+
+        if (req.body.idCardNo) {
+          const idCardInfo = idCard.info(req.body.idCardNo);
+          if (!idCardInfo.valid) {
+            throw new HttpError(400, `非法身份证号`);
+          }
+          user.gender = idCardInfo.gender === "M" ? "男" : "女";
+          user.region = `${idCardInfo.province.text} ${idCardInfo.city.text} ${idCardInfo.area.text}`;
+          user.constellation = idCardInfo.constellation;
+          user.birthday = idCardInfo.birthday
+            .toString()
+            .replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
+        }
+
         if (req.body.cardNo) {
           console.log(
             `[USR] User ${user.id} card number set to ${user.cardNo}.`

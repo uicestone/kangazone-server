@@ -33,6 +33,9 @@ const User = new Schema({
   },
   avatarUrl: String,
   region: String,
+  birthday: String,
+  constellation: String,
+  idCardNo: String,
   openid: { type: String, index: { unique: true, sparse: true } },
   passNo: { type: String }, // staff only
   passNo8: { type: Number }, // staff only
@@ -201,6 +204,9 @@ export interface IUser extends mongoose.Document {
   mobile?: string;
   avatarUrl?: string;
   region?: string;
+  birthday?: string;
+  constellation?: string;
+  idCardNo?: string;
   openid?: string;
   passNo?: string;
   passNo8?: number;

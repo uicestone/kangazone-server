@@ -117,3 +117,32 @@ db.bookings
     );
     print("inserted payment", paymentData);
   });
+
+// bulk update user code amount
+db.users.find({ $where: "this.codes && this.codes.length > 0" }).forEach(u => {
+  const codes = u.codes
+    .map(cid => db.codes.findOne({ _id: cid }))
+    .filter(c => !c.used);
+  const codeAmount = codes.reduce((s, c) => s + (c.amount || 0), 0);
+  db.users.update({ _id: u._id }, { $set: { codeAmount } });
+  print(`${u.mobile} ${u.codeAmount} -> ${codeAmount}`);
+});
+
+// set user cardType
+const cardTypes = { "680": "10次亲子" };
+db.configs
+  .findOne({ depositLevels: { $exists: true } })
+  .depositLevels.forEach(l => {
+    cardTypes[l.price] = l.cardType;
+  });
+
+db.payments
+  .find({ attach: /deposit /, paid: true, amount: { $gt: 1 } })
+  .forEach(p => {
+    const cardType = cardTypes[p.amount];
+    if (!cardType) {
+      throw `Invalid price ${p.amount}`;
+    }
+    db.users.update({ _id: p.customer }, { $set: { cardType } });
+    print(`${p.customer} set to ${cardType}`);
+  });

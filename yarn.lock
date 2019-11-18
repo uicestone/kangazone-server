@@ -3332,6 +3332,11 @@ iconv-lite@0.4.24, iconv-lite@^0.4.15, iconv-lite@^0.4.19, iconv-lite@^0.4.24, i
   dependencies:
     safer-buffer ">= 2.1.2 < 3"
 
+idcard@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/idcard/-/idcard-4.1.0.tgz#816df2ce2e25d3d06fc17a6d2e64da86f954ad44"
+  integrity sha1-gW3yzi4l09BvwXptLmTahvlUrUQ=
+
 ieee754@^1.1.4:
   version "1.1.13"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.13.tgz#ec168558e95aa181fd87d37f55c32bbcb6708b84"
