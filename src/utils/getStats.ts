@@ -76,21 +76,20 @@ export default async (dateInput?: string | Date) => {
     0
   );
 
-  const paidAmount = bookingsPaid.reduce((amount, booking) => {
-    return (
-      amount +
-      booking.payments
-        .filter(p => p.paid)
-        .reduce((a, p) => a + (p.amountDeposit || p.amount), 0)
-    );
-  }, 0);
+  // booking paid amount
+  const paidAmount = payments
+    .filter(p => p.attach.match(/^booking /))
+    .reduce((amount, p) => amount + (p.amountDeposit || p.amount), 0);
 
   const depositAmount = payments
-    .filter(p => p.attach.match(/deposit /))
+    .filter(p => p.attach.match(/^deposit /))
     .reduce((amount, p) => amount + p.amount, 0);
 
   const codeDepositAmount = payments
-    .filter(p => p.attach.match(/deposit /) && p.amount.toString().match(/80$/))
+    .filter(
+      p => p.attach.match(/^deposit /) && p.amount.toString().match(/80$/)
+      // TODO use '80' suffix to detect code deposit, should be smarter
+    )
     .reduce((amount, p) => amount + p.amount, 0);
 
   const socksCount = bookingsPaid.reduce(
