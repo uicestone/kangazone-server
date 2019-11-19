@@ -44,6 +44,7 @@ export default router => {
           }
         }
         if (req.body.idCardNo) {
+          req.body.idCardNo = req.body.idCardNo.replace("*", "X").toUpperCase();
           const userIdCardNoExists = await User.findOne({
             idCardNo: req.body.idCardNo
           });
@@ -215,6 +216,7 @@ export default router => {
           }
         }
         if (req.body.idCardNo) {
+          req.body.idCardNo = req.body.idCardNo.replace("*", "X").toUpperCase();
           const userIdCardNoExists = await User.findOne({
             idCardNo: req.body.idCardNo,
             _id: { $ne: user.id }
