@@ -28,12 +28,13 @@ export default mongoose.model("Config", configSchema);
 export interface IConfig {
   cardTypes?: { [name: string]: { firstHourPrice: number; netPrice: number } };
   depositLevels?: {
-    desc?: string;
+    slug: string;
+    desc: string;
     price: number;
     cardType: string;
     depositCredit?: number;
-    rewardCredit: number;
-    rewardCodes: {
+    rewardCredit?: number;
+    rewardCodes?: {
       title: string;
       type: string;
       hours: number;
@@ -42,6 +43,8 @@ export interface IConfig {
       kidsCount?: number;
       count: number;
     }[];
+    freePlayFrom?: Date;
+    freePlayTo?: Date;
   }[];
   hourPrice?: number;
   sockPrice?: number;

@@ -45,6 +45,8 @@ const User = new Schema({
   },
   creditDeposit: Number, // below for customer only
   creditReward: Number,
+  freePlayFrom: Date,
+  freePlayTo: Date,
   codeAmount: Number, // sum of amount of unused code
   cardType: { type: String },
   cardNo: { type: String },
@@ -62,6 +64,13 @@ User.virtual("credit").get(function() {
     return undefined;
   }
   return +((user.creditDeposit || 0) + (user.creditReward || 0)).toFixed(2);
+});
+
+User.virtual("freePlay").get(function() {
+  const user = this as IUser;
+  const now = new Date();
+  const { freePlayFrom: from, freePlayTo: to } = user;
+  return from && from <= now && to && to >= now;
 });
 
 User.plugin(autoPopulate, ["codes"]);
@@ -85,34 +94,41 @@ User.set("toJSON", {
   }
 });
 
-User.methods.depositSuccess = async function(levelPrice: number) {
+User.methods.depositSuccess = async function(levelName: string) {
   const user = this as IUser;
-  const level = config.depositLevels.filter(l => l.price === levelPrice)[0];
+  const level = config.depositLevels.filter(l => l.slug === levelName)[0];
   if (!level) {
-    throw new Error(`Deposit level not found for price ${levelPrice}.`);
+    throw new Error(`Deposit level not found for slug ${levelName}.`);
   }
-
-  if (!user.creditDeposit) {
-    user.creditDeposit = 0;
-  }
-  if (!user.creditReward) {
-    user.creditReward = 0;
-  }
-
-  console.log(
-    `[USR] User ${user.id} credit was ${user.creditDeposit}:${user.creditReward}.`
-  );
 
   user.cardType = level.cardType;
-  user.creditDeposit +=
-    level.depositCredit === undefined ? levelPrice : level.depositCredit;
-  user.creditReward += level.rewardCredit;
 
-  console.log(
-    `[USR] Deposit success ${user.id}, credit is now ${user.creditDeposit}:${user.creditReward}.`
-  );
+  if (level.depositCredit || level.rewardCredit) {
+    if (!user.creditDeposit) {
+      user.creditDeposit = 0;
+    }
+    if (!user.creditReward) {
+      user.creditReward = 0;
+    }
 
-  const codeWeights = level.rewardCodes.reduce(
+    console.log(
+      `[USR] User ${user.id} credit was ${user.creditDeposit}:${user.creditReward}.`
+    );
+
+    if (level.depositCredit) {
+      user.creditDeposit += level.depositCredit;
+    }
+
+    if (level.rewardCredit) {
+      user.creditReward += level.rewardCredit;
+    }
+
+    console.log(
+      `[USR] Deposit success ${user.id}, credit is now ${user.creditDeposit}:${user.creditReward}.`
+    );
+  }
+
+  const codeWeights = (level.rewardCodes || []).reduce(
     (weights, template) =>
       weights + (template.amountWeight || 1) * template.count,
     0
@@ -122,15 +138,15 @@ User.methods.depositSuccess = async function(levelPrice: number) {
 
   let amountPerWeight: number;
 
-  if (level.depositCredit === undefined || level.depositCredit > 0) {
-    amountPerWeight = 0;
+  if (level.depositCredit) {
+    amountPerWeight = 0; // reward codes for credit deposit are 0-value
   } else {
-    amountPerWeight = +(levelPrice / codeWeights).toFixed(2);
+    amountPerWeight = +(level.price / codeWeights).toFixed(2);
   }
 
   // console.log(`[USR] AmountPerWeight is ${amountPerWeight}.`);
 
-  const codes = level.rewardCodes.reduce((codes, template) => {
+  const codes = (level.rewardCodes || []).reduce((codes, template) => {
     for (let i = 0; i < template.count; i++) {
       const code = new Code({
         title: template.title,
@@ -146,17 +162,27 @@ User.methods.depositSuccess = async function(levelPrice: number) {
     return codes;
   }, []);
 
+  if (level.freePlayFrom && level.freePlayTo) {
+    user.freePlayFrom = level.freePlayTo;
+    user.freePlayTo = level.freePlayTo;
+    console.log(
+      `[USR] Update free-play duration for user ${user.id}: ${user.freePlayFrom}-${user.freePlayTo}`
+    );
+  }
+
   await Promise.all([Code.insertMany(codes), user.save()]);
 
-  const codeAmount = +codes
-    .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
-    .toFixed(2);
+  if (codes.length) {
+    const codeAmount = +codes
+      .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
+      .toFixed(2);
 
-  await user.updateCodeAmount();
+    await user.updateCodeAmount();
 
-  console.log(
-    `[USR] ${codes.length} codes was rewarded to user ${user._id}, amount: ${codeAmount}, user total: ${user.codeAmount}.`
-  );
+    console.log(
+      `[USR] ${codes.length} codes was rewarded to user ${user.id}, amount: ${codeAmount}, user total: ${user.codeAmount}.`
+    );
+  }
 
   // send user notification
 
@@ -215,11 +241,14 @@ export interface IUser extends mongoose.Document {
   creditDeposit?: number;
   creditReward?: number;
   credit?: number;
+  freePlayFrom: Date;
+  freePlayTo: Date;
+  freePlay: boolean;
   codeAmount?: number;
   cardType?: string;
   cardNo?: string;
   codes?: ICode[];
-  depositSuccess: (price: number) => Promise<IUser>;
+  depositSuccess: (level: string) => Promise<IUser>;
   membershipUpgradeSuccess: (cardTypeName: string) => Promise<IUser>;
   updateCodeAmount: (save?: boolean) => Promise<IUser>;
 }

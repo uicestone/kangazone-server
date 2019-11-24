@@ -74,7 +74,7 @@ Payment.methods.paidSuccess = async function() {
       break;
     case "deposit":
       const depositUser = await User.findOne({ _id: paymentAttach[1] });
-      await depositUser.depositSuccess(+paymentAttach[2]);
+      await depositUser.depositSuccess(paymentAttach[2]);
       console.log(`[PAY] User deposit success, id: ${depositUser._id}.`);
       break;
     case "membership":

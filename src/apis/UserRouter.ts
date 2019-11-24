@@ -285,20 +285,18 @@ export default router => {
       }
 
       const level = config.depositLevels.filter(
-        level => level.price === +req.body.depositLevel
+        level => level.slug === req.body.depositLevel
       )[0];
 
       if (!level) {
-        throw new HttpError(400, "充值金额错误");
+        throw new HttpError(400, "充值种类错误");
       }
 
       const payment = new Payment({
         customer,
         amount: DEBUG ? level.price / 1e4 : level.price,
-        title: `充值${level.price}元${
-          level.rewardCredit ? `送${level.rewardCredit}元` : ""
-        }`,
-        attach: `deposit ${customer.id} ${level.price}`,
+        title: `${level.desc}`,
+        attach: `deposit ${customer.id} ${level.slug}`,
         gateway: req.query.paymentGateway || Gateways.WechatPay // TODO more payment options
       });
 

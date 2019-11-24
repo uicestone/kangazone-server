@@ -38,8 +38,11 @@ const initConfig: IConfig = {
   },
   depositLevels: [
     {
+      slug: "deposit-1000",
+      desc: "充值1000元",
       price: 1000,
       cardType: "白金",
+      depositCredit: 1000,
       rewardCredit: 350,
       rewardCodes: [
         {
@@ -51,30 +54,16 @@ const initConfig: IConfig = {
       ]
     },
     {
-      price: 2000,
-      cardType: "荣耀",
-      rewardCredit: 1200,
-      rewardCodes: [
-        {
-          title: "1小时自由体验券",
-          type: "play",
-          hours: 1,
-          count: 2
-        }
-      ]
-    },
-    {
-      price: 3000,
-      cardType: "至尊",
-      rewardCredit: 3000,
-      rewardCodes: [
-        {
-          title: "1小时自由体验券",
-          type: "play",
-          hours: 1,
-          count: 4
-        }
-      ]
+      slug: "monthly-2019-12",
+      desc: "12月月卡",
+      price: 500,
+      cardType: "月卡",
+      freePlayFrom: moment("2019-12-01")
+        .startOf("month")
+        .toDate(),
+      freePlayTo: moment("2019-12-31")
+        .endOf("month")
+        .toDate()
     }
   ],
   hourPriceRatio: [1, 0.5, 0.5],

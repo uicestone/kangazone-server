@@ -13,8 +13,8 @@ import { config } from "../models/Config";
 import stringWidth from "string-width";
 
 setTimeout(async () => {
-  //   const u = await User.findOne({ name: "Uice Stone" });
-  //   u.depositSuccess(2000);
+  const u = await User.findOne({ name: "测试用户2" });
+  u.depositSuccess("deposit-1000");
 }, 500);
 
 export default router => {
