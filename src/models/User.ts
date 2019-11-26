@@ -33,6 +33,8 @@ const User = new Schema({
   },
   avatarUrl: String,
   region: String,
+  country: String,
+  isForeigner: Boolean,
   birthday: String,
   constellation: String,
   idCardNo: String,
@@ -230,6 +232,8 @@ export interface IUser extends mongoose.Document {
   mobile?: string;
   avatarUrl?: string;
   region?: string;
+  country?: string;
+  isForeigner?: boolean;
   birthday?: string;
   constellation?: string;
   idCardNo?: string;
