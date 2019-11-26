@@ -160,32 +160,31 @@ export default async (dateInput?: string | Date) => {
     }, []);
 
   const depositsCount: {
+    slug: string;
     desc: string;
     price: number;
+    cardType: string;
     count: number;
   }[] = [];
 
   payments
     .filter(p => p.attach.match(/^deposit /))
     .reduce((depositsCount, payment) => {
-      const [, levelPrice] = payment.attach.match(/^deposit [\d\w]+ (\-?\d+)/);
-      let depositCount = depositsCount.find(c => c.price === +levelPrice);
+      const [, levelSlug] = payment.attach.match(
+        /^deposit [\d\w]+ ([\d\w\-]+)/
+      );
+      let depositCount = depositsCount.find(c => c.slug === levelSlug);
       if (!depositCount) {
-        const level = config.depositLevels.find(l => l.price === +levelPrice);
+        const level = config.depositLevels.find(l => l.slug === levelSlug);
         if (!level) {
-          // throw new Error(`Level not found for price ${levelPrice}`);
-          depositCount = {
-            desc: "已下架等级",
-            price: +levelPrice,
-            count: 0
-          };
-        } else {
-          depositCount = {
-            desc: level.desc,
-            price: level.price,
-            count: 0
-          };
+          throw new Error(`Level not found for slug ${levelSlug}`);
         }
+
+        depositCount = {
+          ...level,
+          count: 0
+        };
+
         depositsCount.push(depositCount);
       }
       depositCount.count++;
