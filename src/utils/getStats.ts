@@ -121,8 +121,8 @@ export default async (dateInput?: string | Date) => {
     .filter(b => b.coupon)
     .reduce((couponsCount, booking) => {
       let couponCount = couponsCount.find(c => c.slug === booking.coupon);
+      const coupon = coupons.find(c => c.slug === booking.coupon);
       if (!couponCount) {
-        const coupon = coupons.find(c => c.slug === booking.coupon);
         couponCount = {
           slug: coupon.slug,
           name: coupon.name,
@@ -131,7 +131,9 @@ export default async (dateInput?: string | Date) => {
         };
         couponsCount.push(couponCount);
       }
-      couponCount.count += booking.membersCount + booking.kidsCount;
+      couponCount.count +=
+        (booking.membersCount + booking.kidsCount) /
+        ((coupon.membersCount || 0) + (coupon.kidsCount || 0) || 1);
       return couponsCount;
     }, [])
     .map(couponCount => {
