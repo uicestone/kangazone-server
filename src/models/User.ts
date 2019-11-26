@@ -165,7 +165,7 @@ User.methods.depositSuccess = async function(levelName: string) {
   }, []);
 
   if (level.freePlayFrom && level.freePlayTo) {
-    user.freePlayFrom = level.freePlayTo;
+    user.freePlayFrom = level.freePlayFrom;
     user.freePlayTo = level.freePlayTo;
     console.log(
       `[USR] Update free-play duration for user ${user.id}: ${user.freePlayFrom}-${user.freePlayTo}`

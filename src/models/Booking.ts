@@ -99,6 +99,8 @@ Booking.methods.calculatePrice = async function() {
   const kidFirstHourPrice = config.kidHourPrice;
 
   let discountHours = 0;
+  let membersCount = booking.membersCount;
+  let kidsCount = booking.kidsCount;
 
   if (booking.code) {
     await booking.populate("code").execPopulate();
@@ -112,6 +114,14 @@ Booking.methods.calculatePrice = async function() {
 
   if (booking.code && booking.code.hours) {
     discountHours += booking.code.hours;
+  }
+
+  if (booking.customer.freePlay) {
+    if (membersCount > 0) {
+      membersCount -= 1;
+    } else if (kidsCount > 0) {
+      kidsCount -= 1;
+    }
   }
 
   let coupon;
@@ -133,13 +143,13 @@ Booking.methods.calculatePrice = async function() {
         .reduce((price, ratio) => {
           return price + firstHourPrice * ratio;
         }, 0) *
-        booking.membersCount +
+        membersCount +
       config.hourPriceRatio
         .slice(discountHours, booking.hours)
         .reduce((price, ratio) => {
           return price + kidFirstHourPrice * ratio;
         }, 0) *
-        booking.kidsCount; // WARN code will reduce each user by hour, maybe unexpected
+        kidsCount; // WARN code will reduce each user by hour, maybe unexpected
   } else if (booking.code && !booking.code.hours) {
     // unlimited hours with code
     booking.price = 0;
@@ -149,8 +159,8 @@ Booking.methods.calculatePrice = async function() {
   } else {
     // unlimited hours standard
     booking.price =
-      config.unlimitedPrice * booking.membersCount +
-      config.kidUnlimitedPrice * booking.kidsCount;
+      config.unlimitedPrice * membersCount +
+      config.kidUnlimitedPrice * kidsCount;
   }
 
   if (coupon && coupon.price) {
