@@ -110,6 +110,10 @@ export default router => {
           });
         }
 
+        if (req.query.cardTypes) {
+          query.find({ cardType: { $in: req.query.cardTypes } });
+        }
+
         if ($and.length) {
           query.find({ $and });
         }
