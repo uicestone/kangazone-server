@@ -6,19 +6,19 @@ import User from "../models/User";
 import getStats from "../utils/getStats";
 import { Gateways } from "../models/Payment";
 import { Image } from "canvas";
+import XlsxPopulate from "xlsx-populate";
+
+moment.locale("zh-cn");
 
 export default router => {
   // Store CURD
-  router
-    .route("/stats/:date?")
-
-    .get(
-      handleAsyncErrors(async (req, res) => {
-        const dateInput = req.params.date;
-        const stats = await getStats(dateInput);
-        res.json(stats);
-      })
-    );
+  router.route("/stats/:date?").get(
+    handleAsyncErrors(async (req, res) => {
+      const dateInput = req.params.date;
+      const stats = await getStats(dateInput);
+      res.json(stats);
+    })
+  );
 
   router.route("/stats-receipt-data/:date?").get(
     handleAsyncErrors(async (req, res) => {
@@ -100,6 +100,107 @@ export default router => {
       const hexString = Buffer.from(encoder.encode()).toString("hex");
 
       res.send(hexString);
+    })
+  );
+
+  router.route("/daily-report/:date?").get(
+    handleAsyncErrors(async (req, res) => {
+      const dateInput = req.params.date;
+      const workbook = await XlsxPopulate.fromFileAsync(
+        "./reports/templates/daily.xlsx"
+      );
+      const date = moment(dateInput).format("YYYY-MM-DD");
+      const startOfMonth = moment(date)
+        .startOf("month")
+        .toDate();
+      const [year, month, day, dayOfWeek] = moment(date)
+        .format("YYYY MM DD dd")
+        .split(" ");
+      const stats = await getStats(date);
+      const statsM = await getStats(date, startOfMonth);
+      const data = {
+        year,
+        month,
+        day,
+        dayOfWeek,
+        weather: "",
+        customerCount: stats.customerCount,
+        bookingAmount: stats.paidAmount - stats.socksAmount,
+        couponPaid: stats.paidAmountByGateways.coupon,
+        tbAmount: stats.tbAmount,
+        partyAmount: stats.partyAmount,
+        creditAmount: stats.paidAmountByGateways.credit,
+        restaurantAmount: "",
+        drinkAmount: "",
+        socksAmount: stats.socksAmount,
+        depositAmount1000:
+          (
+            stats.depositsCount.find(d => d.slug === "deposit-1000") || {
+              count: 0
+            }
+          ).count * 1000,
+        depositAmount2000:
+          (
+            stats.depositsCount.find(d => d.slug === "deposit-2000") || {
+              count: 0
+            }
+          ).count * 2000,
+        depositAmount3000:
+          (
+            stats.depositsCount.find(d => d.slug === "deposit-3000") || {
+              count: 0
+            }
+          ).count * 3000,
+        codeDepositAmount: stats.codeDepositAmount,
+        freePlayDepositAmount: "",
+
+        customerCountM: statsM.customerCount,
+        bookingAmountM: statsM.paidAmount - statsM.socksAmount,
+        couponPaidM: statsM.paidAmountByGateways.coupon,
+        tbAmountM: statsM.tbAmount,
+        partyAmountM: statsM.partyAmount,
+        creditAmountM: statsM.paidAmountByGateways.credit,
+        restaurantAmountM: "",
+        drinkAmountM: "",
+        socksAmountM: statsM.socksAmount,
+        depositAmount1000M:
+          (
+            statsM.depositsCount.find(d => d.slug === "deposit-1000") || {
+              count: 0
+            }
+          ).count * 1000,
+        depositAmount2000M:
+          (
+            statsM.depositsCount.find(d => d.slug === "deposit-2000") || {
+              count: 0
+            }
+          ).count * 2000,
+        depositAmount3000M:
+          (
+            statsM.depositsCount.find(d => d.slug === "deposit-3000") || {
+              count: 0
+            }
+          ).count * 3000,
+        codeDepositAmountM: statsM.codeDepositAmount,
+        freePlayDepositAmountM: ""
+      };
+      Object.keys(data).forEach(key => {
+        let replace = data[key];
+        if (typeof replace === "number") {
+          replace = +replace.toFixed(2);
+        }
+        if (replace === undefined || replace === null) {
+          replace = "";
+        }
+        workbook.find(`{{${key}}}`, replace);
+      });
+
+      const filename = `日报 ${date}.xlsx`;
+      const path = `./reports/${filename}`;
+
+      await workbook.toFileAsync(path);
+
+      res.download(path, filename);
     })
   );
 

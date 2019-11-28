@@ -6,15 +6,19 @@ import Booking, {
 } from "../models/Booking";
 import Payment, { Gateways } from "../models/Payment";
 
-export default async (dateInput?: string | Date) => {
+export default async (
+  dateInput?: string | Date,
+  dateInputFrom?: string | Date
+) => {
   const dateStr = moment(dateInput).format("YYYY-MM-DD"),
-    startOfDay = moment(dateInput)
+    dateStrFrom = dateInputFrom && moment(dateInputFrom).format("YYYY-MM-DD"),
+    startOfDay = moment(dateInputFrom || dateInput)
       .startOf("day")
       .toDate(),
     endOfDay = moment(dateInput)
       .endOf("day")
       .toDate(),
-    dateRangeStartStr = moment(dateInput)
+    dateRangeStartStr = moment(dateInputFrom || dateInput)
       .subtract(6, "days")
       .format("YYYY-MM-DD"),
     startOfDateRange = moment(dateInput)
@@ -25,7 +29,7 @@ export default async (dateInput?: string | Date) => {
   const coupons = config.coupons;
 
   const bookingsPaid = await Booking.find({
-    date: dateStr,
+    date: dateStrFrom ? { $gte: dateStrFrom, $lte: dateStr } : dateStr,
     status: { $in: paidBookingStatuses }
   });
 
@@ -96,6 +100,30 @@ export default async (dateInput?: string | Date) => {
     (socks, booking) => socks + booking.socksCount,
     0
   );
+
+  const socksAmount = socksCount * config.sockPrice;
+
+  const tbAmount = bookingsPaid
+    .filter(booking => booking.type === "tb")
+    .reduce(
+      (amount, booking) =>
+        amount +
+        booking.payments
+          .filter(p => p.paid)
+          .reduce((a, p) => a + (p.amountDeposit || p.amount), 0),
+      0
+    );
+
+  const partyAmount = bookingsPaid
+    .filter(booking => booking.type === "party")
+    .reduce(
+      (amount, booking) =>
+        amount +
+        booking.payments
+          .filter(p => p.paid)
+          .reduce((a, p) => a + (p.amountDeposit || p.amount), 0),
+      0
+    );
 
   const paidAmountByGateways: { [gateway: string]: number } = payments.reduce(
     (amountByGateways, payment) => {
@@ -179,7 +207,9 @@ export default async (dateInput?: string | Date) => {
       if (!depositCount) {
         const level = config.depositLevels.find(l => l.slug === levelSlug);
         if (!level) {
-          throw new Error(`Level not found for slug ${levelSlug}`);
+          throw new Error(
+            `Level not found for slug ${levelSlug}, ${payment.attach}`
+          );
         }
 
         depositCount = {
@@ -366,9 +396,12 @@ export default async (dateInput?: string | Date) => {
     customerCount,
     kidsCount,
     paidAmount,
+    partyAmount,
+    tbAmount,
     depositAmount,
     codeDepositAmount,
     socksCount,
+    socksAmount,
     paidAmountByGateways,
     couponsCount,
     codesCount,
