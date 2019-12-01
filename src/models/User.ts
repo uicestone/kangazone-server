@@ -155,7 +155,9 @@ User.methods.depositSuccess = async function(levelName: string) {
         type: template.type,
         amount: amountPerWeight * (template.amountWeight || 1),
         hours: template.hours,
-        customer: user
+        customer: user,
+        membersCount: template.membersCount,
+        kidsCount: template.kidsCount
       });
       console.log(`[USR] Code amount is ${code.amount}`);
       codes.push(code);
