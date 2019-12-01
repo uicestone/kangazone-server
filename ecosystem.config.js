@@ -1,8 +1,9 @@
 module.exports = {
   apps: {
     name: "kangazone-server",
-    script: "./node_modules/.bin/ts-node",
-    args: "src/index.ts",
+    // script: "./node_modules/.bin/ts-node",
+    // args: "src/index.ts",
+    script: "./dist/index.js",
     log_date_format: "YYYY-MM-DD HH:mm:ss.SSS (ZZ)",
     log: true,
     env: {
