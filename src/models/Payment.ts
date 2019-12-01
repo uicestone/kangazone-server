@@ -184,6 +184,9 @@ Payment.pre("save", async function(next) {
       code.usedInBooking = payment.gatewayData.bookingId;
       await code.save();
       await customer.updateCodeAmount();
+      console.log(
+        `[PAY] Code ${code.id} used in ${code.usedInBooking}, customer ${customer.id} code amount is now ${customer.codeAmount}`
+      );
       payment.paid = true;
       break;
     case Gateways.Card:

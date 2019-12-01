@@ -213,6 +213,7 @@ User.methods.membershipUpgradeSuccess = async function(cardTypeName: string) {
 
 User.methods.updateCodeAmount = async function(save = true) {
   const user = this as IUser;
+  await user.populate("codes").execPopulate();
   user.codeAmount = +user.codes
     .filter(c => !c.used)
     .reduce((codeAmount, code) => codeAmount + (code.amount || 0), 0)
