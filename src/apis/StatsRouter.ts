@@ -53,7 +53,7 @@ export default router => {
         .line(`成人数：${stats.customerCount}`)
         .line(`儿童数：${stats.kidsCount}`)
         .line(`袜子数：${stats.socksCount}`)
-        .line(`门票收入：${stats.paidAmount}`)
+        .line(`门票收入：${stats.paidAmount - stats.socksAmount}`)
         .line(`充值收入：${stats.depositAmount}`)
         .line(`收款方式：`)
         .line(`- 余额：${stats.paidAmountByGateways[Gateways.Credit] || 0}`)
@@ -129,7 +129,9 @@ export default router => {
         couponPaid: stats.paidAmountByGateways.coupon,
         tbAmount: stats.tbAmount,
         partyAmount: stats.partyAmount,
-        creditAmount: stats.paidAmountByGateways.credit,
+        creditAndCodeAmount:
+          (stats.paidAmountByGateways.credit || 0) +
+          (stats.paidAmountByGateways.code || 0),
         restaurantAmount: "",
         drinkAmount: "",
         socksAmount: stats.socksAmount,
@@ -159,7 +161,9 @@ export default router => {
         couponPaidM: statsM.paidAmountByGateways.coupon,
         tbAmountM: statsM.tbAmount,
         partyAmountM: statsM.partyAmount,
-        creditAmountM: statsM.paidAmountByGateways.credit,
+        creditAndCodeAmountM:
+          (statsM.paidAmountByGateways.credit || 0) +
+          (statsM.paidAmountByGateways.code || 0),
         restaurantAmountM: "",
         drinkAmountM: "",
         socksAmountM: statsM.socksAmount,
