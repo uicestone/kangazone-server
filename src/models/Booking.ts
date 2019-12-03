@@ -112,10 +112,6 @@ Booking.methods.calculatePrice = async function() {
     }
   }
 
-  if (booking.code && booking.code.hours) {
-    discountHours += booking.code.hours;
-  }
-
   if (booking.customer.freePlay) {
     if (membersCount > 0) {
       membersCount -= 1;
@@ -136,6 +132,18 @@ Booking.methods.calculatePrice = async function() {
     }
   }
 
+  if (booking.code) {
+    if (+booking.code.hours === +booking.hours) {
+      membersCount -= booking.code.membersCount || 1;
+      kidsCount -= booking.code.kidsCount || 0;
+    } else {
+      throw new Error("code_booking_hours_not_match");
+    }
+    if (booking.code.hours) {
+      discountHours += booking.code.hours;
+    }
+  }
+
   if (booking.hours) {
     booking.price =
       config.hourPriceRatio
@@ -149,10 +157,7 @@ Booking.methods.calculatePrice = async function() {
         .reduce((price, ratio) => {
           return price + kidFirstHourPrice * ratio;
         }, 0) *
-        kidsCount; // WARN code will reduce each user by hour, maybe unexpected
-  } else if (booking.code && !booking.code.hours) {
-    // unlimited hours with code
-    booking.price = 0;
+        kidsCount; // WARN: code will reduce each user by hour, maybe unexpected
   } else if (coupon && !coupon.hours) {
     // unlimited hours with coupon
     booking.price = 0;
