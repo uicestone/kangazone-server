@@ -281,23 +281,36 @@ Booking.methods.paymentSuccess = async function() {
 Booking.methods.createRefundPayment = async function() {
   const booking = this as IBooking;
 
-  const creditPayments = booking.payments.filter(
-    p => p.gateway === Gateways.Credit && p.amount > 0 && p.paid
+  // repopulate payments with customers
+  await booking.populate("payments").execPopulate();
+
+  const creditAndCodePayments = booking.payments.filter(
+    p =>
+      [Gateways.Credit, Gateways.Code].includes(p.gateway) &&
+      p.amount > 0 &&
+      p.paid
   );
   const extraPayments = booking.payments.filter(
-    p => p.gateway !== Gateways.Credit && p.amount > 0 && p.paid
+    p =>
+      ![Gateways.Credit, Gateways.Code].includes(p.gateway) &&
+      p.amount > 0 &&
+      p.paid
   );
 
   await Promise.all(
-    creditPayments.map(async p => {
+    creditAndCodePayments.map(async p => {
       const refundPayment = new Payment({
         customer: p.customer,
         amount: -p.amount,
         title: `退款：${p.title}`,
         attach: p.attach,
         gateway: p.gateway,
+        gatewayData: p.gatewayData,
         original: p.id
       });
+      if (p.gateway === Gateways.Code) {
+        p.gatewayData.codeRefund = true;
+      }
       await refundPayment.save();
       booking.payments.push(refundPayment);
     })

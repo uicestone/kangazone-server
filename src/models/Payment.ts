@@ -179,15 +179,33 @@ Payment.pre("save", async function(next) {
         throw new Error("invalid_code_payment_gateway_data");
       }
       const code = await Code.findOne({ _id: payment.gatewayData.codeId });
-      code.used = true;
-      code.usedAt = new Date();
-      code.usedInBooking = payment.gatewayData.bookingId;
-      await code.save();
-      await customer.updateCodeAmount();
-      console.log(
-        `[PAY] Code ${code.id} used in ${code.usedInBooking}, customer ${customer.id} code amount is now ${customer.codeAmount}`
-      );
-      payment.paid = true;
+
+      if (Math.abs(payment.amount) !== code.amount) {
+        throw new Error("code_payment_amount_mismatch");
+      }
+
+      if (payment.gatewayData.codeRefund) {
+        code.used = false;
+        code.usedAt = undefined;
+        code.usedInBooking = undefined;
+        await code.save();
+        await customer.updateCodeAmount();
+        console.log(
+          `[PAY] Code ${code.id} refunded, customer ${customer.id} code amount is now ${customer.codeAmount}`
+        );
+        payment.paid = true;
+      } else {
+        code.used = true;
+        code.usedAt = new Date();
+        code.usedInBooking = payment.gatewayData.bookingId;
+        await code.save();
+        await customer.updateCodeAmount();
+        console.log(
+          `[PAY] Code ${code.id} used in ${code.usedInBooking}, customer ${customer.id} code amount is now ${customer.codeAmount}`
+        );
+        payment.paid = true;
+      }
+
       break;
     case Gateways.Card:
       break;
@@ -209,7 +227,7 @@ export interface IPayment extends mongoose.Document {
   paid: boolean;
   title: string;
   attach: string;
-  gateway: string;
+  gateway: Gateways;
   gatewayData?: { [key: string]: any };
   original?: string;
   paidSuccess: () => Promise<IPayment>;
