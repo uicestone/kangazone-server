@@ -57,6 +57,9 @@ Store.methods.authBands = async function(
   for (const serial of serials) {
     for (const bandId of bandIds) {
       try {
+        if (!storeGateControllers[serial]) {
+          throw new Error("controller_not_connected");
+        }
         revoke
           ? storeGateControllers[serial].removeAuth(icCode10To8(bandId))
           : storeGateControllers[serial].setAuth(icCode10To8(bandId));
