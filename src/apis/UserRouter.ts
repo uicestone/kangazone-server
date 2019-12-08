@@ -207,7 +207,7 @@ export default router => {
             _id: { $ne: user.id }
           });
           if (userMobileExists) {
-            throw new HttpError(409, `手机号${req.body.mobile}已被使用.`);
+            throw new HttpError(409, `手机号${req.body.mobile}已被使用`);
           }
         }
         if (req.body.cardNo) {
@@ -216,7 +216,7 @@ export default router => {
             _id: { $ne: user.id }
           });
           if (userCardNoExists) {
-            throw new HttpError(409, `会员卡号${req.body.cardNo}已被使用.`);
+            throw new HttpError(409, `会员卡号${req.body.cardNo}已被使用`);
           }
         }
         if (req.body.idCardNo) {
@@ -226,7 +226,12 @@ export default router => {
             _id: { $ne: user.id }
           });
           if (userIdCardNoExists) {
-            throw new HttpError(409, `身份证号${req.body.idCardNo}已被使用.`);
+            throw new HttpError(409, `身份证号${req.body.idCardNo}已被使用`);
+          }
+        }
+        if (req.body.isForeigner) {
+          if (!req.body.country) {
+            throw new HttpError(400, "外籍用户必须录入国籍");
           }
         }
         if (req.body.passNo) {
