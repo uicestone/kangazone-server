@@ -192,9 +192,9 @@ Booking.methods.createPayment = async function(
     paymentGateway = Gateways.WechatPay,
     useCredit = true,
     adminAddWithoutPayment = false,
-    extendHoursBy = 0
+    extendHoursBy = null // 0 stands for unlimited
   } = {},
-  amount
+  amount?: number
 ) {
   const booking = this as IBooking;
 
@@ -204,7 +204,7 @@ Booking.methods.createPayment = async function(
 
   let attach = `booking ${booking._id}`;
 
-  if (extendHoursBy) {
+  if (extendHoursBy !== null) {
     attach += ` extend ${extendHoursBy}`;
   }
 
@@ -235,7 +235,7 @@ Booking.methods.createPayment = async function(
     const creditPayment = new Payment({
       customer: booking.customer,
       amount: creditPayAmount,
-      amountForceDeposit: booking.socksCount * 10,
+      amountForceDeposit: booking.socksCount * config.sockPrice,
       title,
       attach,
       gateway: Gateways.Credit
@@ -250,6 +250,11 @@ Booking.methods.createPayment = async function(
 
   if (extraPayAmount < 0.01 || adminAddWithoutPayment) {
     booking.status = BookingStatuses.BOOKED;
+    if (extendHoursBy === 0) {
+      booking.hours = 0;
+    } else if (extendHoursBy) {
+      booking.hours += extendHoursBy;
+    }
   } else {
     const extraPayment = new Payment({
       customer: booking.customer,
@@ -297,24 +302,26 @@ Booking.methods.createRefundPayment = async function() {
       p.paid
   );
 
-  await Promise.all(
-    creditAndCodePayments.map(async p => {
-      const refundPayment = new Payment({
-        customer: p.customer,
-        amount: -p.amount,
-        title: `退款：${p.title}`,
-        attach: p.attach,
-        gateway: p.gateway,
-        gatewayData: p.gatewayData,
-        original: p.id
-      });
-      if (p.gateway === Gateways.Code) {
-        p.gatewayData.codeRefund = true;
-      }
-      await refundPayment.save();
-      booking.payments.push(refundPayment);
-    })
-  );
+  for (const p of creditAndCodePayments) {
+    const refundPayment = new Payment({
+      customer: p.customer,
+      amount: -p.amount,
+      amountDeposit: p.amountDeposit ? -p.amountDeposit : undefined,
+      amountForceDeposit: p.amountForceDeposit
+        ? -p.amountForceDeposit
+        : undefined,
+      title: `退款：${p.title}`,
+      attach: p.attach,
+      gateway: p.gateway,
+      gatewayData: p.gatewayData,
+      original: p.id
+    });
+    if (p.gateway === Gateways.Code) {
+      p.gatewayData.codeRefund = true;
+    }
+    await refundPayment.save();
+    booking.payments.push(refundPayment);
+  }
 
   if (!extraPayments.length) {
     booking.status = BookingStatuses.CANCELED;
@@ -415,8 +422,8 @@ Booking.methods.cancel = async function(save = true) {
   if (booking.payments.filter(p => p.paid).length) {
     console.log(`[BOK] Refund booking ${booking._id}.`);
     // we don't directly change status to canceled, will auto change on refund fullfil
-    await booking.createRefundPayment();
     booking.status = BookingStatuses.PENDING_REFUND;
+    await booking.createRefundPayment();
   } else {
     booking.status = BookingStatuses.CANCELED;
   }

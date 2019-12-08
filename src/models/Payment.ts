@@ -62,7 +62,11 @@ Payment.methods.paidSuccess = async function() {
     case "booking":
       const booking = await Booking.findOne({ _id: paymentAttach[1] });
       if (paymentAttach[2] === "extend") {
-        booking.hours += +paymentAttach[3];
+        if (+paymentAttach[3] === 0) {
+          booking.hours = 0;
+        } else {
+          booking.hours += +paymentAttach[3];
+        }
       }
       if (payment.amount >= 0) {
         await booking.paymentSuccess();
@@ -139,15 +143,18 @@ Payment.pre("save", async function(next) {
         payment.amountForceDeposit = 0;
       }
 
-      const depositPaymentAmount = Math.max(
-        +(
-          payment.amountForceDeposit +
-          ((payment.amount - payment.amountForceDeposit) *
-            customer.creditDeposit) /
-            customer.credit
-        ).toFixed(2),
-        0.01
-      );
+      const depositPaymentAmount =
+        payment.amountDeposit ||
+        Math.max(
+          +(
+            payment.amountForceDeposit +
+            ((payment.amount - payment.amountForceDeposit) *
+              customer.creditDeposit) /
+              customer.credit
+          ).toFixed(2),
+          0.01
+        );
+
       const rewardPaymentAmount = +(
         payment.amount - depositPaymentAmount
       ).toFixed(2);

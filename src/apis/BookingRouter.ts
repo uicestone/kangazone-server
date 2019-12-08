@@ -353,7 +353,7 @@ export default router => {
         }
 
         if (hoursWas !== booking.hours) {
-          if (booking.hours < hoursWas) {
+          if (booking.hours && booking.hours < hoursWas) {
             throw new HttpError(
               400,
               "Hour must greater than original if not equal."
@@ -380,16 +380,28 @@ export default router => {
                 throw err;
             }
           }
-          await booking.createPayment(
-            {
-              paymentGateway: req.query.paymentGateway,
-              useCredit: req.query.useCredit !== "false",
-              adminAddWithoutPayment: req.user.role === "admin",
-              extendHoursBy: booking.hours - hoursWas
-            },
-            booking.price - priceWas
-          );
+          const extendHoursBy = booking.hours ? booking.hours - hoursWas : 0;
           booking.hours = hoursWas;
+          try {
+            await booking.createPayment(
+              {
+                paymentGateway: req.query.paymentGateway,
+                useCredit: req.query.useCredit !== "false",
+                adminAddWithoutPayment: req.user.role === "admin",
+                extendHoursBy
+              },
+              booking.price - priceWas
+            );
+          } catch (err) {
+            switch (err.message) {
+              case "no_customer_openid":
+                throw new HttpError(400, "Customer openid is missing.");
+              case "insufficient_credit":
+                throw new HttpError(400, "Customer credit is insufficient.");
+              default:
+                throw err;
+            }
+          }
         }
 
         await booking.save();
