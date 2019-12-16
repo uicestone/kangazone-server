@@ -59,7 +59,7 @@ const Booking = new Schema({
     enum: Object.values(BookingStatuses),
     default: BookingStatuses.PENDING
   },
-  price: { type: Number },
+  price: { type: Number, default: 0 },
   code: { type: Schema.Types.ObjectId, ref: Code },
   coupon: { type: String },
   payments: [{ type: Schema.Types.ObjectId, ref: Payment }],
@@ -139,13 +139,18 @@ Booking.methods.calculatePrice = async function() {
     } else {
       throw new Error("code_booking_hours_not_match");
     }
+
+    if (booking.code.price) {
+      booking.price += booking.code.price;
+    }
+
     if (booking.code.hours) {
       discountHours += booking.code.hours;
     }
   }
 
   if (booking.hours) {
-    booking.price =
+    booking.price +=
       config.hourPriceRatio
         .slice(discountHours, booking.hours)
         .reduce((price, ratio) => {

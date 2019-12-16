@@ -8,6 +8,7 @@ import { config } from "../models/Config";
 import Payment, { Gateways } from "../models/Payment";
 import Store from "../models/Store";
 import idCard from "idcard";
+import Code from "../models/Code";
 
 const { DEBUG } = process.env;
 
@@ -66,6 +67,19 @@ export default router => {
             .replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
         }
         await user.save();
+
+        // award user an 0.5-hour code
+        const trialCode = new Code({
+          customer: user.id,
+          title: "半小时体验券",
+          price: 49,
+          amount: 0,
+          hours: 0.5
+        });
+        await trialCode.save();
+        user.codes.push(trialCode);
+        await user.save();
+
         res.json(user);
       })
     )
