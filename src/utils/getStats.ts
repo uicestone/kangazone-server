@@ -91,8 +91,7 @@ export default async (
 
   const codeDepositAmount = payments
     .filter(
-      p => p.attach.match(/^deposit /) && p.amount.toString().match(/80$/)
-      // TODO use '80' suffix to detect code deposit, should be smarter
+      p => p.attach.match(/^deposit /) && p.attach.split(" ")[2].match(/-time-/)
     )
     .reduce((amount, p) => amount + p.amount, 0);
 
