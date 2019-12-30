@@ -125,7 +125,10 @@ export default router => {
         dayOfWeek,
         weather: "",
         customerCount: stats.customerCount,
-        bookingAmount: stats.paidAmount - stats.socksAmount,
+        bookingAmount:
+          stats.paidAmount -
+          stats.socksAmount -
+          (stats.paidAmountByGateways.code || 0),
         couponPaid: stats.paidAmountByGateways.coupon,
         tbAmount: stats.tbAmount,
         partyAmount: stats.partyAmount,
@@ -135,29 +138,41 @@ export default router => {
         restaurantAmount: "",
         drinkAmount: "",
         socksAmount: stats.socksAmount,
-        depositAmount1000:
+        depositAmount1:
           (
-            stats.depositsCount.find(d => d.slug === "deposit-1000") || {
+            stats.depositsCount.find(d => d.slug === "10-time-unlimited") || {
               count: 0
             }
-          ).count * 1000,
-        depositAmount2000:
+          ).count * 1180,
+        depositAmount2:
           (
-            stats.depositsCount.find(d => d.slug === "deposit-2000") || {
+            stats.depositsCount.find(d => d.slug === "20-time-unlimited") || {
               count: 0
             }
-          ).count * 2000,
-        depositAmount3000:
+          ).count * 2160,
+        depositAmount3:
           (
-            stats.depositsCount.find(d => d.slug === "deposit-3000") || {
+            stats.depositsCount.find(
+              d => d.slug === "10-time-parent-child-unlimited"
+            ) || {
               count: 0
             }
-          ).count * 3000,
+          ).count * 1680,
+        depositAmount4:
+          (
+            stats.depositsCount.find(
+              d => d.slug === "8-time-couple-unlimited"
+            ) || {
+              count: 0
+            }
+          ).count * 1314,
         codeDepositAmount: stats.codeDepositAmount,
-        freePlayDepositAmount: "",
 
         customerCountM: statsM.customerCount,
-        bookingAmountM: statsM.paidAmount - statsM.socksAmount,
+        bookingAmountM:
+          statsM.paidAmount -
+          statsM.socksAmount -
+          (statsM.paidAmountByGateways.code || 0),
         couponPaidM: statsM.paidAmountByGateways.coupon,
         tbAmountM: statsM.tbAmount,
         partyAmountM: statsM.partyAmount,
@@ -167,24 +182,34 @@ export default router => {
         restaurantAmountM: "",
         drinkAmountM: "",
         socksAmountM: statsM.socksAmount,
-        depositAmount1000M:
+        depositAmount1M:
           (
-            statsM.depositsCount.find(d => d.slug === "deposit-1000") || {
+            statsM.depositsCount.find(d => d.slug === "10-time-unlimited") || {
               count: 0
             }
-          ).count * 1000,
-        depositAmount2000M:
+          ).count * 1180,
+        depositAmount2M:
           (
-            statsM.depositsCount.find(d => d.slug === "deposit-2000") || {
+            statsM.depositsCount.find(d => d.slug === "20-time-unlimited") || {
               count: 0
             }
-          ).count * 2000,
-        depositAmount3000M:
+          ).count * 2160,
+        depositAmount3M:
           (
-            statsM.depositsCount.find(d => d.slug === "deposit-3000") || {
+            statsM.depositsCount.find(
+              d => d.slug === "10-time-parent-child-unlimited"
+            ) || {
               count: 0
             }
-          ).count * 3000,
+          ).count * 1680,
+        depositAmount4M:
+          (
+            statsM.depositsCount.find(
+              d => d.slug === "8-time-couple-unlimited"
+            ) || {
+              count: 0
+            }
+          ).count * 1314,
         codeDepositAmountM: statsM.codeDepositAmount,
         freePlayDepositAmountM: ""
       };
