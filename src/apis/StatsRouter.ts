@@ -125,10 +125,7 @@ export default router => {
         dayOfWeek,
         weather: "",
         customerCount: stats.customerCount,
-        bookingAmount:
-          stats.paidAmount -
-          stats.socksAmount -
-          (stats.paidAmountByGateways.code || 0),
+        bookingAmount: stats.paidAmount - stats.socksAmount,
         couponPaid: stats.paidAmountByGateways.coupon,
         tbAmount: stats.tbAmount,
         partyAmount: stats.partyAmount,
@@ -169,10 +166,7 @@ export default router => {
         codeDepositAmount: stats.codeDepositAmount,
 
         customerCountM: statsM.customerCount,
-        bookingAmountM:
-          statsM.paidAmount -
-          statsM.socksAmount -
-          (statsM.paidAmountByGateways.code || 0),
+        bookingAmountM: statsM.paidAmount - statsM.socksAmount,
         couponPaidM: statsM.paidAmountByGateways.coupon,
         tbAmountM: statsM.tbAmount,
         partyAmountM: statsM.partyAmount,
