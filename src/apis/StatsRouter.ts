@@ -137,17 +137,25 @@ export default router => {
         socksAmount: stats.socksAmount,
         depositAmount1:
           (
+            stats.depositsCount.find(d => d.slug === "5-time-2-hour") || {
+              count: 0
+            }
+          ).count * 580,
+        depositAmount2:
+          (
             stats.depositsCount.find(d => d.slug === "10-time-unlimited") || {
               count: 0
             }
-          ).count * 1180,
-        depositAmount2:
+          ).count * 1280,
+        depositAmount3:
           (
-            stats.depositsCount.find(d => d.slug === "20-time-unlimited") || {
+            stats.depositsCount.find(
+              d => d.slug === "5-time-parent-child-2-hour"
+            ) || {
               count: 0
             }
-          ).count * 2160,
-        depositAmount3:
+          ).count * 780,
+        depositAmount4:
           (
             stats.depositsCount.find(
               d => d.slug === "10-time-parent-child-unlimited"
@@ -155,7 +163,7 @@ export default router => {
               count: 0
             }
           ).count * 1680,
-        depositAmount4:
+        depositAmount5:
           (
             stats.depositsCount.find(
               d => d.slug === "8-time-couple-unlimited"
@@ -178,17 +186,25 @@ export default router => {
         socksAmountM: statsM.socksAmount,
         depositAmount1M:
           (
+            statsM.depositsCount.find(d => d.slug === "5-time-2-hour") || {
+              count: 0
+            }
+          ).count * 580,
+        depositAmount2M:
+          (
             statsM.depositsCount.find(d => d.slug === "10-time-unlimited") || {
               count: 0
             }
-          ).count * 1180,
-        depositAmount2M:
+          ).count * 1280,
+        depositAmount3M:
           (
-            statsM.depositsCount.find(d => d.slug === "20-time-unlimited") || {
+            statsM.depositsCount.find(
+              d => d.slug === "5-time-parent-child-2-hour"
+            ) || {
               count: 0
             }
-          ).count * 2160,
-        depositAmount3M:
+          ).count * 780,
+        depositAmount4M:
           (
             statsM.depositsCount.find(
               d => d.slug === "10-time-parent-child-unlimited"
@@ -196,7 +212,7 @@ export default router => {
               count: 0
             }
           ).count * 1680,
-        depositAmount4M:
+        depositAmount5M:
           (
             statsM.depositsCount.find(
               d => d.slug === "8-time-couple-unlimited"
