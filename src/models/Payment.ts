@@ -35,7 +35,8 @@ Payment.virtual("payArgs").get(function() {
       !payment.gatewayData.nonce_str ||
       !payment.gatewayData.prepay_id
     ) {
-      throw new Error(`incomplete_gateway_data`);
+      if (payment.isNew) return null;
+      else throw new Error(`incomplete_gateway_data`);
     }
     const wechatGatewayData = payment.gatewayData as {
       nonce_str: string;
