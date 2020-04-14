@@ -10,6 +10,7 @@ import WgCtl from "wiegand-control";
 import { sleep, icCode10To8 } from "../utils/helper";
 import Booking, { liveBookingStatuses } from "../models/Booking";
 import moment from "moment";
+import agenda from "../utils/agenda";
 
 export default router => {
   // Store CURD
@@ -242,6 +243,15 @@ export default router => {
       }
       storeGateControllers[req.params.serial].clearAuth();
       res.end();
+    })
+  );
+
+  router.route("/store/reset-auth").post(
+    handleAsyncErrors(async (req, res) => {
+      if (req.user.role !== "admin") {
+        throw new HttpError(403);
+      }
+      agenda.now("reset auth");
     })
   );
 
