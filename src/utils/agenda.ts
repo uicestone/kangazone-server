@@ -106,7 +106,7 @@ agenda.define("reset auth", async (job, done) => {
         continue;
       }
       ctl.clearAuth();
-      await sleep(500);
+      await sleep(15 * 60 * 1e3); // wait 15 minutes (after all echo done) before start setting auth.
       const users = await User.find({ passNo8: { $exists: true } }); // TODO add store to condition
       for (const user of users) {
         ctl.setAuth(user.passNo8);
