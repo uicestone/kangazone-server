@@ -246,7 +246,7 @@ export default router => {
     })
   );
 
-  router.route("/store/reset-auth").post(
+  router.route("/reset-auth").post(
     handleAsyncErrors(async (req, res) => {
       if (req.user.role !== "admin") {
         throw new HttpError(403);
