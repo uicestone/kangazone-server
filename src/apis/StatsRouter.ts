@@ -7,6 +7,7 @@ import getStats from "../utils/getStats";
 import { Gateways } from "../models/Payment";
 import { Image } from "canvas";
 import XlsxPopulate from "xlsx-populate";
+import { unlinkSync } from "fs";
 
 moment.locale("zh-cn");
 
@@ -91,11 +92,7 @@ export default router => {
         encoder.line("- 无");
       }
 
-      encoder
-        .newline()
-        .newline()
-        .newline()
-        .newline();
+      encoder.newline().newline().newline().newline();
 
       const hexString = Buffer.from(encoder.encode()).toString("hex");
 
@@ -114,6 +111,11 @@ export default router => {
       const [year, month, day, dayOfWeek] = moment(date)
         .format("YYYY MM DD dd")
         .split(" ");
+      const filename = `日报 ${date}.xlsx`;
+      const path = `./reports/${filename}`;
+
+      unlinkSync(path); // delete file if exists before generating a new report
+
       const stats = await getStats(date);
       const statsM = await getStats(date, startOfMonth);
       const data = {
@@ -227,9 +229,6 @@ export default router => {
         }
         workbook.find(`{{${key}}}`, replace);
       });
-
-      const filename = `日报 ${date}.xlsx`;
-      const path = `./reports/${filename}`;
 
       await workbook.toFileAsync(path);
 
