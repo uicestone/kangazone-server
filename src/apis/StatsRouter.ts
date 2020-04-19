@@ -123,7 +123,11 @@ export default router => {
         dayOfWeek,
         weather: "",
         customerCount: stats.customerCount,
-        bookingAmount: stats.paidAmount - stats.socksAmount,
+        bookingAmount:
+          stats.paidAmount -
+          stats.socksAmount -
+          (stats.paidAmountByGateways.credit || 0) -
+          (stats.paidAmountByGateways.code || 0),
         couponPaid: stats.paidAmountByGateways.coupon,
         tbAmount: stats.tbAmount,
         partyAmount: stats.partyAmount,
@@ -163,18 +167,14 @@ export default router => {
               count: 0
             }
           ).count * 1680,
-        depositAmount5:
-          (
-            stats.depositsCount.find(
-              d => d.slug === "8-time-couple-unlimited"
-            ) || {
-              count: 0
-            }
-          ).count * 1314,
         codeDepositAmount: stats.codeDepositAmount,
 
         customerCountM: statsM.customerCount,
-        bookingAmountM: statsM.paidAmount - statsM.socksAmount,
+        bookingAmountM:
+          statsM.paidAmount -
+          statsM.socksAmount -
+          (stats.paidAmountByGateways.credit || 0) -
+          (stats.paidAmountByGateways.code || 0),
         couponPaidM: statsM.paidAmountByGateways.coupon,
         tbAmountM: statsM.tbAmount,
         partyAmountM: statsM.partyAmount,
@@ -214,14 +214,6 @@ export default router => {
               count: 0
             }
           ).count * 1680,
-        depositAmount5M:
-          (
-            statsM.depositsCount.find(
-              d => d.slug === "8-time-couple-unlimited"
-            ) || {
-              count: 0
-            }
-          ).count * 1314,
         codeDepositAmountM: statsM.codeDepositAmount,
         freePlayDepositAmountM: ""
       };
