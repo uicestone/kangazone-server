@@ -110,9 +110,7 @@ export default router => {
         "./reports/templates/daily.xlsx"
       );
       const date = moment(dateInput).format("YYYY-MM-DD");
-      const startOfMonth = moment(date)
-        .startOf("month")
-        .toDate();
+      const startOfMonth = moment(date).startOf("month").toDate();
       const [year, month, day, dayOfWeek] = moment(date)
         .format("YYYY MM DD dd")
         .split(" ");
@@ -137,20 +135,22 @@ export default router => {
         socksAmount: stats.socksAmount,
         depositAmount1:
           (
-            stats.depositsCount.find(d => d.slug === "5-time-2-hour") || {
+            stats.depositsCount.find(d => d.slug === "5-time-2-hour-2020") || {
               count: 0
             }
           ).count * 580,
         depositAmount2:
           (
-            stats.depositsCount.find(d => d.slug === "10-time-unlimited") || {
+            stats.depositsCount.find(
+              d => d.slug === "10-time-unlimited-2020"
+            ) || {
               count: 0
             }
           ).count * 1280,
         depositAmount3:
           (
             stats.depositsCount.find(
-              d => d.slug === "5-time-parent-child-2-hour"
+              d => d.slug === "5-time-parent-child-2-hour-2020"
             ) || {
               count: 0
             }
@@ -158,7 +158,7 @@ export default router => {
         depositAmount4:
           (
             stats.depositsCount.find(
-              d => d.slug === "10-time-parent-child-unlimited"
+              d => d.slug === "10-time-parent-child-unlimited-2020"
             ) || {
               count: 0
             }
@@ -186,20 +186,22 @@ export default router => {
         socksAmountM: statsM.socksAmount,
         depositAmount1M:
           (
-            statsM.depositsCount.find(d => d.slug === "5-time-2-hour") || {
+            statsM.depositsCount.find(d => d.slug === "5-time-2-hour-2020") || {
               count: 0
             }
           ).count * 580,
         depositAmount2M:
           (
-            statsM.depositsCount.find(d => d.slug === "10-time-unlimited") || {
+            statsM.depositsCount.find(
+              d => d.slug === "10-time-unlimited-2020"
+            ) || {
               count: 0
             }
           ).count * 1280,
         depositAmount3M:
           (
             statsM.depositsCount.find(
-              d => d.slug === "5-time-parent-child-2-hour"
+              d => d.slug === "5-time-parent-child-2-hour-2020"
             ) || {
               count: 0
             }
@@ -207,7 +209,7 @@ export default router => {
         depositAmount4M:
           (
             statsM.depositsCount.find(
-              d => d.slug === "10-time-parent-child-unlimited"
+              d => d.slug === "10-time-parent-child-unlimited-2020"
             ) || {
               count: 0
             }
