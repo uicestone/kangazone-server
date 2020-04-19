@@ -7,7 +7,7 @@ import getStats from "../utils/getStats";
 import { Gateways } from "../models/Payment";
 import { Image } from "canvas";
 import XlsxPopulate from "xlsx-populate";
-import { unlinkSync } from "fs";
+import { unlinkSync, existsSync } from "fs";
 
 moment.locale("zh-cn");
 
@@ -114,7 +114,11 @@ export default router => {
       const filename = `日报 ${date}.xlsx`;
       const path = `./reports/${filename}`;
 
-      unlinkSync(path); // delete file if exists before generating a new report
+      try {
+        unlinkSync(path); // delete file if exists before generating a new report
+      } catch (e) {
+        // keep silent when file does not exist
+      }
 
       const stats = await getStats(date);
       const statsM = await getStats(date, startOfMonth);
