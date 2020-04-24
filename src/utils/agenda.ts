@@ -27,9 +27,7 @@ agenda.define("cancel expired pending bookings", async (job, done) => {
   const bookings = await Booking.find({
     status: BookingStatuses.PENDING,
     createdAt: {
-      $lt: moment()
-        .subtract(1, "day")
-        .toDate()
+      $lt: moment().subtract(1, "day").toDate()
     }
   });
 
@@ -138,6 +136,23 @@ agenda.define("generate 8 digit card no", async (job, done) => {
   });
   await Promise.all(promisesBookings);
 
+  done();
+});
+
+agenda.define("fireman reward", async (job, done) => {
+  console.log("Start fireman reward.");
+  for (const cardNo of ["00007192", "00007193", "00007194", "00007195"]) {
+    const user = new User({
+      name: cardNo,
+      role: "customer",
+      mobile: "100" + cardNo,
+      cardType: "赠10次畅玩卡",
+      cardNo
+    });
+    await user.save();
+    await user.depositSuccess("10-time-unlimited");
+  }
+  console.log("Finish fireman reward.");
   done();
 });
 
