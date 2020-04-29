@@ -179,8 +179,8 @@ export default router => {
         bookingAmountM:
           statsM.paidAmount -
           statsM.socksAmount -
-          (stats.paidAmountByGateways.credit || 0) -
-          (stats.paidAmountByGateways.code || 0),
+          (statsM.paidAmountByGateways.credit || 0) -
+          (statsM.paidAmountByGateways.code || 0),
         couponPaidM: statsM.paidAmountByGateways.coupon,
         tbAmountM: statsM.tbAmount,
         partyAmountM: statsM.partyAmount,
