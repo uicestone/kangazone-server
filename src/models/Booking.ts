@@ -81,13 +81,13 @@ Booking.plugin(updateTimes);
 
 Booking.set("toJSON", {
   getters: true,
-  transform: function(doc, ret, options) {
+  transform: function (doc, ret, options) {
     delete ret._id;
     delete ret.__v;
   }
 });
 
-Booking.methods.calculatePrice = async function() {
+Booking.methods.calculatePrice = async function () {
   const booking = this as IBooking;
 
   await booking.populate("customer").execPopulate();
@@ -192,7 +192,7 @@ Booking.methods.calculatePrice = async function() {
   booking.price = +booking.price.toFixed(2);
 };
 
-Booking.methods.createPayment = async function(
+Booking.methods.createPayment = async function (
   {
     paymentGateway = Gateways.WechatPay,
     useCredit = true,
@@ -281,14 +281,14 @@ Booking.methods.createPayment = async function(
   }
 };
 
-Booking.methods.paymentSuccess = async function() {
+Booking.methods.paymentSuccess = async function () {
   const booking = this as IBooking;
   booking.status = BookingStatuses.BOOKED;
   await booking.save();
   // send user notification
 };
 
-Booking.methods.createRefundPayment = async function() {
+Booking.methods.createRefundPayment = async function () {
   const booking = this as IBooking;
 
   // repopulate payments with customers
@@ -348,7 +348,7 @@ Booking.methods.createRefundPayment = async function() {
   }
 };
 
-Booking.methods.refundSuccess = async function() {
+Booking.methods.refundSuccess = async function () {
   const booking = this as IBooking;
   booking.status = BookingStatuses.CANCELED;
   await booking.save();
@@ -356,7 +356,7 @@ Booking.methods.refundSuccess = async function() {
   booking.store.authBands(booking.bandIds, true);
 };
 
-Booking.methods.bindBands = async function(auth = true) {
+Booking.methods.bindBands = async function (auth = true) {
   const booking = this as IBooking;
 
   if (!booking.bandIds.length) return;
@@ -369,14 +369,27 @@ Booking.methods.bindBands = async function(auth = true) {
     throw new Error("band_count_unmatched");
   }
 
-  const bookingsOccupyingBand = await this.constructor.find({
+  const bookingsOccupyingBand = (await this.constructor.find({
     status: {
       $in: liveBookingStatuses
     },
     _id: { $ne: booking.id },
     bandIds: { $in: booking.bandIds }
-  });
-  if (bookingsOccupyingBand.length) {
+  })) as IBooking[];
+
+  for (const bookingOccupyingBand of bookingsOccupyingBand) {
+    if (booking.status === BookingStatuses.PENDING_REFUND) {
+      continue;
+    } else if (booking.status === BookingStatuses.PENDING) {
+      bookingOccupyingBand.cancel();
+    } else {
+      await bookingOccupyingBand.finish();
+    }
+  }
+
+  if (
+    bookingsOccupyingBand.some(b => b.status === BookingStatuses.PENDING_REFUND)
+  ) {
     throw new Error("band_occupied");
   }
 
@@ -392,7 +405,7 @@ Booking.methods.bindBands = async function(auth = true) {
   }
 };
 
-Booking.methods.checkIn = async function(save = true) {
+Booking.methods.checkIn = async function (save = true) {
   const booking = this as IBooking;
   booking.status = BookingStatuses.IN_SERVICE;
   booking.checkInAt = moment().format("HH:mm:ss");
@@ -409,7 +422,7 @@ Booking.methods.checkIn = async function(save = true) {
   // send user notification
 };
 
-Booking.methods.cancel = async function(save = true) {
+Booking.methods.cancel = async function (save = true) {
   const booking = this as IBooking;
 
   if (
@@ -440,7 +453,7 @@ Booking.methods.cancel = async function(save = true) {
   }
 };
 
-Booking.methods.finish = async function(save = true) {
+Booking.methods.finish = async function (save = true) {
   const booking = this as IBooking;
 
   booking.status = BookingStatuses.FINISHED;
