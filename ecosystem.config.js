@@ -17,7 +17,7 @@ module.exports = {
       ref: "origin/master",
       repo: "https://github.com/uicestone/kangazone-server",
       path: "/var/www/kangazone-server",
-      "post-deploy": "yarn && pm2 startOrRestart ecosystem.config.js"
+      "post-deploy": "yarn"
     },
     testing: {
       user: "www-data",
@@ -25,7 +25,7 @@ module.exports = {
       ref: "origin/testing",
       repo: "https://github.com/uicestone/kangazone-server",
       path: "/var/www/kangazone-server",
-      "post-deploy": "yarn && pm2 startOrRestart ecosystem.config.js"
+      "post-deploy": "yarn"
     }
   }
 };
