@@ -22,7 +22,7 @@ Store.index({ name: 1 }, { unique: true });
 
 Store.plugin(updateTimes);
 
-Store.virtual("localServer").get(function() {
+Store.virtual("localServer").get(function () {
   const store = this as IStore;
   const localServer = { ip: undefined, status: "disconnected" };
   if (storeServerSockets[store.id]) {
@@ -35,13 +35,13 @@ Store.virtual("localServer").get(function() {
 
 Store.set("toJSON", {
   getters: true,
-  transform: function(doc, ret, options) {
+  transform: function (doc, ret, options) {
     delete ret._id;
     delete ret.__v;
   }
 });
 
-Store.methods.authBands = async function(
+Store.methods.authBands = async function (
   bandIds: string[],
   revoke: boolean = false
 ) {
@@ -69,7 +69,7 @@ Store.methods.authBands = async function(
           )}) to ${serial} (All doors).`
         );
       } catch (err) {
-        console.error(err);
+        console.error(err.message);
         throw new Error("auth_band_fail");
       }
       await sleep(500 + Math.round(Math.random() * 500)); // random sleep 500~1000ms

@@ -249,12 +249,17 @@ export default router => {
           }
         }
         if (req.body.passNo) {
+          delete req.body.passNo8;
           if (req.user.role !== "admin") {
             throw new HttpError(403);
           }
           user.passNo8 = icCode10To8(req.body.passNo);
           const store = await Store.findOne();
-          store.authBands([req.body.passNo]);
+          try {
+            await store.authBands([req.body.passNo]);
+          } catch (e) {
+            console.error(e.message);
+          }
         }
 
         user.set(req.body);
