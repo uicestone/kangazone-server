@@ -11,7 +11,7 @@ import { unlinkSync, existsSync } from "fs";
 
 moment.locale("zh-cn");
 
-export default (router) => {
+export default router => {
   // Store CURD
   router.route("/stats/:date?").get(
     handleAsyncErrors(async (req, res) => {
@@ -35,7 +35,7 @@ export default (router) => {
         receiptLogo.onload = () => {
           resolve();
         };
-        receiptLogo.onerror = (err) => {
+        receiptLogo.onerror = err => {
           reject(err);
         };
         receiptLogo.src = __dirname + "/../resource/images/logo-greyscale.png";
@@ -65,7 +65,7 @@ export default (router) => {
 
       encoder.line(`优惠人数：`);
       if (stats.couponsCount.length) {
-        stats.couponsCount.forEach((couponCount) => {
+        stats.couponsCount.forEach(couponCount => {
           encoder.line(`- ${couponCount.name}：${couponCount.count}`);
         });
       } else {
@@ -74,7 +74,7 @@ export default (router) => {
 
       encoder.line(`次卡券码：`);
       if (stats.codesCount.length) {
-        stats.codesCount.forEach((codeCount) => {
+        stats.codesCount.forEach(codeCount => {
           encoder.line(`- ${codeCount.title}：${codeCount.count}`);
         });
       } else {
@@ -83,7 +83,7 @@ export default (router) => {
 
       encoder.line(`充值开卡：`);
       if (stats.depositsCount.length) {
-        stats.depositsCount.forEach((depositCount) => {
+        stats.depositsCount.forEach(depositCount => {
           encoder.line(
             `- ${depositCount.desc}（${depositCount.price}）：${depositCount.count}`
           );
@@ -145,36 +145,32 @@ export default (router) => {
         socksAmount: stats.socksAmount,
         depositAmount1:
           (
-            stats.depositsCount.find(
-              (d) => d.slug === "5-time-2-hour-2020"
-            ) || {
-              count: 0,
+            stats.depositsCount.find(d => d.slug === "5-time-2-hour") || {
+              count: 0
             }
-          ).count * 780,
+          ).count * 580,
         depositAmount2:
           (
-            stats.depositsCount.find(
-              (d) => d.slug === "10-time-unlimited-2020"
-            ) || {
-              count: 0,
+            stats.depositsCount.find(d => d.slug === "10-time-unlimited") || {
+              count: 0
             }
-          ).count * 1580,
+          ).count * 1280,
         depositAmount3:
           (
             stats.depositsCount.find(
-              (d) => d.slug === "5-time-parent-child-2-hour-2020"
+              d => d.slug === "5-time-parent-child-2-hour"
             ) || {
-              count: 0,
+              count: 0
             }
-          ).count * 980,
+          ).count * 780,
         depositAmount4:
           (
             stats.depositsCount.find(
-              (d) => d.slug === "10-time-parent-child-unlimited-2020"
+              d => d.slug === "10-time-parent-child-unlimited"
             ) || {
-              count: 0,
+              count: 0
             }
-          ).count * 1980,
+          ).count * 1680,
         codeDepositAmount: stats.codeDepositAmount,
 
         customerCountM: statsM.customerCount,
@@ -194,40 +190,36 @@ export default (router) => {
         socksAmountM: statsM.socksAmount,
         depositAmount1M:
           (
-            statsM.depositsCount.find(
-              (d) => d.slug === "5-time-2-hour-2020"
-            ) || {
-              count: 0,
+            statsM.depositsCount.find(d => d.slug === "5-time-2-hour") || {
+              count: 0
             }
-          ).count * 780,
+          ).count * 580,
         depositAmount2M:
           (
-            statsM.depositsCount.find(
-              (d) => d.slug === "10-time-unlimited-2020"
-            ) || {
-              count: 0,
+            statsM.depositsCount.find(d => d.slug === "10-time-unlimited") || {
+              count: 0
             }
-          ).count * 1580,
+          ).count * 1280,
         depositAmount3M:
           (
             statsM.depositsCount.find(
-              (d) => d.slug === "5-time-parent-child-2-hour-2020"
+              d => d.slug === "5-time-parent-child-2-hour"
             ) || {
-              count: 0,
+              count: 0
             }
-          ).count * 980,
+          ).count * 780,
         depositAmount4M:
           (
             statsM.depositsCount.find(
-              (d) => d.slug === "10-time-parent-child-unlimited-2020"
+              d => d.slug === "10-time-parent-child-unlimited"
             ) || {
-              count: 0,
+              count: 0
             }
-          ).count * 1980,
+          ).count * 1680,
         codeDepositAmountM: statsM.codeDepositAmount,
-        freePlayDepositAmountM: "",
+        freePlayDepositAmountM: ""
       };
-      Object.keys(data).forEach((key) => {
+      Object.keys(data).forEach(key => {
         let replace = data[key];
         if (typeof replace === "number") {
           replace = +replace.toFixed(2);
