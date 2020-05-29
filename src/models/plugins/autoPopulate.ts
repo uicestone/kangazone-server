@@ -13,7 +13,11 @@ function autoPopulate(schema, options) {
   }
 
   async function postFind(docs) {
-    await Promise.all(docs.map(doc => postFindOne(doc)));
+    await Promise.all(
+      populates.map(populate => {
+        return this.model.populate(docs, populate);
+      })
+    );
   }
 
   schema.post("find", postFind);
