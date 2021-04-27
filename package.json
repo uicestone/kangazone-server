@@ -40,7 +40,7 @@
     "method-override": "^3.0.0",
     "moment": "^2.24.0",
     "mongoose": "^5.5.7",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "socket.io": "^2.2.0",
     "string-width": "^4.1.0",
     "wiegand-control": "^1.0.5",
