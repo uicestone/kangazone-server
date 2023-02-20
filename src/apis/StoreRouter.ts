@@ -4,7 +4,7 @@ import parseSortString from "../utils/parseSortString";
 import HttpError from "../utils/HttpError";
 import Store, {
   storeGateControllers,
-  storeServerSockets
+  storeServerSockets,
 } from "../models/Store";
 import WgCtl from "wiegand-control";
 import { sleep, icCode10To8 } from "../utils/helper";
@@ -12,7 +12,7 @@ import Booking, { liveBookingStatuses } from "../models/Booking";
 import moment from "moment";
 import agenda from "../utils/agenda";
 
-export default router => {
+export default (router) => {
   // Store CURD
   router
     .route("/store")
@@ -36,7 +36,7 @@ export default router => {
         const { limit, skip } = req.pagination;
         const query = Store.find();
         const sort = parseSortString(req.query.order) || {
-          createdAt: -1
+          createdAt: -1,
         };
 
         let total = await query.countDocuments();
@@ -134,10 +134,10 @@ export default router => {
         throw new HttpError(403);
       }
       const store = await Store.findById(req.params.storeId);
-      const bookings = await Booking.find({
+      const bookings = await Booking.find().where({
         date: moment().format("YYYY-MM-DD"),
         status: { $in: liveBookingStatuses },
-        $where: "this.bandIds.length > 0"
+        $where: "this.bandIds.length > 0",
       });
       for (let i = 0; i < bookings.length; i++) {
         if (i > 0) {

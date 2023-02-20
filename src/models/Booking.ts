@@ -18,26 +18,26 @@ export enum BookingStatuses {
   IN_SERVICE = "IN_SERVICE",
   PENDING_REFUND = "PENDING_REFUND",
   FINISHED = "FINISHED",
-  CANCELED = "CANCELED"
+  CANCELED = "CANCELED",
 }
 
 export const liveBookingStatuses = [
   BookingStatuses.PENDING,
   BookingStatuses.BOOKED,
   BookingStatuses.IN_SERVICE,
-  BookingStatuses.PENDING_REFUND
+  BookingStatuses.PENDING_REFUND,
 ];
 
 export const deadBookingStatuses = [
   BookingStatuses.FINISHED,
-  BookingStatuses.CANCELED
+  BookingStatuses.CANCELED,
 ];
 
 export const paidBookingStatuses = [
   BookingStatuses.BOOKED,
   BookingStatuses.IN_SERVICE,
   BookingStatuses.PENDING_REFUND,
-  BookingStatuses.FINISHED
+  BookingStatuses.FINISHED,
 ];
 
 const Booking = new Schema({
@@ -57,16 +57,16 @@ const Booking = new Schema({
   status: {
     type: String,
     enum: Object.values(BookingStatuses),
-    default: BookingStatuses.PENDING
+    default: BookingStatuses.PENDING,
   },
   price: { type: Number, default: 0 },
   code: { type: Schema.Types.ObjectId, ref: Code },
   coupon: { type: String },
   payments: [{ type: Schema.Types.ObjectId, ref: Payment }],
   passLogs: {
-    type: [{ time: Date, gate: String, entry: Boolean, allow: Boolean }]
+    type: [{ time: Date, gate: String, entry: Boolean, allow: Boolean }],
   },
-  remarks: String
+  remarks: String,
 });
 
 Booking.index({ date: 1, checkInAt: 1, customer: 1 }, { unique: true });
@@ -75,7 +75,7 @@ Booking.plugin(autoPopulate, [
   { path: "customer", select: "name avatarUrl mobile" },
   { path: "store", select: "name" },
   { path: "payments", options: { sort: { _id: -1 } }, select: "-customer" },
-  { path: "code" }
+  { path: "code" },
 ]);
 Booking.plugin(updateTimes);
 
@@ -84,7 +84,7 @@ Booking.set("toJSON", {
   transform: function (doc, ret, options) {
     delete ret._id;
     delete ret.__v;
-  }
+  },
 });
 
 Booking.methods.calculatePrice = async function () {
@@ -123,7 +123,7 @@ Booking.methods.calculatePrice = async function () {
   let coupon;
 
   if (booking.coupon) {
-    coupon = config.coupons.find(c => c.slug === booking.coupon);
+    coupon = config.coupons.find((c) => c.slug === booking.coupon);
     if (!coupon) {
       throw new Error("coupon_not_found");
     }
@@ -197,7 +197,7 @@ Booking.methods.createPayment = async function (
     paymentGateway = Gateways.WechatPay,
     useCredit = true,
     adminAddWithoutPayment = false,
-    extendHoursBy = null // 0 stands for unlimited
+    extendHoursBy = null, // 0 stands for unlimited
   } = {},
   amount?: number
 ) {
@@ -224,7 +224,7 @@ Booking.methods.createPayment = async function (
       title,
       attach,
       gateway: Gateways.Code,
-      gatewayData: { codeId: booking.code.id, bookingId: booking.id }
+      gatewayData: { codeId: booking.code.id, bookingId: booking.id },
     });
     await codePayment.save();
     booking.payments.push(codePayment);
@@ -243,7 +243,7 @@ Booking.methods.createPayment = async function (
       amountForceDeposit: booking.socksCount * config.sockPrice,
       title,
       attach,
-      gateway: Gateways.Credit
+      gateway: Gateways.Credit,
     });
 
     await creditPayment.save();
@@ -266,7 +266,7 @@ Booking.methods.createPayment = async function (
       amount: DEBUG ? extraPayAmount / 1e4 : extraPayAmount,
       title,
       attach,
-      gateway: paymentGateway || Gateways.WechatPay
+      gateway: paymentGateway || Gateways.WechatPay,
     });
 
     console.log(`[PAY] Extra payment: `, JSON.stringify(extraPayment));
@@ -295,13 +295,13 @@ Booking.methods.createRefundPayment = async function () {
   await booking.populate("payments").execPopulate();
 
   const creditAndCodePayments = booking.payments.filter(
-    p =>
+    (p) =>
       [Gateways.Credit, Gateways.Code].includes(p.gateway) &&
       p.amount > 0 &&
       p.paid
   );
   const extraPayments = booking.payments.filter(
-    p =>
+    (p) =>
       ![Gateways.Credit, Gateways.Code].includes(p.gateway) &&
       p.amount > 0 &&
       p.paid
@@ -319,7 +319,7 @@ Booking.methods.createRefundPayment = async function () {
       attach: p.attach,
       gateway: p.gateway,
       gatewayData: p.gatewayData,
-      original: p.id
+      original: p.id,
     });
     if (p.gateway === Gateways.Code) {
       p.gatewayData.codeRefund = true;
@@ -332,14 +332,14 @@ Booking.methods.createRefundPayment = async function () {
     booking.status = BookingStatuses.CANCELED;
   } else {
     await Promise.all(
-      extraPayments.map(async p => {
+      extraPayments.map(async (p) => {
         const refundPayment = new Payment({
           customer: p.customer,
           amount: -p.amount,
           title: `退款：${p.title}`,
           attach: p.attach,
           gateway: p.gateway,
-          original: p.id
+          original: p.id,
         });
         await refundPayment.save();
         booking.payments.push(refundPayment);
@@ -369,12 +369,12 @@ Booking.methods.bindBands = async function (auth = true) {
     throw new Error("band_count_unmatched");
   }
 
-  const bookingsOccupyingBand = (await this.constructor.find({
+  const bookingsOccupyingBand = (await (this.constructor as any).find({
     status: {
-      $in: liveBookingStatuses
+      $in: liveBookingStatuses,
     },
     _id: { $ne: booking.id },
-    bandIds: { $in: booking.bandIds }
+    bandIds: { $in: booking.bandIds },
   })) as IBooking[];
 
   for (const bookingOccupyingBand of bookingsOccupyingBand) {
@@ -388,12 +388,14 @@ Booking.methods.bindBands = async function (auth = true) {
   }
 
   if (
-    bookingsOccupyingBand.some(b => b.status === BookingStatuses.PENDING_REFUND)
+    bookingsOccupyingBand.some(
+      (b) => b.status === BookingStatuses.PENDING_REFUND
+    )
   ) {
     throw new Error("band_occupied");
   }
 
-  booking.bandIds8 = booking.bandIds.map(id => icCode10To8(id));
+  booking.bandIds8 = booking.bandIds.map((id) => icCode10To8(id));
 
   // (re)authorize band to gate controllers
   if (auth && liveBookingStatuses.includes(booking.status)) {
@@ -412,7 +414,7 @@ Booking.methods.checkIn = async function (save = true) {
   if (booking.hours) {
     agenda.schedule(`in ${booking.hours} hours`, "revoke band auth", {
       bandIds: booking.bandIds,
-      storeId: booking.store.id
+      storeId: booking.store.id,
     });
   }
   if (save) {
@@ -437,7 +439,7 @@ Booking.methods.cancel = async function (save = true) {
   ) {
     throw new Error("uncancelable_booking_status");
   }
-  if (booking.payments.filter(p => p.paid).length) {
+  if (booking.payments.filter((p) => p.paid).length) {
     console.log(`[BOK] Refund booking ${booking._id}.`);
     // we don't directly change status to canceled, will auto change on refund fullfil
     booking.status = BookingStatuses.PENDING_REFUND;

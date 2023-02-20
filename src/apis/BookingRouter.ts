@@ -6,8 +6,8 @@ import HttpError from "../utils/HttpError";
 import Booking, { IBooking, BookingStatuses } from "../models/Booking";
 import User from "../models/User";
 import Store from "../models/Store";
-import EscPosEncoder from "esc-pos-encoder-canvas";
-import { Image } from "canvas";
+// import EscPosEncoder from "esc-pos-encoder-canvas";
+// import { Image } from "canvas";
 import Payment, { gatewayNames } from "../models/Payment";
 import { config } from "../models/Config";
 import stringWidth from "string-width";
@@ -17,7 +17,7 @@ setTimeout(async () => {
   // u.depositSuccess("deposit-1000");
 }, 500);
 
-export default router => {
+export default (router) => {
   // Booking CURD
   router
     .route("/booking")
@@ -55,9 +55,7 @@ export default router => {
         }
 
         if (!booking.checkInAt) {
-          booking.checkInAt = moment()
-            .add(5, "minutes")
-            .format("HH:mm:ss");
+          booking.checkInAt = moment().add(5, "minutes").format("HH:mm:ss");
         }
 
         // if (booking.hours > config.hourPriceRatio.length) {
@@ -92,8 +90,9 @@ export default router => {
               case "band_count_unmatched":
                 throw new HttpError(
                   400,
-                  `手环数量必须等于玩家数量（${booking.membersCount +
-                    booking.kidsCount}）`
+                  `手环数量必须等于玩家数量（${
+                    booking.membersCount + booking.kidsCount
+                  }）`
                 );
               case "band_occupied":
                 throw new HttpError(
@@ -125,7 +124,7 @@ export default router => {
           await booking.createPayment({
             paymentGateway: req.query.paymentGateway,
             useCredit: req.query.useCredit !== "false",
-            adminAddWithoutPayment: req.user.role === "admin"
+            adminAddWithoutPayment: req.user.role === "admin",
           });
         } catch (err) {
           switch (err.message) {
@@ -151,7 +150,7 @@ export default router => {
         const { limit, skip } = req.pagination;
         const query = Booking.find();
         const sort = parseSortString(req.query.order) || {
-          createdAt: -1
+          createdAt: -1,
         };
 
         const $and = []; // combine all $or conditions into one $and
@@ -161,7 +160,7 @@ export default router => {
           query.find({ customer: req.user._id });
         }
 
-        ["type", "store", "date", "customer"].forEach(field => {
+        ["type", "store", "date", "customer"].forEach((field) => {
           if (req.query[field]) {
             query.find({ [field]: req.query[field] });
           }
@@ -170,14 +169,14 @@ export default router => {
         if (req.query.status) {
           query.find({
             status: {
-              $in: req.query.status.split(",").map(s => s.toUpperCase())
-            }
+              $in: req.query.status.split(",").map((s) => s.toUpperCase()),
+            },
           });
         }
 
         if (req.query.due) {
           query.find({
-            status: BookingStatuses.IN_SERVICE
+            status: BookingStatuses.IN_SERVICE,
           });
           $and.push({
             $or: config.hourPriceRatio.map((ratio, index) => {
@@ -188,10 +187,10 @@ export default router => {
                   $lt: moment()
                     .subtract(hours, "hours")
                     .subtract(5, "minutes")
-                    .format("HH:mm:ss")
-                }
+                    .format("HH:mm:ss"),
+                },
               };
-            })
+            }),
           });
         }
 
@@ -200,8 +199,8 @@ export default router => {
             $or: [
               { name: new RegExp(req.query.customerKeyword, "i") },
               { mobile: new RegExp(req.query.customerKeyword) },
-              { cardNo: new RegExp(req.query.customerKeyword) }
-            ]
+              { cardNo: new RegExp(req.query.customerKeyword) },
+            ],
           });
           query.find({ customer: { $in: matchCustomers } });
         }
@@ -210,8 +209,8 @@ export default router => {
           $and.push({
             $or: [
               { bandIds: new RegExp(req.query.bandId) },
-              { bandIds8: +req.query.bandId }
-            ]
+              { bandIds8: +req.query.bandId },
+            ],
           });
         }
 
@@ -239,7 +238,7 @@ export default router => {
           total = skip + page.length;
         }
 
-        const result = page.map(i => {
+        const result = page.map((i) => {
           const o = i.toJSON();
           if (o.store && o.store.localServer) {
             delete o.store.localServer;
@@ -305,8 +304,9 @@ export default router => {
               case "band_count_unmatched":
                 throw new HttpError(
                   400,
-                  `手环数量必须等于玩家数量（${booking.membersCount +
-                    booking.kidsCount}）`
+                  `手环数量必须等于玩家数量（${
+                    booking.membersCount + booking.kidsCount
+                  }）`
                 );
               case "band_occupied":
                 throw new HttpError(
@@ -388,7 +388,7 @@ export default router => {
                 paymentGateway: req.query.paymentGateway,
                 useCredit: req.query.useCredit !== "false",
                 adminAddWithoutPayment: req.user.role === "admin",
-                extendHoursBy
+                extendHoursBy,
               },
               booking.price - priceWas
             );
@@ -419,19 +419,19 @@ export default router => {
 
         const booking = req.item as IBooking;
 
-        if (booking.payments.some(p => p.paid)) {
+        if (booking.payments.some((p) => p.paid)) {
           throw new HttpError(403, "已有成功付款记录，无法删除");
         }
 
         await Payment.deleteOne({
-          _id: { $in: booking.payments.map(p => p.id) }
+          _id: { $in: booking.payments.map((p) => p.id) },
         });
         await booking.remove();
         res.end();
       })
     );
 
-  router.route("/booking/:bookingId/receipt-data").get(
+  /**router.route("/booking/:bookingId/receipt-data").get(
     handleAsyncErrors(async (req, res) => {
       if (!["manager", "admin"].includes(req.user.role)) {
         throw new HttpError(403, "只有店员可以打印小票");
@@ -443,7 +443,7 @@ export default router => {
         receiptLogo.onload = () => {
           resolve();
         };
-        receiptLogo.onerror = err => {
+        receiptLogo.onerror = (err) => {
           reject(err);
         };
         receiptLogo.src = __dirname + "/../resource/images/logo-greyscale.png";
@@ -455,7 +455,7 @@ export default router => {
         ![
           BookingStatuses.BOOKED,
           BookingStatuses.IN_SERVICE,
-          BookingStatuses.FINISHED
+          BookingStatuses.FINISHED,
         ].includes(booking.status) &&
         booking.bandIds.length
       ) {
@@ -575,7 +575,7 @@ export default router => {
       }
 
       if (booking.coupon) {
-        const coupon = config.coupons.find(c => c.slug === booking.coupon);
+        const coupon = config.coupons.find((c) => c.slug === booking.coupon);
         if (coupon) {
           encoder.line(
             coupon.name +
@@ -630,7 +630,7 @@ export default router => {
         );
 
       const creditPayment = booking.payments.filter(
-        p => p.gateway === "credit" && p.paid
+        (p) => p.gateway === "credit" && p.paid
       )[0];
       if (creditPayment) {
         encoder.line(
@@ -641,7 +641,7 @@ export default router => {
       }
 
       const extraPayment = booking.payments.filter(
-        p => p.gateway !== "credit" && p.paid
+        (p) => p.gateway !== "credit" && p.paid
       )[0];
 
       if (extraPayment) {
@@ -676,7 +676,7 @@ export default router => {
 
       res.send(hexString);
     })
-  );
+  );**/
 
   router.route("/booking-price").post(
     handleAsyncErrors(async (req, res) => {
@@ -706,9 +706,7 @@ export default router => {
       }
 
       if (!booking.checkInAt) {
-        booking.checkInAt = moment()
-          .add(5, "minutes")
-          .format("HH:mm:ss");
+        booking.checkInAt = moment().add(5, "minutes").format("HH:mm:ss");
       }
 
       // if (booking.hours > config.hourPriceRatio.length) {
@@ -777,7 +775,7 @@ export default router => {
 
           availability = {
             full: ["2019-07-16", "2019-07-18"],
-            peak: ["2019-07-20", "2019-07-21"]
+            peak: ["2019-07-20", "2019-07-21"],
           };
         } else {
           availability = {
@@ -790,8 +788,8 @@ export default router => {
               "17:00:00",
               "18:00:00",
               "19:00:00",
-              "21:00:00"
-            ]
+              "21:00:00",
+            ],
           };
         }
 

@@ -1,17 +1,17 @@
 import handleAsyncErrors from "../utils/handleAsyncErrors";
 import moment from "moment";
 import HttpError from "../utils/HttpError";
-import EscPosEncoder from "esc-pos-encoder-canvas";
+// import EscPosEncoder from "esc-pos-encoder-canvas";
 import User from "../models/User";
 import getStats from "../utils/getStats";
 import { Gateways } from "../models/Payment";
-import { Image } from "canvas";
+// import { Image } from "canvas";
 import XlsxPopulate from "xlsx-populate";
 import { unlinkSync, existsSync } from "fs";
 
 moment.locale("zh-cn");
 
-export default router => {
+export default (router) => {
   // Store CURD
   router.route("/stats/:date?").get(
     handleAsyncErrors(async (req, res) => {
@@ -21,7 +21,7 @@ export default router => {
     })
   );
 
-  router.route("/stats-receipt-data/:date?").get(
+  /**router.route("/stats-receipt-data/:date?").get(
     handleAsyncErrors(async (req, res) => {
       if (!["manager", "admin"].includes(req.user.role)) {
         throw new HttpError(403, "只有店员可以打印小票");
@@ -35,7 +35,7 @@ export default router => {
         receiptLogo.onload = () => {
           resolve();
         };
-        receiptLogo.onerror = err => {
+        receiptLogo.onerror = (err) => {
           reject(err);
         };
         receiptLogo.src = __dirname + "/../resource/images/logo-greyscale.png";
@@ -65,7 +65,7 @@ export default router => {
 
       encoder.line(`优惠人数：`);
       if (stats.couponsCount.length) {
-        stats.couponsCount.forEach(couponCount => {
+        stats.couponsCount.forEach((couponCount) => {
           encoder.line(`- ${couponCount.name}：${couponCount.count}`);
         });
       } else {
@@ -74,7 +74,7 @@ export default router => {
 
       encoder.line(`次卡券码：`);
       if (stats.codesCount.length) {
-        stats.codesCount.forEach(codeCount => {
+        stats.codesCount.forEach((codeCount) => {
           encoder.line(`- ${codeCount.title}：${codeCount.count}`);
         });
       } else {
@@ -83,7 +83,7 @@ export default router => {
 
       encoder.line(`充值开卡：`);
       if (stats.depositsCount.length) {
-        stats.depositsCount.forEach(depositCount => {
+        stats.depositsCount.forEach((depositCount) => {
           encoder.line(
             `- ${depositCount.desc}（${depositCount.price}）：${depositCount.count}`
           );
@@ -145,30 +145,30 @@ export default router => {
         socksAmount: stats.socksAmount,
         depositAmount1:
           (
-            stats.depositsCount.find(d => d.slug === "5-time-2-hour") || {
-              count: 0
+            stats.depositsCount.find((d) => d.slug === "5-time-2-hour") || {
+              count: 0,
             }
           ).count * 580,
         depositAmount2:
           (
-            stats.depositsCount.find(d => d.slug === "10-time-unlimited") || {
-              count: 0
+            stats.depositsCount.find((d) => d.slug === "10-time-unlimited") || {
+              count: 0,
             }
           ).count * 1280,
         depositAmount3:
           (
             stats.depositsCount.find(
-              d => d.slug === "5-time-parent-child-2-hour"
+              (d) => d.slug === "5-time-parent-child-2-hour"
             ) || {
-              count: 0
+              count: 0,
             }
           ).count * 780,
         depositAmount4:
           (
             stats.depositsCount.find(
-              d => d.slug === "10-time-parent-child-unlimited"
+              (d) => d.slug === "10-time-parent-child-unlimited"
             ) || {
-              count: 0
+              count: 0,
             }
           ).count * 1680,
         codeDepositAmount: stats.codeDepositAmount,
@@ -190,36 +190,38 @@ export default router => {
         socksAmountM: statsM.socksAmount,
         depositAmount1M:
           (
-            statsM.depositsCount.find(d => d.slug === "5-time-2-hour") || {
-              count: 0
+            statsM.depositsCount.find((d) => d.slug === "5-time-2-hour") || {
+              count: 0,
             }
           ).count * 580,
         depositAmount2M:
           (
-            statsM.depositsCount.find(d => d.slug === "10-time-unlimited") || {
-              count: 0
+            statsM.depositsCount.find(
+              (d) => d.slug === "10-time-unlimited"
+            ) || {
+              count: 0,
             }
           ).count * 1280,
         depositAmount3M:
           (
             statsM.depositsCount.find(
-              d => d.slug === "5-time-parent-child-2-hour"
+              (d) => d.slug === "5-time-parent-child-2-hour"
             ) || {
-              count: 0
+              count: 0,
             }
           ).count * 780,
         depositAmount4M:
           (
             statsM.depositsCount.find(
-              d => d.slug === "10-time-parent-child-unlimited"
+              (d) => d.slug === "10-time-parent-child-unlimited"
             ) || {
-              count: 0
+              count: 0,
             }
           ).count * 1680,
         codeDepositAmountM: statsM.codeDepositAmount,
-        freePlayDepositAmountM: ""
+        freePlayDepositAmountM: "",
       };
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         let replace = data[key];
         if (typeof replace === "number") {
           replace = +replace.toFixed(2);
@@ -234,7 +236,7 @@ export default router => {
 
       res.download(path, filename);
     })
-  );
+  );**/
 
   return router;
 };

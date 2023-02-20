@@ -3,7 +3,7 @@ import Booking, { BookingStatuses } from "../models/Booking";
 import Store, {
   storeGateControllers,
   IStore,
-  storeServerSockets
+  storeServerSockets,
 } from "../models/Store";
 import { sleep } from "../utils/helper";
 import { Socket } from "net";
@@ -54,7 +54,7 @@ export default function handleSocketData(
           ) as number[];
 
           const lostSerials = serials.filter(
-            s => !storeData.serials.includes(s)
+            (s) => !storeData.serials.includes(s)
           );
 
           if (lostSerials.length) {
@@ -65,8 +65,10 @@ export default function handleSocketData(
             );
           }
 
-          const controllers = serials.map(serial => new WgCtl(socket, serial));
-          controllers.forEach(c => {
+          const controllers = serials.map(
+            (serial) => new WgCtl(socket, serial)
+          );
+          controllers.forEach((c) => {
             storeGateControllers[c.serial] = c;
           });
         } catch (err) {
@@ -101,13 +103,13 @@ export default function handleSocketData(
       };
 
       const store = await Store.findOne({
-        "gates.serial": statusMessage.serial
+        "gates.serial": statusMessage.serial,
       });
 
       if (!store) return;
 
       const gate = store.gates.find(
-        g =>
+        (g) =>
           g.serial === statusMessage.serial && g.number === statusMessage.door
       );
 
@@ -126,7 +128,7 @@ export default function handleSocketData(
           [
             BookingStatuses.CANCELED,
             BookingStatuses.PENDING,
-            BookingStatuses.FINISHED
+            BookingStatuses.FINISHED,
           ].includes(booking.status)
         ) {
           continue;
@@ -141,7 +143,7 @@ export default function handleSocketData(
           time: new Date(),
           gate: gate.name,
           entry: gate.entry,
-          allow: statusMessage.allow
+          allow: statusMessage.allow,
         });
 
         console[statusMessage.allow ? "log" : "error"](
@@ -154,7 +156,7 @@ export default function handleSocketData(
       }
 
       const bookedBookings = bookings.filter(
-        b => b.status === BookingStatuses.BOOKED
+        (b) => b.status === BookingStatuses.BOOKED
       );
 
       if (bookedBookings.length > 1) {
@@ -163,7 +165,7 @@ export default function handleSocketData(
         );
       }
 
-      bookedBookings.forEach(booking => booking.checkIn());
+      bookedBookings.forEach((booking) => booking.checkIn());
 
       const matchedUsers = await User.find({ passNo8: statusMessage.cardNo });
 
@@ -181,7 +183,7 @@ export default function handleSocketData(
           time: new Date(),
           gate: gate.name,
           entry: gate.entry,
-          allow: statusMessage.allow
+          allow: statusMessage.allow,
         });
         await user.save();
         console[statusMessage.allow ? "log" : "error"](

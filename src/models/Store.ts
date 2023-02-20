@@ -14,8 +14,8 @@ const Store = new Schema({
   partyRooms: Number,
   ip: String,
   gates: {
-    type: [{ entry: Boolean, serial: Number, number: Number, name: String }]
-  }
+    type: [{ entry: Boolean, serial: Number, number: Number, name: String }],
+  },
 });
 
 Store.index({ name: 1 }, { unique: true });
@@ -38,7 +38,7 @@ Store.set("toJSON", {
   transform: function (doc, ret, options) {
     delete ret._id;
     delete ret.__v;
-  }
+  },
 });
 
 Store.methods.authBands = async function (
@@ -77,7 +77,13 @@ Store.methods.authBands = async function (
   }
 };
 
-export interface IStore extends mongoose.Document {
+interface TimeStampedDocument extends mongoose.Document {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IStore extends TimeStampedDocument {
   name: string;
   address: string;
   phone: string;

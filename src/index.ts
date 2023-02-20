@@ -28,10 +28,10 @@ const portSocket: string = process.env.PORT_SOCKET || process.exit();
 console.log(`[SYS] System time is ${new Date()}`);
 
 mongoose.connect(mongooseUrl, {
-  useNewUrlParser: true,
-  useFindAndModify: false
+  // useNewUrlParser: true,
+  // useFindAndModify: false
 });
-mongoose.set("useCreateIndex", true);
+// mongoose.set("useCreateIndex", true);
 mongoose.Promise = global.Promise;
 
 app.use(bodyParser.json({ limit: "4mb" }));

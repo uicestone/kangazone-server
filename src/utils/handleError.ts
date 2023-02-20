@@ -23,8 +23,8 @@ export default (err: Error, req, res, next) => {
       // @ts-ignore
       message: Object.values(err.errors)
         // @ts-ignore
-        .map(e => e.message)
-        .join("\n")
+        .map((e) => e.message)
+        .join("\n"),
     });
   } else {
     console.error(`${err.name}: ${err.message}`, "\n[Stack]", err.stack);
